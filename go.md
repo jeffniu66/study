@@ -1023,6 +1023,318 @@ func main() {
 }
 ```
 
+## 8.5 map
+
+### 8.5.1 map的基本使用
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	// 定义一个map
+	var m map[int]string
+	fmt.Println("m = ", m)
+	// 对于map只有len，没有cap
+	fmt.Println("len = ", len(m))
+
+	// 可以通过make创建
+	m1 := make(map[int]string)
+	fmt.Println("m1 = ", m1)
+	fmt.Println("len = ", len(m1))
+
+	// 可以通过make创建，可以指定长度，只是指定了容量，但是里面一个数据也没有
+	m2 := make(map[int]string, 2) // 自动扩容
+	m2[1] = "java"
+	m2[2] = "go"
+	m2[3] = "c++"
+
+	fmt.Println("m2 = ", m2)
+	fmt.Println("len = ", len(m2))
+
+	// 初始化赋值
+	m3 := map[int]string{1: "java", 2: "go", 3: "c++"}
+	fmt.Println("m3 = ", m3)
+}
+```
+
+### 8.5.2 map的遍历
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	m := map[int]string{1: "java", 2: "go", 3: "c++"}
+	for key, value := range m {
+		fmt.Printf("%d======>%s\n", key, value)
+	}
+
+	// 判断一个key值是否存在
+	// 第一个返回值为key所对应的value, 第二个返回值为key是否存在的条件，存在ok为true
+	value, ok := m[1]
+	if ok == true {
+		fmt.Println("m[1] = ", value)
+	} else {
+		fmt.Println("key不存在")
+	}
+}
+```
+
+### 8.5.3 map的删除
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	m := map[int]string{1: "java", 2: "go", 3: "c++"}
+	delete(m, 1) // 删除key为1的内容
+	fmt.Println("m = ", m)
+}
+```
+
+### 8.5.4 map做函数参数
+
+```go
+package main
+
+import "fmt"
+
+func test(m map[int]string) {
+	delete(m, 1)
+}
+
+func main() {
+	m := map[int]string{1: "java", 2: "go", 3: "c++"}
+
+	test(m) // 在函数内部删除某个key
+
+	fmt.Println("m = ", m)
+}
+```
+
+## 8.6 结构体
+
+### 8.6.1 结构体普通变量初始化
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func main() {
+	// 顺序初始化, 每个成员必须初始化
+	var s1 Student = Student{1, "jeffrey", 'm', 18, "深圳"}
+	fmt.Println("s1 = ", s1)
+
+	// 指定成员初始化，没有初始化的成员，自动赋值为0
+	s2 := Student{id: 1, name: "jeff"}
+	fmt.Println("s2 = ", s2)
+}
+```
+
+### 8.6.2 结构体指针变量初始化
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func main() {
+	// 顺序初始化, 每个成员必须初始化
+	var p1 *Student = &Student{1, "jeffrey", 'm', 18, "深圳"}
+	fmt.Println("p1 = ", p1)
+
+	// 指定成员初始化，没有初始化的成员，自动赋值为0
+	p2 := &Student{id: 1, name: "jeff"}
+	fmt.Printf("p2 type is %T\n", p2)
+	fmt.Println("p2 = ", p2)
+}
+```
+
+### 8.6.3 结构体成员的使用：普通变量
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func main() {
+	// 定义一个结构体
+	var s Student
+
+	// 操作成员，需要使用点（.）运算符
+	s.id = 1
+	s.name = "jack"
+	s.sex = 'm'
+	s.age = 20
+	s.addr = "bj"
+	fmt.Println("s = ", s)
+}
+```
+
+### 8.6.3 结构体成员的使用：指针变量
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func main() {
+	// 1、指针有合法指向后，才操作成员
+	// 先定义一个普通结构体变量
+	var s Student
+	// 再定义一个指针变量，保存s的地址
+	var p1 *Student
+	p1 = &s
+
+	// 通过指针操作成员，p1.id和(*p1).id完全等价，只能使用.运算符
+	p1.id = 1
+	(*p1).name = "mike"
+	p1.age = 19
+	p1.addr = "bj"
+	fmt.Println("p1 = ", p1)
+
+	// 2、通过new申请一个结构体
+	p2 := new(Student)
+	p2.id = 1
+	(*p2).name = "mike"
+	p2.age = 19
+	p2.addr = "bj"
+	fmt.Println("p2 = ", p2)
+}
+```
+
+### 8.6.4 结构体比较和赋值
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func main() {
+	s1 := Student{1, "mike", 'm', 18, "bj"}
+	s2 := Student{1, "mike", 'm', 18, "bj"}
+	s3 := Student{2, "mike", 'm', 18, "bj"}
+	fmt.Println("s1 == s2 ", s1 == s2)
+	fmt.Println("s1 == s2 ", s1 == s3)
+
+	// 同类型的2个结构体变量可以相互转换
+	var temp Student
+	temp = s3
+	fmt.Println("temp = ", temp)
+}
+```
+
+### 8.6.5 结构体做函数参数：值传递
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func test01(s Student) {
+	s.id = 16
+	fmt.Println("test01: ", s)
+}
+
+func main() {
+	s := Student{1, "mike", 'm', 19, "bj"}
+
+	test01(s) // 值传递，形参无法改实参
+	fmt.Println("main: ", s)
+}
+```
+
+### 8.6.6 结构体做函数参数：地址传递
+
+```go
+package main
+
+import "fmt"
+
+// 定义一个结构体类型
+type Student struct {
+	id int
+	name string
+	sex byte // 字符类型
+	age int
+	addr string
+}
+
+func test01(p *Student) {
+	p.id = 16
+	fmt.Println("test01: ", p)
+}
+
+func main() {
+	s := Student{1, "mike", 'm', 19, "bj"}
+
+	test01(&s) // 地址传递(引用传递)，形参可以改实参
+	fmt.Println("main: ", s)
+}
+```
+
+
+
 # 9. 并发
 
 ## 9.1 goroutine
@@ -1183,6 +1495,330 @@ func main() {
   for num := range ch {
     fmt.Println("num = ", num)
   }
+}
+```
+
+### 9.4.4 单向channel的特点
+
+```go
+package main
+
+func main() {
+	// 创造一个channel，双向的
+	ch := make(chan int)
+
+	// 双向channel能隐式转换为单向channel
+	var writeCh chan<- int = ch // 只能写，不能读
+	var readCh <-chan int = ch // 只能读，不能写
+
+	writeCh <- 666 // 写
+	//<- writeCh // err
+
+	<- readCh // 读
+	//readCh <- 666 // err
+
+	// 单向无法转换为双向
+	//var ch2 chan int = writeCh
+}
+```
+
+### 9.4.5 单向channel的应用
+
+```go
+package main
+
+import "fmt"
+
+// 此通道只能写，不能读
+func producer(out chan<- int) {
+	for i := 0; i < 10; i++ {
+		out <- i * i
+	}
+	close(out)
+}
+
+// 此channel只能读，不能写
+func consumer(in <-chan int) {
+	for num := range in {
+		fmt.Println("num = ", num)
+	}
+}
+
+func main() {
+	// 创造一个channel，双向的
+	ch := make(chan int)
+
+	// 生产者，生产数字，写入channel
+	// 新开一个协程
+	go producer(ch) // channel传参，引用传递
+
+	// 消费者，从channel读取内容，打印
+	consumer(ch)
+}
+```
+
+## 9.5 定时器
+
+### 9.5.1 Timer的使用
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// 创建一个定时器，设置时间为2s，2s后，往time通道写内容（当前时间）
+	timer := time.NewTimer(2 * time.Second) // 时间到了，只会响应一次
+	fmt.Println("当前时间：", time.Now())
+
+	// 2s后，往timer.C写数据，有数据后，就可以读取
+	t := <-timer.C
+	fmt.Println("t = ", t)
+}
+```
+
+### 9.5.2 通过Timer实现延时功能
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// 第1种写法
+	// 延时2s后打印一句话
+	timer := time.NewTimer(2 * time.Second)
+	<-timer.C
+	fmt.Println("时间到")
+
+	// 第2种写法
+	time.Sleep(2 * time.Second)
+	fmt.Println("时间到")
+
+	// 第3种写法
+	<-time.After(2 * time.Second)
+	fmt.Println("时间到")
+}
+```
+
+### 9.5.3 定时器停止和重置
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	timer := time.NewTimer(3 * time.Second)
+	ok := timer.Reset(1 * time.Second) // 重新设置为1s
+	fmt.Println("ok = ", ok)
+
+	go func() {
+		<-timer.C
+		fmt.Println("子协程可以打印了，因为定时器的时间到")
+	}()
+
+	timer.Stop()
+}
+```
+
+### 9.5.4 Ticker的使用
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ticker := time.NewTicker(1 * time.Second)
+
+	i := 0
+	for {
+		<-ticker.C
+
+		i++
+		fmt.Println("i = ", i)
+
+		if i == 5 {
+			ticker.Stop()
+			break
+		}
+	}
+}
+```
+
+## 9.6 select
+
+### 9.6.1 通过select实现fibonacci数列
+
+```go
+package main
+
+import "fmt"
+
+// ch只写，quit只读
+func fibonacci(ch chan<- int, quit <-chan bool) {
+	x, y := 1, 1
+	for {
+		// 监听channel数据的流动
+		select {
+		case ch <- x:
+			x, y = y, x+y
+		case flag := <-quit:
+			fmt.Println("flag = ", flag)
+			return
+		}
+	}
+}
+
+func main() {
+	ch := make(chan int)    // 数字通信
+	quit := make(chan bool) // 程序是否结束
+
+	// 消费者，从channel读取内容
+	// 新建协程
+	go func() {
+		for i := 0; i < 8; i++ {
+			num := <-ch
+			fmt.Println("num = ", num)
+		}
+		// 可以停止
+		quit <- true
+	}()
+
+	// 生产者，产生数字，写入channel
+	fibonacci(ch, quit)
+}
+```
+
+### 9.6.2 select实现的超时机制
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ch := make(chan int)
+	quit := make(chan bool)
+
+	// 新开一个协程
+	go func() {
+		for {
+			select {
+			case num := <-ch:
+				fmt.Println("num = ", num)
+			case <-time.After(3 * time.Second):
+				fmt.Println("超时")
+				quit <- true
+			}
+		}
+	}()
+
+	for i := 0; i < 5; i++ {
+		ch <- i
+		time.Sleep(time.Second)
+	}
+
+	quit <- true
+	fmt.Println("程序退出")
+}
+```
+
+# 10. 异常处理
+
+## 10.1 error接口的使用
+
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func main() {
+	err := fmt.Errorf("%s", "this is normal err")
+	fmt.Println("err = ", err)
+
+	err1 := errors.New("this is normal err")
+	fmt.Println("err1 = ", err1)
+}
+```
+
+## 10.2 error接口的应用
+
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func MyDiv(a, b int) (result int, err error) {
+	err = nil
+	if b == 0 {
+		err = errors.New("分母不能为空")
+	} else {
+		result = a / b
+	}
+	return
+}
+
+func main() {
+	result, err := MyDiv(10, 0)
+	if err != nil {
+		fmt.Println("err = ", err)
+	} else {
+		fmt.Println("result = ", result)
+	}
+}
+```
+
+## 10.3 panic函数
+
+<font color="red">我们不应该通过调用panic函数来报告普通的错误，而应该只把它作为报告致命错误的一种方式，当panic发生时，程序会中断运行。</font>
+
+### 10.3.1 显示调用panic函数
+
+```go
+package main
+
+import "fmt"
+
+func testa()  {
+	fmt.Println("aaaaaa")
+}
+
+func testb()  {
+	//fmt.Println("bbbbbb")
+	panic("this is a panic test")
+}
+
+func testc()  {
+	fmt.Println("ccccc")
+}
+
+func main() {
+	testa()
+	testb()
+	testc()
 }
 ```
 
