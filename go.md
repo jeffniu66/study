@@ -1822,3 +1822,403 @@ func main() {
 }
 ```
 
+## 10.4 recover
+
+```go
+package main
+
+import "fmt"
+
+func testa() {
+	fmt.Println("aaaaaa")
+}
+
+func testb(x int) {
+	// 设置recover
+	defer func() {
+		// recover可以打印panic的错误信息
+		// fmt.Println(recover())
+		if err := recover(); err != nil { // 产生了panic异常
+			fmt.Println(err)
+		}
+	}()
+
+	var a [10]int
+	a[x] = 111 // x大于等于10的时候，数组越界
+}
+
+func testc() {
+	fmt.Println("ccccc")
+}
+
+func main() {
+	testa()
+	testb(20)
+	testc()
+}
+```
+
+# 11. 文本文件处理
+
+## 11.1 字符串处理
+
+### 11.1.1 字符串操作
+
+#### 11.1.1.1 Contains
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// "hellogo"中是否包含"hello", 包含返回true, 不包含返回false
+	fmt.Println(strings.Contains("hellogo", "go")) // 输出：true
+}
+```
+
+#### 11.1.1.2 Joins
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Joins组合
+	s := []string{"abc", "hello", "jack", "go"}
+	buf := strings.Join(s, "@")
+	fmt.Println("buf = ", buf) // 输出：buf =  abc@hello@jack@go
+}
+```
+
+#### 11.1.1.3 Index
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Index
+	fmt.Println(strings.Index("abcdhello", "hello")) // 输出：4
+	fmt.Println(strings.Index("abcdhello", "go")) // 输出：-1
+}
+```
+
+#### 11.1.1.4 Repeat
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Repeat
+	buf := strings.Repeat("go", 3)
+	fmt.Println("buf = ", buf)
+}
+```
+
+#### 11.1.1.5 Index
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Split 以指定的分隔符拆分
+	buf := "hello|abc|go|jack"
+	s := strings.Split(buf, "|")
+	fmt.Println("s = ", s)
+}
+```
+
+#### 11.1.1.6 Trim
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Trim去掉两头的字符
+	buf := strings.Trim("  are u ok?  ", " ") // 去掉两头空格
+	fmt.Printf("buf = #%s#\n", buf) // 输出：buf = #are u ok?#
+}
+```
+
+#### 11.1.1.7 Fields
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	s := strings.Fields("   are u ok?    ")
+	for i, data := range s {
+		fmt.Println(i, ", ", data)
+	}
+}
+```
+
+### 11.1.2 字符串转换
+
+#### 11.1.2.1 Append
+
+```go
+// 转换成字符串后追加到字节数组
+	slice := make([]byte, 0, 1024)
+	slice = strconv.AppendBool(slice, true)
+	// 第二个数为要追加的数，第3个为指定10进制方式追加
+	slice = strconv.AppendInt(slice, 1234, 10)
+	slice = strconv.AppendQuote(slice, "abcgohello") // 双引号也带着
+	fmt.Println("slice = ", string(slice))
+```
+
+#### 11.1.2.2 Format
+
+```go
+// 其它类型转换为字符串
+	var str string
+	str = strconv.FormatBool(false)
+	// 'f' 指打印格式，以小数方式，-1指小数点位数（紧缩模式），64指以float64处理
+	str = strconv.FormatFloat(3.14, 'f', -1, 64)
+	fmt.Println("str = ", str)
+```
+
+#### 11.1.2.3 Parse
+
+```go
+package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+func main() {
+	// 整型转字符串 常用
+	str := strconv.Itoa(666)
+	fmt.Println("str = ", str)
+
+	// 字符串转换为整型
+	a, _ := strconv.Atoi("567")
+	fmt.Println("a = ", a)
+
+	// 字符串转其它类型
+	flag, err := strconv.ParseBool("true")
+	if err == nil {
+		fmt.Println("flag = ", flag)
+	} else {
+		fmt.Println("err = ", err)
+	}
+}
+```
+
+# 12. 网络编程
+
+## 12.1 TCP服务器代码的编写
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+)
+
+func main() {
+	// 监听
+	listener, err := net.Listen("tcp", "127.0.0.1:8000")
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+
+	defer listener.Close()
+
+	// 阻塞等待用户链接
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("err = ", err)
+			continue
+		}
+
+		// 接收用户的请求
+		buf := make([]byte, 1024) // 1024大小的缓冲区
+		n, err1 := conn.Read(buf) // n表示长度
+		if err1 != nil {
+			fmt.Println("err1 = ", err1)
+			continue
+		}
+
+		fmt.Println("buf = ", string(buf[:n]))
+	}
+}
+```
+
+## 12.2 TCP客户端
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+)
+
+func main() {
+	// 主动连接服务器
+	conn, err := net.Dial("tcp", "127.0.0.1:8000")
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+
+	defer conn.Close()
+
+	// 发送数据
+	conn.Write([]byte("are u ok?"))
+}
+```
+
+## 12.3 简单版并发服务器
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"strings"
+)
+
+// 处理用户请求
+func HandleConn(conn net.Conn) {
+	// 函数调用完毕，自动关闭conn
+	defer conn.Close()
+
+	// 获取客户端的网络地址信息
+	addr := conn.RemoteAddr().String()
+	fmt.Println(addr, " connect success")
+
+	buf := make([]byte, 2048) // 2048大小的缓冲区
+
+	for {
+		// 读取用户数据
+		n, err := conn.Read(buf) // n表示长度
+		if err != nil {
+			fmt.Println("err = ", err)
+			return
+		}
+		fmt.Printf("[%s]: = %s\n", addr, string(buf[:n]))
+
+		if "exit" == string(buf[:n-1]) { // 发送时，windows会多了2个字符，"\r\n", mac会多1个字符
+			fmt.Println(addr, " exit")
+			return
+		}
+
+		// 把数据转换为大写，再给用户发送
+		conn.Write([]byte(strings.ToUpper(string(buf[:n]))))
+	}
+}
+
+func main() {
+	// 监听
+	listener, err := net.Listen("tcp", "127.0.0.1:8000")
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+
+	defer listener.Close()
+
+	// 阻塞等待用户链接
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("err = ", err)
+			continue
+		}
+
+		// 处理用户请求，新建一个协程
+		go HandleConn(conn)
+	}
+}
+```
+
+## 12.4 客户端可输入也可接收服务器回复
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"os"
+)
+
+func main() {
+	// 主动连接服务器
+	conn, err := net.Dial("tcp", "127.0.0.1:8000")
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+
+	defer conn.Close()
+
+	go func() {
+		// 从键盘输入内容，给服务器发送内容
+		str := make([]byte, 1024)
+		for {
+			n, err := os.Stdin.Read(str) // 从键盘读取内容
+			if err != nil {
+				fmt.Println("os.Stdin. err = ", err)
+				return
+			}
+			// 把输入的内容发送给服务器
+			conn.Write(str[:n])
+		}
+
+	}()
+
+	// 接收服务器回复的数据, 新任务
+	// 切片缓冲
+	buf := make([]byte, 1024)
+	for {
+		n, err := conn.Read(buf) // 接收服务器的请求
+		if err != nil {
+			fmt.Println("conn.Read err = ", err)
+			return
+		}
+		fmt.Println(string(buf[:n])) // 打印接收到的请求
+	}
+}
+```
+
