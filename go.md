@@ -2222,3 +2222,37 @@ func main() {
 } 
 ```
 
+# 13. 常用配置设置命令
+
+## 13.1 下载包
+
+```go
+go get -u github.com/gogo/protobuf/protoc-gen-gogo
+
+参数介绍：
+-d 只下载不安装
+-f 只有在你包含了 -u 参数的时候才有效，不让 -u 去验证 import 中的每一个都已经获取了，这对于本地 fork 的包特别有用
+-fix 在获取源码之后先运行 fix，然后再去做其他的事情
+-t 同时也下载需要为运行测试所需要的包
+-u 强制使用网络去更新包和它的依赖包
+-v 显示执行的命令
+```
+
+## 13.2 设置环境参数
+
+```go
+// 设置代理
+go env -w GOPROXY=https://goproxy.cn
+// 设置GOPATh路径
+go env -w GOPATH=E:\go_game_server
+```
+
+## 13.3 生成proto文件
+
+```go
+// 普通protoc生成
+protoc --go_out=../ login.proto
+// 使用的是protoc-gen-go
+protoc --gogo_out=../ login.proto
+```
+
