@@ -1,5 +1,7 @@
 ---
-typora-root-url: ./go_images
+
+typora-copy-images-to: ./go_images
+typora-root-url: ../study
 ---
 
 # 1. 第一个go程序
@@ -1119,6 +1121,8 @@ func main() {
 
 ## 8.6 结构体
 
+<font color="red">结构体是值类型</font>
+
 ### 8.6.1 结构体普通变量初始化
 
 ```go
@@ -1333,7 +1337,157 @@ func main() {
 }
 ```
 
+### 8.6.7 结构体内数据默认值和使用陷阱
 
+```go
+type Student struct {
+  ptr *int // 默认为nil，使用时需要new
+  slice []int // 默认为nil
+  map1 map[string]string // 默认为nil
+}
+
+// 使用slice需要先make分配空间
+var s Student
+s.slice = make([]int, 10)
+s.slice[0] = 100
+
+// 使用map，一定要先make
+s.map1 = make(map[string]string)
+s.map1["key1"] = "tom"
+```
+
+### 8.6.8 结构体创建的四种方式
+
+```go
+// 第一种 直接声明
+var person Person
+
+// 第二种 {}   推荐使用这种
+var person Person = Person{"mary", 18}
+// person.Name = tom
+// person.Age = 18
+
+// 第三种
+var person *Person = new(Person)
+// 因为person是个指针，因此标准的给字段赋值方式
+(*person).Name = "smith" // 也可以这样写 person.Name = "smith"，原因：go的设计者为了程序员使用方便，底层会对person.Name = "smith"进程处理，会给person加上取值运算(*person).Name = "smith"
+(*person).Age = 30
+
+// 第四种
+var person *Person = &Person{} // 有初始值 = &Person{"mary", 60}
+// 因为person是个指针，因此标准的给字段赋值方式
+(*person).Name = "smith"
+```
+
+### 8.6.9 结构体使用细节
+
+案例一-结构体内存地址
+
+```go
+package main
+
+import "fmt"
+
+type Point struct {
+	x int
+	y int
+}
+
+type Rect struct {
+	leftUp, rightDown Point
+}
+
+func main() {
+	r1 := Rect{Point{1, 2}, Point{3, 4}}
+
+	// r1有四个int，在内存中是连续分布
+	// 打印地址
+	fmt.Printf("r1.leftUp.x 地址=%p r1.leftUp.y 地址=%p "+
+		"r1.rightDown.x 地址=%p r1.rightDown.y 地址=%p", &r1.leftUp.x, &r1.leftUp.y,
+		&r1.rightDown.x, &r1.rightDown.y)
+}
+```
+
+案例二-结构体内存地址
+
+```go
+package main
+
+import "fmt"
+
+type Point struct {
+	x int
+	y int
+}
+
+type Rect struct {
+	leftUp, rightDown *Point
+}
+
+func main() {
+	// r1有两个 *Point类型，这个两个*Point类型的本身地址也是连续的，但是他们指向的地址不一定连续
+	r1 := Rect{&Point{1, 2}, &Point{3, 4}}
+
+	// 打印地址
+	fmt.Printf("r1.leftUp 本身地址=%p r1.rightDown 本身地址=%p\n", &r1.leftUp, &r1.rightDown)
+	fmt.Printf("r1.leftUp 地址=%p r1.rightDown 地址=%p", r1.leftUp, r1.rightDown)
+}
+```
+
+案例三-结构体转换
+
+```go
+package main
+
+import "fmt"
+
+type A struct {
+	Num int
+}
+
+type B struct {
+	Num int
+}
+
+func main() {
+	var a A
+	var b B
+	a = A(b) // 可以转换 要求结构体字段(名字、个数和类型)完全一样
+	fmt.Println(a, b)
+}
+```
+
+案例四
+
+![image-20201114143909295](/image-20201114143909295.png)
+
+案例五
+
+<font color="red">struct每个字段上，都可以写上一个tag，该tag可以通过反射机制获取，常用的使用场景是序列化和反序列化</font>
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Monster struct {
+	Name  string `json:"name"`
+	Age   int    `json:"age"`
+	Skill string `json:"skill"`
+}
+
+func main() {
+	monster := Monster{"牛魔王", 500, "牛气冲天"}
+
+	jsonStr, _ := json.Marshal(monster)
+	fmt.Println("jsonStr = ", string(jsonStr))
+}
+```
+
+​	
 
 # 9. 并发
 
@@ -2421,4 +2575,139 @@ protoc --go_out=../ login.proto
 // 使用的是protoc-gen-go
 protoc --gogo_out=../ login.proto
 ```
+
+# 14. 面向对象编程
+
+## 14.1 封装
+
+### 14.1.1 封装入门案例
+
+<font color="blue">person.go</font>
+
+```go
+package model
+
+import "fmt"
+
+type person struct {
+	Name string
+	age  int
+	sal  float64
+}
+
+// 写一个工厂模式的函数，相当于构造函数
+func NewPerson(name string) *person {
+	return &person{
+		Name: name,
+	}
+}
+
+// 为了访问age和sal，编写一堆SetXxx的方法和GetXxx的方法
+func (p *person) SetAge(age int) {
+	if age > 0 && age < 150 {
+		p.age = age
+	} else {
+		fmt.Println("年龄范围不正确...")
+	}
+}
+
+func (p *person) GetAge() int {
+	return p.age
+}
+
+func (p *person) SetSal(sal float64) {
+	if sal > 3000 && sal <= 30000 {
+		p.sal = sal
+	} else {
+		fmt.Println("薪水范围不正确...")
+	}
+}
+
+func (p *person) GetSal() float64 {
+	return p.sal
+}
+```
+
+<font color="blue">test.go</font>
+
+```go
+package main
+
+import (
+	"fmt"
+	"model"
+)
+
+func main() {
+	p := model.NewPerson("smith")
+	p.SetAge(19)
+	p.SetSal(30000)
+	fmt.Println(p)
+	fmt.Println(p.Name, "age =", p.GetAge(), "sal =", p.GetSal())
+}
+```
+
+## 14.2 继承
+
+<font color="red">通过匿名结构体实现继承特性</font>
+
+### 14.2.1 继承快速入门案例
+
+```go
+package main
+
+import "fmt"
+
+type Student struct {
+	Name  string
+	Age   int
+	Score int
+}
+
+// 小学生
+type Pupil struct {
+	Student // 嵌入了Student匿名结构体
+}
+
+// 大学生
+type Graduate struct {
+	Student // 嵌入了Student匿名结构体
+}
+
+func (p *Pupil) testing() {
+	fmt.Println("小学生正在考试中...")
+}
+
+func (p *Graduate) testing() {
+	fmt.Println("大学生正在考试中...")
+}
+
+func main() {
+	// 当我们对结构体嵌入了匿名结构体 使用方法会发生变化
+	pupil := &Pupil{}
+	pupil.Student.Name = "tom"
+	pupil.Student.Age = 8
+	pupil.testing()
+}
+```
+
+### 14.2.2 继承的深入讨论
+
+<font color="red">1.结构体可以使用嵌套匿名结构体所有的字段和方法，即：首字母大写或小写的字段、方法，都可以使用</font>
+
+<font color="red">2.匿名结构体字段访问可以简化</font>
+
+![image-20201115161819785](/image-20201115161819785.png)
+
+<font color="red">3.当结构体和匿名结构体有相同的字段或者方法时，编译期采用”就近访问原则“访问，如希望访问匿名结构体的字段和方法，可以通过匿名结构体名来区分</font>
+
+<img src="/go_images/image-20201115163136128.png" alt="image-20201115163136128" style="zoom:50%;" />
+
+<font color="red">4.如果一个struct嵌套了一个有名称的结构体，这种模式就是”组合“，如果是组合关系，那么在访问组合的结构体的字段或方法时，必须带上结构体的名字</font>
+
+<img src="/go_images/image-20201115170349511.png" alt="image-20201115170349511" style="zoom:50%;" />
+
+<font color="red">5.</font>
+
+![image-20201115171104867](/go_images/image-20201115171104867.png)
 
