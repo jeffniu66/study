@@ -2697,7 +2697,7 @@ func main() {
 
 <font color="red">2.匿名结构体字段访问可以简化</font>
 
-![image-20201115161819785](/image-20201115161819785.png)
+![](/go_images/image-20201115161819785.png)
 
 <font color="red">3.当结构体和匿名结构体有相同的字段或者方法时，编译期采用”就近访问原则“访问，如希望访问匿名结构体的字段和方法，可以通过匿名结构体名来区分</font>
 
@@ -2710,4 +2710,80 @@ func main() {
 <font color="red">5.</font>
 
 ![image-20201115171104867](/go_images/image-20201115171104867.png)
+
+### 14.3.3 多重继承
+
+<img src="/go_images/image-20201120072546014.png" alt="image-20201120072546014" style="zoom:50%;" />
+
+## 14.3 接口
+
+### 14.3.1 定义一个接口
+
+```go
+type Usb interface {
+  // 声明2个没有实现的方法
+  Start()
+  Stop()
+}
+
+type Phone struct {
+  
+}
+
+// 让Phone实现Usb接口的方法
+func (p Phone) Start() {
+  fmt.Println("手机开始工作...")
+}
+
+// 让Phone实现Usb接口的方法
+func (p Phone) Stop() {
+  fmt.Println("手机开始工作...")
+}
+
+type Camera struct {
+  
+}
+
+func (c Camera) Start() {
+  fmt.Println("相机开始工作...")
+}
+
+func (c Camera) Stop() {
+  fmt.Println("相机停止工作...")
+}
+
+type Computer struct {
+  
+}
+
+func (c Computer) Working(usb Usb) {
+  usb.Start()
+  usb.Stop()
+}
+
+func main() {
+  computer := Computer{}
+  phone := Phone{}
+  camera := Camera{} 
+  
+  computer.Working(phone)
+  computer.Working(camera)
+}
+```
+
+### 14.3.2 接口的特点和语法说明
+
+<img src="/go_images/image-20201121104937932.png" alt="image-20201121104937932" style="zoom:50%;" />
+
+### 14.3.3 接口注意事项
+
+![image-20201121111520782](/go_images/image-20201121111520782.png)
+
+6.一个接口（比如A接口）可以<font color="red">继承多个</font>多个别的接口（比如B，C接口），这时如果要实现A接口，也必须将B，C接口的方法也全部实现。
+
+7.空接口interface{}没有任何方法，所以所有类型都实现了空接口（<font color="red">即我们可以把任何一个变量赋值给空接口</font>）。
+
+8.如果实现了两个接口，两个接口里有相同的方法，编译会报错，而在java里即是A接口，也是B接口，可以正常使用。<font color="red">但是后续的go版本好像又支持重复的方法了..</font>
+
+### 14.3.4 接口编程的经典案例
 
