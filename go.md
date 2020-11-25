@@ -2787,3 +2787,184 @@ func main() {
 
 ### 14.3.4 接口编程的经典案例
 
+<font color="red">结构体排序</font>
+
+```go
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sort"
+)
+
+// 1.声明Hero结构体
+type Hero struct {
+	Name string
+	Age  int
+}
+
+// 2.声明一个Hero结构体切片类型
+type HeroSlice []Hero
+
+// 3.实现Interface接口
+func (h HeroSlice) Len() int {
+	return len(h)
+}
+
+// Less方法就是决定你使用什么标准进行排序
+// 1.安Hero的年龄从小到大排序！
+func (h HeroSlice) Less(i, j int) bool {
+	return h[i].Age > h[j].Age
+}
+
+func (h HeroSlice) Swap(i, j int) {
+	//temp := h[i]
+	//h[i] = h[j]
+	//h[j] = temp
+	h[i], h[j] = h[j], h[i]
+}
+
+func main() {
+	//var intSlice = []int{0, -1, 10, 7, 90}
+	//sort.Ints(intSlice)
+	//fmt.Println(intSlice)
+
+	var heros HeroSlice
+	for i := 0; i < 10; i++ {
+		hero := Hero{
+			Name: fmt.Sprintf("英雄~%d", rand.Intn(100)),
+			Age:  rand.Intn(100),
+		}
+		heros = append(heros, hero)
+	}
+
+	// 排序前
+	for _, v := range heros {
+		fmt.Println(v)
+	}
+
+	fmt.Println("排序后----------")
+	sort.Sort(heros)
+	for _, v := range heros {
+		fmt.Println(v)
+	}
+}
+```
+
+## 14.4 实现接口和继承比较
+
+<font color="red">接口是对继承的补充</font>
+
+<img src="/go_images/image-20201122165447376.png" alt="image-20201122165447376" style="zoom: 50%;" />
+
+小猴子继承了老猴子的属性，可是又向学习像小鸟一样飞翔，像鱼一样游泳，这时候就需要实现接口。
+
+
+
+![image-20201122171043236](/go_images/image-20201122171043236.png)
+
+![image-20201122171232488](/go_images/image-20201122171232488.png)
+
+## 14.5 多态
+
+![image-20201122171643647](/go_images/image-20201122171643647.png)
+
+![image-20201122172913834](/go_images/image-20201122172913834.png)
+
+## 14.6 类型断言
+
+```go
+package main
+
+import "fmt"
+
+type Point struct {
+	x int
+	y int
+}
+
+func main() {
+	var a interface{}
+	var point Point = Point{1, 2}
+	a = point
+	fmt.Println("a = ", a)
+	var b Point
+	//b = a // 不可以
+	b = a.(Point)
+	fmt.Println(b)
+}
+```
+
+<font color="red">带检查的断言</font>
+
+```go
+package main
+
+import "fmt"
+
+type Point struct {
+	x int
+	y int
+}
+
+func main() {
+	var a interface{}
+	var point Point = Point{1, 2}
+	a = point
+	fmt.Println("a = ", a)
+	//var b Point
+	//b = a // 不可以
+	if b, ok := a.(Point); ok {
+		fmt.Println("转换成功 b = ", b)
+	} else {
+		fmt.Println("转换失败")
+	}
+}
+```
+
+<font color="red">类型断言的最佳实践</font>
+
+```go
+package main
+
+import "fmt"
+
+type Student struct {
+}
+
+// 编写一个函数，可以判断输入的参数是什么类型
+func TypeJudge(items ...interface{}) {
+	for index, v := range items {
+		switch v.(type) {
+		case bool:
+			fmt.Printf("第%v个参数是bool类型, 值是%v\n", index, v)
+		case float32:
+			fmt.Printf("第%v个参数是float32类型, 值是%v\n", index, v)
+		case float64:
+			fmt.Printf("第%v个参数是float64类型, 值是%v\n", index, v)
+		case int, int32, int64:
+			fmt.Printf("第%v个参数是int类型, 值是%v\n", index, v)
+		case string:
+			fmt.Printf("第%v个参数是string类型, 值是%v\n", index, v)
+		case Student:
+			fmt.Printf("第%v个参数是Student类型, 值是%v\n", index, v)
+		case *Student:
+			fmt.Printf("第%v个参数是*Student类型, 值是%v\n", index, v)
+		default:
+			fmt.Printf("第%v个参数类型类型不确定, 值是%v\n", index, v)
+		}
+	}
+}
+
+func main() {
+	var n1 float32 = 1.1
+	var n2 float64 = 2.3
+	var n3 int32 = 30
+	var name string = "tom"
+	address := "深圳"
+	n4 := 300
+	TypeJudge(n1, n2, n3, name, address, n4, Student{}, &Student{})
+}
+```
+
