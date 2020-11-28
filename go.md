@@ -2968,3 +2968,117 @@ func main() {
 }
 ```
 
+# 15. 反射
+
+## 15.1 反射重要的函数和概念
+
+(1) reflect.TypeOf(变量名)，获取变量的类型，返回reflect.Type类型。
+
+(2) reflect.ValueOf(变量名)，获取变量的值，返回reflect.Value类型，reflect.Value是一个结构体类型。通过reflect.Value，可以获取到关于变量的很多信息。
+
+(3) <font color="red">变量、interface{}和reflect.Value是可以相互转换的，这点在实际开发中，会经常使用到。</font>
+
+```go
+// 专门用于做反射
+func test(b interface{}) {
+  // 1.如何将interface{}转成reflect.Value
+  rVal := reflect.Value(b)
+  // 2.如何将reflect.Value转成interface{}
+  iVal := rVal.interface()
+  // 3.如何将interface{}转成原来的变量类型，使用类型断言
+  v := iVal.(Student)
+}
+```
+
+## 15.2 快速入门案例
+
+1.对(基本数据类型、interface{}、reflect.Value)进行反射的基本操作
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+func reflectTest01(b interface{}) {
+	// 通过反射获取到传入的变量的type，kind，值
+	// 1.先获取到reflect.Type
+	rTyp := reflect.TypeOf(b)
+	fmt.Println("tTyp = ", rTyp)
+
+	// 2.获取到reflect.Value
+	rVal := reflect.ValueOf(b)
+	fmt.Println("rVal = ", rVal.Int()+2) // 真正的类型是reflect.Value
+
+	// 3.将rVal转成interface{}
+	iV := rVal.Interface()
+	// 将interface通过断言转成需要的类型
+	num2 := iV.(int)
+	fmt.Println("num2 = ", num2)
+}
+
+func main() {
+	var num int = 100
+	reflectTest01(num)
+}
+```
+
+2.对结构体进行反射的基本操作
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+func testReflect02(b interface{}) {
+	// 通过反射获取到传入的变量的type，kind，值
+	// 1.先获取到reflect.Type
+	rTyp := reflect.TypeOf(b)
+	fmt.Println("tTyp = ", rTyp)
+
+	// 2.获取到reflect.Value
+	rVal := reflect.ValueOf(b)
+	iV := rVal.Interface()
+	fmt.Printf("iv=%v iv type=%T\n", iV, iV)
+
+	// 3.获取变量对应的Kind
+	fmt.Printf("kind = %v, kind = %v\n", rTyp.Kind(), rVal.Kind())
+
+	// 将interface{} 通过断言转成需要的类型
+	// 这里，我们就简单使用了一带检测的类型断言.
+	// 也可以使用 switch 的断言形式来做的更加的灵活
+	stu, ok := iV.(student)
+	if ok {
+		fmt.Printf("stu.name=%v\n", stu.Name)
+	}
+}
+
+type student struct {
+	Name string
+	Age  int
+}
+
+func main() {
+	stu := student{Name: "tom", Age: 18}
+	testReflect02(stu)
+}
+```
+
+## 15.3 反射注意事项和细节说明
+
+1.reflect.Value.Kind，获取变量的类别，返回的是一个常量（看手册）
+2.Type是类型，Kind是类别，Type和Kind<font color="red">可能是相同的</font>，<font color="red">也可能是不同的</font>。
+
+比如：var num int = 10 num的Type是int，Kind也是int
+
+比如：var stu Studnet  stu的Type是pkg1.Student，Kind是struct
+
+3.通过反射可以让变量在interface{}和Reflect.Value之间相互转换。
+
+4.使用反射的方式来获取变量的值（<font color="red">并返回对应的类型</font>），要求数据类型匹配，比如x是int，那么就应用使用reflect.Value(x).Int()，而不能使用其它的，否则报panic。
+
