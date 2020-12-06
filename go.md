@@ -1,4 +1,6 @@
 ---
+
+typora-copy-images-to: ./go_images
 typora-root-url: ../study
 ---
 
@@ -3247,4 +3249,5 @@ func main() {
 }
 ```
 
-![image-20201206162425786](/go_images/image-20201206162425786.png)
+![image-20201206162811083](/go_images/image-20201206162811083.png)
+
