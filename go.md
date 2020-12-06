@@ -1,6 +1,4 @@
 ---
-
-typora-copy-images-to: ./go_images
 typora-root-url: ../study
 ---
 
@@ -914,7 +912,7 @@ func main() {
 
 切片并不是数组或数组指针，<font color="red">它通过内部指针和相关属性引用数组片段，以实现变长方案</font>
 
-![image-20201101160625195](/image-20201101160625195.png)
+![go_images/image-20201101160625195](go_images/image-20201101160625195.png)
 
 ### 8.4.1 切片的容量和长度
 
@@ -1459,7 +1457,7 @@ func main() {
 
 案例四
 
-![image-20201114143909295](/image-20201114143909295.png)
+![go_images/image-20201114143909295](go_images/image-20201114143909295.png)
 
 案例五
 
@@ -1509,9 +1507,9 @@ P:协程执行需要的上下文
 G:协程
 ```
 
-![image-20201112225302150](/image-20201112225302150.png)
+![go_images/image-20201112225302150](go_images/image-20201112225302150.png)
 
-![image-20201112230657676](/image-20201112230657676.png)
+![go_images/image-20201112230657676](go_images/image-20201112230657676.png)
 
 ## 9.2 主goroutine退出了，其它子协程也要跟着退出
 
@@ -2697,7 +2695,7 @@ func main() {
 
 <font color="red">2.匿名结构体字段访问可以简化</font>
 
-![](/go_images/image-20201115161819785.png)
+![](go_images/image-20201115161819785.png)
 
 <font color="red">3.当结构体和匿名结构体有相同的字段或者方法时，编译期采用”就近访问原则“访问，如希望访问匿名结构体的字段和方法，可以通过匿名结构体名来区分</font>
 
@@ -2709,7 +2707,7 @@ func main() {
 
 <font color="red">5.</font>
 
-![image-20201115171104867](/go_images/image-20201115171104867.png)
+![go_images/image-20201115171104867](go_images/image-20201115171104867.png)
 
 ### 14.3.3 多重继承
 
@@ -2777,7 +2775,7 @@ func main() {
 
 ### 14.3.3 接口注意事项
 
-![image-20201121111520782](/go_images/image-20201121111520782.png)
+![image-20201121111520782](go_images/image-20201121111520782.png)
 
 6.一个接口（比如A接口）可以<font color="red">继承多个</font>多个别的接口（比如B，C接口），这时如果要实现A接口，也必须将B，C接口的方法也全部实现。
 
@@ -2862,15 +2860,13 @@ func main() {
 
 
 
-![image-20201122171043236](/go_images/image-20201122171043236.png)
-
-![image-20201122171232488](/go_images/image-20201122171232488.png)
+![image-20201122171043236](go_images/image-20201122171043236.png)![image-20201122171232488](go_images/image-20201122171232488.png)
 
 ## 14.5 多态
 
-![image-20201122171643647](/go_images/image-20201122171643647.png)
+![image-20201122171643647](go_images/image-20201122171643647.png)
 
-![image-20201122172913834](/go_images/image-20201122172913834.png)
+![image-20201122172913834](go_images/image-20201122172913834.png)
 
 ## 14.6 类型断言
 
@@ -3251,3 +3247,4 @@ func main() {
 }
 ```
 
+![image-20201206162425786](/go_images/image-20201206162425786.png)
