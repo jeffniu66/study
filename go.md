@@ -3221,3 +3221,33 @@ struct has 3 methods
 res= 50
 ```
 
+# 16. go操作Redis
+
+```go
+// 需要安装第三方Redis库，在GOPATH路径下执行安装指令：
+go get github.com/garyburd/redigo/redis
+```
+
+## 16.1 连接到redis
+
+```go
+package main
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"fmt"
+)
+
+func main() {
+	// 通过go 向redis 写入数据和读取数据
+	// 1. 连接到redis
+	conn, err := redis.Dial("tcp", "127.0.0.1:6379")
+	if err != nil {
+		fmt.Println("redis.Dial err =  ", err)
+		return
+	}
+
+	fmt.Println("conn succ...", conn)
+}
+```
+
