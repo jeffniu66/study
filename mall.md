@@ -1,5 +1,5 @@
 ---
-typora-root-url: ./mall_images
+
 ---
 
 # 4. Vue
@@ -22,7 +22,7 @@ VM: 即View-Model，模型与视图间的双向操作（无需开发人员干涉
 
 2.使用 npm install vue 来安装vue相关包，会生成node_modules/vue目录。
 
-<img src="/image-20201205095805181.png" alt="image-20201205095805181" style="zoom:50%;" />
+<img src="mall_images/image-20201205095805181.png" alt="image-20201205095805181" style="zoom:50%;" />
 
 3.Vue版HelloWorld
 
@@ -112,7 +112,7 @@ chrome可以安装vue devtool插件。
 
 浏览器可以模拟网速慢的效果，开3G
 
-<img src="/image-20201205112147895.png" alt="image-20201205112147895" style="zoom:50%;" />
+<img src="mall_images/image-20201205112147895.png" alt="image-20201205112147895" style="zoom:50%;" />
 
 ### 4.4.1 v-text、v-html
 
