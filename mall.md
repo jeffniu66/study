@@ -8,7 +8,13 @@ typora-root-url: ../study
 
 <img src="mall_images/image-20201211233213094.png" alt="image-20201211233213094" style="zoom:50%;" />
 
+版本适配
+
 ![image-20201211234738534](/mall_images/image-20201211234738534.png)
+
+## 1.2 SpringCloud Alibaba-Nacos作为注册中心
+
+
 
 # 4. Vue
 
