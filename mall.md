@@ -1,5 +1,5 @@
 ---
-typora-root-url: ./mall_images
+typora-root-url: ../study
 ---
 
 # 1. SpringCloud Alibaba
@@ -8,7 +8,7 @@ typora-root-url: ./mall_images
 
 <img src="mall_images/image-20201211233213094.png" alt="image-20201211233213094" style="zoom:50%;" />
 
-![image-20201211234537138](/image-20201211234537138.png)
+![image-20201211234738534](/mall_images/image-20201211234738534.png)
 
 # 4. Vue
 
