@@ -3249,5 +3249,196 @@ func main() {
 }
 ```
 
-![image-20201206162811083](/go_images/image-20201206162811083.png)
+## 16.2 go操作redis(string)
+
+```go
+package main
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"fmt"
+)
+
+func main() {
+	// 通过go 向redis 写入数据和读取数据
+	// 1. 连接到redis
+	conn, err := redis.Dial("tcp", "192.168.0.192:6379")
+	if err != nil {
+		fmt.Println("redis.Dial err =  ", err)
+		return
+	}
+	defer conn.Close()
+
+	// 2.通过go 向redis写入数据 string [key-value]
+	_, err = conn.Do("Set", "name", "tom狗")
+	if err != nil {
+		fmt.Println("set err = ", err)
+		return
+	}
+
+	// 3.通过go 向redis读取数据 string [key-value]
+	ret, err := redis.String(conn.Do("Get", "name"))
+	if err != nil {
+		fmt.Println("set err = ", err)
+		return
+	}
+
+	// 因为返回的是interface{}
+	// 因为 name 对应的值是string, 因此我们需要转换
+
+
+	fmt.Println("操作ok", ret)
+}
+```
+
+## 16.3 go操作redis(hash)
+
+单个设值
+
+```go
+package main
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"fmt"
+)
+
+func main() {
+	// 通过go 向redis 写入数据和读取数据
+	// 1. 连接到redis
+	conn, err := redis.Dial("tcp", "192.168.0.192:6379")
+	if err != nil {
+		fmt.Println("redis.Dial err =  ", err)
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Do("HSet", "user01", "name", "john")
+	if err != nil {
+		fmt.Println("hset err = ", err)
+		return
+	}
+
+	_, err = conn.Do("HSet", "user01", "age", "18")
+	if err != nil {
+		fmt.Println("hget err = ", err)
+		return
+	}
+
+	name, err := redis.String(conn.Do("HGet", "user01", "name"))
+	if err != nil {
+		fmt.Println("hget err = ", err)
+		return
+	}
+
+	age, err := redis.Int(conn.Do("HGet", "user01", "age"))
+	if err != nil {
+		fmt.Println("hget err = ", err)
+		return
+	}
+
+	// 因为返回的是interface{}
+	// 因为 name 对应的值是string, 因此我们需要转换
+
+
+	fmt.Println("操作ok", name, age)
+}
+```
+
+批量设值
+
+```go
+package main
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"fmt"
+)
+
+func main() {
+	// 通过go 向redis 写入数据和读取数据
+	// 1. 连接到redis
+	conn, err := redis.Dial("tcp", "192.168.0.192:6379")
+	if err != nil {
+		fmt.Println("redis.Dial err =  ", err)
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Do("HMSet", "user01", "name", "john", "age", 18)
+	if err != nil {
+		fmt.Println("HMSet err = ", err)
+		return
+	}
+
+	ret, err := redis.Strings(conn.Do("HMGet", "user01", "name", "age"))
+	if err != nil {
+		fmt.Println("HMGet err = ", err)
+		return
+	}
+
+	for i, v := range ret {
+		fmt.Printf("ret[%d]=%s\n", i, v)
+	}
+
+	fmt.Println("操作ok", ret)
+}
+```
+
+## 16.4 连接池使用
+
+<img src="/go_images/image-20201206192405873.png" alt="image-20201206192405873" style="zoom:50%;" />
+
+```go
+package main
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"fmt"
+)
+
+// 定义一个全局的pool
+var pool *redis.Pool
+
+// 当程序启动时，就初始化连接池
+func init() {
+
+	pool = &redis.Pool{
+		MaxIdle:     8,
+		MaxActive:   0,
+		IdleTimeout: 100,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", "192.168.0.192:6379")
+		},
+	}
+}
+
+func main() {
+	// 先从pool取出一个连接
+	conn := pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("Set", "name", "汤姆狗")
+	if err != nil {
+		fmt.Println("conn.Do err = ", err)
+		return
+	}
+
+	// 取出
+	r, err := redis.String(conn.Do("Get", "name"))
+	if err != nil {
+		fmt.Println("conn.Do err = ", err)
+	}
+	fmt.Println("r = ", r)
+
+	// 如何我们要从pool取出连接，一定要保证连接池是没有关闭
+	pool.Close()
+	conn2 := pool.Get()
+	fmt.Println(conn2)
+}
+```
+
+# 17. 海量用户通讯系统
+
+
 
