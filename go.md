@@ -1,6 +1,4 @@
 ---
-
-typora-copy-images-to: ./go_images
 typora-root-url: ../study
 ---
 

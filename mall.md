@@ -14,6 +14,26 @@ typora-root-url: ../study
 
 ## 1.2 SpringCloud Alibaba-Nacos作为注册中心
 
+github地址
+
+```java
+https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md
+```
+
+Linux/Unix/Mac操作系统，执行命令启动nacos
+
+```shell
+sh startup.sh -m standalone
+```
+
+nacos访问地址
+
+```java
+http://localhost:8848/nacos/
+```
+
+
+
 
 
 # 4. Vue
@@ -705,16 +725,95 @@ chrome可以安装vue devtool插件。
 
 ## 4.8 vue模块化开发
 
-1、npm install webpack -g
+1.全局安装webpack（<font color="red">mac下需要获取root权限 sudo -s，或者修改权限sudo chmod -R 777 /usr/local/lib/node_modules/</font>）
 
-全局安装webpack
+```shell
+npm install webpack -g
+```
 
-2、npm install -g @vue/cli-init
+2.全局安装vue脚手架
 
-全局安装vue脚手架
+```shell
+npm install -g @vue/cli-init
+# mac下使用以下命令
+npm install vue-cli -g
+```
 
-3、初始化vue项目
+3.初始化vue项目，vue脚手架使用webpack模板初始化一个appname项目
 
+```shell
 vue init webpack appname
+```
 
-vue脚手架使用webpack模板初始化一个appname项目
+4.初始化过程会进行一系列的选择
+
+<img src="/mall_images/image-20201212110731135.png" alt="image-20201212110731135" style="zoom:50%;" />
+
+5.运行项目
+
+```shell
+npm run dev
+```
+
+## 4.9 整合ElementUI快速开发
+
+网站地址
+
+```java
+https://element.eleme.cn/#/zh-CN
+```
+
+element安装
+
+```shell
+npm i element-ui -S
+```
+
+快速上手
+
+```java
+https://element.eleme.cn/#/zh-CN/component/quickstart
+```
+
+# 5.商品服务
+
+## 5.1 API-三级分类-配置网关路由与路径重写
+
+1.启动renren-fast后台项目
+
+2.打开vscode启动前端项目renren-fast-vue，使用命令启动
+
+```shell
+npm run dev
+```
+
+3.登录人人后台
+
+```java
+http://localhost:8001/
+账号 admin
+密码 admin
+```
+
+## 5.2 API-三级分类-配置网关路由与路径重写
+
+## 5.3 API-三级分类-网关统一配置跨域
+
+跨域：指的是浏览器不能执行其它网站的脚本。它是由浏览器的同源策略造成的，是<font color="red">浏览器对javascript施加的安全限制。</font>
+
+同源策略：是指协议，域名，端口都要相同，其中有一个不同都会产生跨域；
+
+<img src="/mall_images/image-20201213162729892.png" alt="image-20201213162729892" style="zoom:50%;" />
+
+
+
+<img src="/mall_images/image-20201213163341187.png" alt="image-20201213163341187" style="zoom:50%;" />
+
+```java
+https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS
+```
+
+<img src="/mall_images/image-20201213164322090.png" alt="image-20201213164322090" style="zoom:50%;" />
+
+<img src="/mall_images/image-20201213164553433.png" alt="image-20201213164553433" style="zoom:50%;" />
+
