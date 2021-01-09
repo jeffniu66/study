@@ -1323,7 +1323,40 @@ GET bank/_search
 }
 ```
 
+### Mapping
 
+#### 创建映射
+
+<img src="/mall_images/image-20210109074912024.png" alt="image-20210109074912024"  />
+
+<font color="red">创建一个索引并指定映射</font>（类似于MYSQL创建表字段类型）
+
+```java
+PUT /my_index
+{
+  "mappings": {
+    "properties": {
+      "age":{"type": "integer"},
+      "email":{"type": "keyword"},
+      "name":{"type": "text"}
+    }
+  }
+}
+```
+
+#### 添加新的字段映射
+
+```java
+PUT my_index/_mapping
+{
+  "properties":{
+    "employee-id":{
+      "type": "keyword",
+      "index": false
+    }
+  }
+}
+```
 
 
 
