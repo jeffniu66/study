@@ -904,7 +904,7 @@ chmod -R 777 /mydata/elasticsearch/
 // 9200后来发送http请求REST API时用到的 9300是在分布式集群节点下各服务器之间通信的端口
 docker run --name elasticsearch -p 9200:9200 -p 9300:9300 \
 -e "discovery.type=single-node" \
--e ES_JAVA_OPTS="-Xms64m -Xmx128m" \
+-e ES_JAVA_OPTS="-Xms64m -Xmx512m" \
 -v /mydata/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml \
 -v /mydata/elasticsearch/data:/usr/share/elasticsearch/data \
 -v  /mydata/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
@@ -1357,6 +1357,154 @@ PUT my_index/_mapping
   }
 }
 ```
+
+#### 更新映射
+
+<font color="red">对于已经存在的映射字段，我们不能更新。更新必须创建新的索引进行数据迁移</font>
+
+#### 数据迁移
+
+先创建出new_twitter的正确映射。然后使用如下方式进行数据迁移
+
+6.0以后没有type的写法
+
+```java
+POST _reindex	【固定写法】
+{
+  "source":{
+    "index":"twitter"
+  },
+  "dest":{
+    "index":"new_twitter"
+  }
+}
+```
+
+6.0之前有type的写法
+
+```java
+POST _reindex
+{
+  "source":{
+    "index":"twitter",
+    "type":"tweet"
+  },
+  "dest":{
+    "index":"tweets"
+  }
+}
+```
+
+### 分词
+
+```java
+POST _analyze
+{
+  "tokenizer": "standard",
+  "text": "The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."
+}
+```
+
+#### 安装ik分词器
+
+**注意**:	不能用默认 elasticsearch-plugin install xxx.zip 进行自动安装
+
+```java
+https://github.com/medcl/elasticsearch-analysis-ik/releases?after=v6.4.2
+```
+
+对应es版本安装
+
+```java
+进入es容器内部plugins目录
+docker exec -it 容器id /bin/bash
+wget
+https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.4.2/elasticsearch-analysis-ik-7.4.2.zip
+unzip 下载的文件
+rm -rf *.zip
+mv elasticsearch/ik
+可以确认是否安装好了分词器
+cd ../bin
+elasticsearch plugin list:	即可列出系统的分词器
+```
+
+```java
+POST _analyze
+{
+  "tokenizer": "ik_smart",
+  "text": "xmall电商项目"
+}
+```
+
+```java
+POST _analyze
+{
+  "tokenizer": "ik_max_word",
+  "text": "xmall电商项目"
+}
+```
+
+#### 附录：安装Nginx
+
+随便启动一个nginx实例，只是为了复制出配置
+
+```shell
+docker run -p80:80 --name nginx -d nginx:1.10
+```
+
+将容器内的配置文件拷贝到当前目录
+
+```shell
+docker container cp nginx:/etc/nginx .
+```
+
+停止原容器
+
+```shell
+docker stop nginx
+```
+
+执行命令删除原容器
+
+```shell
+docker rm nginx
+```
+
+创建新的Nginx，执行以下命令
+
+```shell
+docker run -p 80:80 --name nginx \
+ -v /mydata/nginx/html:/usr/share/nginx/html \
+ -v /mydata/nginx/logs:/var/log/nginx \
+ -v /mydata/nginx/conf/:/etc/nginx \
+ -d nginx:1.10
+```
+
+## Elasticsearch-Rest-Client
+
+9300:	TCP端口
+
+spring-data-elasticsearch-transport-api.jar
+
+​	springboot版本不同，**transport-api.jar**不同，不能适配es版本
+
+​	7.x 已经不建议使用，8以后就要废弃
+
+9200:	HTTP
+
+JestClient:	非官方，更新慢
+
+RestTemplate:	模拟发HTTP请求，ES很多操作需要自己封装，麻烦
+
+HttpClient：同上
+
+Elasticsearch-Rest-Client：官方RestClient，封装了ES操作，API层次分明，上手简单
+
+
+
+
+
+
 
 
 
