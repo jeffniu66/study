@@ -1,4 +1,12 @@
+---
+typora-root-url: ../study
+---
+
 # 1. 初级
+
+时间复杂度
+
+![image-20210124154452824](/algo_images/image-20210124154452824.png)
 
 ## 1.1 TwoSum
 
