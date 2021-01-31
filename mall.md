@@ -1444,7 +1444,39 @@ POST _analyze
 }
 ```
 
-#### 附录：安装Nginx
+## Elasticsearch-Rest-Client
+
+9300:	TCP端口
+
+spring-data-elasticsearch-transport-api.jar
+
+​	springboot版本不同，**transport-api.jar**不同，不能适配es版本
+
+​	7.x 已经不建议使用，8以后就要废弃
+
+9200:	HTTP
+
+JestClient:	非官方，更新慢
+
+RestTemplate:	模拟发HTTP请求，ES很多操作需要自己封装，麻烦
+
+HttpClient：同上
+
+Elasticsearch-Rest-Client：官方RestClient，封装了ES操作，API层次分明，上手简单
+
+# 性能与压力测试
+
+![image-20210131081331603](/mall_images/image-20210131081331603.png)
+
+![image-20210131082201219](/mall_images/image-20210131082201219.png)
+
+
+
+
+
+
+
+# 附录：安装Nginx
 
 随便启动一个nginx实例，只是为了复制出配置
 
@@ -1480,27 +1512,7 @@ docker run -p 80:80 --name nginx \
  -d nginx:1.10
 ```
 
-## Elasticsearch-Rest-Client
-
-9300:	TCP端口
-
-spring-data-elasticsearch-transport-api.jar
-
-​	springboot版本不同，**transport-api.jar**不同，不能适配es版本
-
-​	7.x 已经不建议使用，8以后就要废弃
-
-9200:	HTTP
-
-JestClient:	非官方，更新慢
-
-RestTemplate:	模拟发HTTP请求，ES很多操作需要自己封装，麻烦
-
-HttpClient：同上
-
-Elasticsearch-Rest-Client：官方RestClient，封装了ES操作，API层次分明，上手简单
-
-
+## 
 
 
 
