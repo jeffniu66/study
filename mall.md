@@ -775,9 +775,13 @@ npm i element-ui -S
 https://element.eleme.cn/#/zh-CN/component/quickstart
 ```
 
-# 5.商品服务
+# 商品服务
 
-## 5.1 API-三级分类-配置网关路由与路径重写
+## API
+
+### 三级分类
+
+#### 配置网关路由与路径重写
 
 1.启动renren-fast后台项目
 
@@ -795,9 +799,7 @@ http://localhost:8001/
 密码 admin
 ```
 
-## 5.2 API-三级分类-配置网关路由与路径重写
-
-## 5.3 API-三级分类-网关统一配置跨域
+#### 网关统一配置跨域
 
 跨域：指的是浏览器不能执行其它网站的脚本。它是由浏览器的同源策略造成的，是<font color="red">浏览器对javascript施加的安全限制。</font>
 
@@ -817,7 +819,7 @@ https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS
 
 <img src="/mall_images/image-20201213164553433.png" alt="image-20201213164553433" style="zoom:50%;" />
 
-## 5.4 API-三级分类-删除-删除效果细化
+#### 删除-删除效果细化
 
 vue发送GET和POST代码模板
 
@@ -846,6 +848,191 @@ vue发送GET和POST代码模板
 "description": " httpPOST请求"  
 }  
 ```
+
+#### 新增-新增效果完成
+
+![image-20210209165840650](/mall_images/image-20210209165840650.png)
+
+<font color="gree">category.vue</font>
+
+```vue
+<template>
+  <div>
+    <el-tree
+      :data="menus"
+      :props="defaultProps"
+      :expand-on-click-node="false"
+      show-checkbox
+      node-key="catId"
+      :default-expanded-keys="expandedKey"
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            v-if="node.level <= 2"
+            type="text"
+            size="mini"
+            @click="() => append(data)"
+          >
+            Append
+          </el-button>
+          <el-button type="text" size="mini" @click="() => edit(data)">
+            edit
+          </el-button>
+          <el-button
+            v-if="node.childNodes == 0"
+            type="text"
+            size="mini"
+            @click="() => remove(node, data)"
+          >
+            Delete
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
+
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+      <el-form :model="category">
+        <el-form-item label="分类名称">
+          <el-input v-model="category.name" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addCategory">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+//这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
+//例如：import 《组件名称》 from '《组件路径》';
+
+export default {
+  //import引入的组件需要注入到对象中才能使用
+  components: {},
+  props: {},
+  data() {
+    return {
+      category: {
+        name: "",
+        parentCid: 0,
+        catLevel: 0,
+        showStatus: 1,
+        sort: 0,
+        catId: null,
+      },
+      dialogVisible: false,
+      menus: [],
+      expandedKey: [],
+      defaultProps: {
+        children: "children",
+        label: "name",
+      },
+    };
+  },
+  methods: {
+    edit(data) {
+      console.log("要修改的数据", data);
+      this.dialogVisible = true;
+
+      this.category.name = data.name;
+      this.category.catId = data.catId
+    },
+    append(data) {
+      console.log("append", data);
+      this.dialogVisible = true;
+
+      this.category.parentCid = data.catId;
+      this.category.catLevel = data.catLevel * 1 + 1; // 防止是个字符串
+    },
+    // 添加三级分类
+    addCategory() {
+      console.log("提交的三级分类数据", this.category);
+      this.$http({
+        url: this.$http.adornUrl("/product/category/save"),
+        method: "post",
+        data: this.$http.adornData(this.category, false),
+      }).then(({ data }) => {
+        this.$message({
+          message: "菜单保存成功",
+          type: "success",
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 刷新出新的菜单
+        this.getMenus();
+        // 设置需要默认展开的菜单
+        this.expandedKey = [this.category.parentCid];
+      });
+    },
+    remove(node, data) {
+      console.log("remove", node, data);
+      var ids = [data.catId];
+      this.$confirm(`是否删除【${data.name}】菜单?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(ids, false),
+          }).then(({ data }) => {
+            this.$message({
+              message: "菜单删除成功",
+              type: "success",
+            });
+            // 刷新出新的菜单
+            this.getMenus();
+            // 设置需要默认展开的菜单
+            this.expandedKey = [node.parent.data.catId];
+          });
+        })
+        .catch(() => {});
+    },
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get",
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    },
+  },
+  //计算属性 类似于data概念
+  computed: {},
+  //监控data中的数据变化
+  watch: {},
+  //生命周期 - 创建完成（可以访问当前this实例）
+  created() {
+    this.getMenus();
+  },
+  //生命周期 - 挂载完成（可以访问DOM元素）
+  mounted() {},
+  beforeCreate() {}, //生命周期 - 创建之前
+  beforeMount() {}, //生命周期 - 挂载之前
+  beforeUpdate() {}, //生命周期 - 更新之前
+  updated() {}, //生命周期 - 更新之后
+  beforeDestroy() {}, //生命周期 - 销毁之前
+  destroyed() {}, //生命周期 - 销毁完成
+  activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
+};
+</script>
+<style scoped>
+</style>
+```
+
+
+
+
+
+
 
 # Elasticsearch
 
@@ -1474,7 +1661,258 @@ Elasticsearch-Rest-Client：官方RestClient，封装了ES操作，API层次分�
 
 
 
+# 缓存
 
+![image-20210202074332999](/mall_images/image-20210202074332999.png)
+
+## 整合redis
+
+1、引入data-redis-starter
+
+2、简单配置redis的host等信息
+
+3、使用SpringBoot自动配置好的StringRedisTemplate来操作redis
+
+## 压力测试出的内存泄漏及解决
+
+1、SpringBoot2.0以后默认使用lettuce作为操作redis的客户端。它使用netty进行网络通信。
+
+2、lettuce的bug导致netty堆外内存溢出，-Xmx300m；netty如果没有指定堆外内存，默认使用-Xmx300m，可以通过
+
+-Dio.netty.maxDirectMemory进行设置。
+
+<font color="red">解决方案：不能使用-Dio.netty.maxDirectMemory只去调大堆外内存。</font>
+
+<font color="red">1、升级lettuce客户端。</font>
+
+<font color="red">2、切换使用jedis。</font>
+
+lettuce、jedis操作redis的底层客户端。Spring再次封装redisTemplate
+
+## 缓存穿透
+
+![image-20210204081358437](/mall_images/image-20210204081358437.png)
+
+## 缓存雪崩
+
+![image-20210204081627216](/mall_images/image-20210204081627216.png)
+
+## 缓存击穿
+
+![image-20210204081828985](/mall_images/image-20210204081828985.png)
+
+### 加锁解决缓存击穿问题
+
+<font color="red">在分布式情况下，想要锁住所有，必须使用分布式锁，加锁和解锁都需要原子操作</font>
+
+## 分布式锁-Redisson
+
+### lock看门狗原理-redisson如何解决死锁问题
+
+加锁
+
+```java
+lock.lock(); // 阻塞式等待。默认加的锁都是30s时间。
+```
+
+1. 锁的自动续期，如果业务超长，运行期间自动给锁续上新的30s。不用担心业务时间长，锁自动过期被删掉。
+2. 加锁的业务只要运行完成，就不会给当前锁续期，即使不手动解锁，锁默认在30s以后自动删除。
+
+```java
+lock.lock(10, TimeUnit.SECONDS); // 10秒自动解锁，自动解锁时间一定要大于业务的执行时间
+```
+
+问题：lock.lock(10, TimeUnit.SECONDS); 在锁时间到了以后，不会自动续期。
+
+1. 如果我们传递了锁的超时时间，就发送给redis执行脚本，进行占锁，默认超时就是我们指定的时间。
+2. 如果我们未指定锁的超时时间，就使用30*1000【LockWatchdogTimeout看门狗的默认时间】
+3. 只要占锁成功，就会启动一个定时任务【重新给锁设置过期时间，新的过期时间就是看门狗的默认时间】，每隔10s都会自动再次续期，internalLockLeaseTime【看门狗时间】/ 3, 10s
+
+<font color="red">最佳实践: lock.lock(30, TimeUnit.SECONDS); 省掉了续期操作。</font>
+
+## SpringCache
+
+### 简介
+
+![image-20210208082706761](/mall_images/image-20210208082706761.png)
+
+### 基础概念
+
+![image-20210208084705514](/mall_images/image-20210208084705514.png)
+
+### 整合SpringCache简化缓存开发
+
+#### 引入依赖
+
+spring-boot-starter-cache, spring-boot-starter-data-redis
+
+#### 写配置
+
+##### 自动配置了哪些
+
+CacheAutoConfiguration会导入RedisCacheConfiguration
+
+自动配好了缓存管理器RedisCacheManager
+
+##### 配置使用redis作为缓存
+
+```properties
+spring.cache.type=redis
+```
+
+#### 测试使用缓存
+
+```properties
+@Cacheable: Triggers cache population. 
+	// 触发将数据保存到缓存的操作
+
+@CacheEvict: Triggers cache eviction. 
+	// 触发将数据从缓存删除的操作
+
+@CachePut: Updates the cache without interfering with the method execution.
+  // 不影响方法执行更新缓存
+
+@Caching: Regroups multiple cache operations to be applied on a method.
+  // 组合以上多个缓存
+
+@CacheConfig: Shares some common cache-related settings at class-level.
+  // 在类级别共享缓存的相同配置
+```
+
+##### 开启缓存功能
+
+```properties
+@EnableCaching
+```
+
+##### 只需要使用注解就能完成缓存操作
+
+```properties
+// 每一个需要缓存的数据我们都来指定要放到哪个名字的缓存。【缓存的分区（按照业务类型分）】
+@Cacheable 
+// 代表当前方法的结果需要缓存，如果缓存中有，方法不用调用。如果缓存中没有，会调用方法，最后将方法的结果放入缓存
+```
+
+##### 原理
+
+```java
+CacheAutoConfiguration -> RedisAutoConfiguration -> 自动配置了RedisCacheManager -> 初始化所有的缓存
+-> 每个缓存决定使用什么配置 -> 如果redisCacheConfiguration有就用已有的，没有就用默认配置 
+-> 想改缓存的配置，只需要给容器中放一个RedisCacheConfiguration即可
+-> 就会应用到当前RedisCacheManager管理的所有缓存分区中
+```
+
+### @Cacheable细节设置
+
+默认行为
+
+1. 如果缓存中有，方法不用调用。
+2. key默认自动生成：缓存的名字::SimpleKey[] (自动生成的key值)
+3. 缓存的value的值，默认使用jdk序列化机制，将序列化后的数据存到redis
+4. 默认ttl时间为-1；
+
+自定义
+
+1. 指定生成的缓存使用的key		key属性指定，接收一个SpEL表达式
+
+   SpEL详细参考地址
+
+   ```java
+   https://docs.spring.io/spring-framework/docs/5.2.12.RELEASE/spring-framework-reference/integration.html#cache-spel-context
+   ```
+
+2. 指定缓存的数据的存活时间      配置文件中修改ttl: spring.cache.redis.time-to-live=3600000 毫秒
+
+3. 将数据保存为json格式:
+
+   CacheAutoConfiguration
+
+   RedisAutoConfiguration
+
+### 自定义缓存配置
+
+MyCacheConfig.java
+
+```java
+package com.lzd.xmall.product.config;
+
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+@EnableConfigurationProperties(CacheProperties.class)
+@Configuration
+@EnableCaching
+public class MyCacheConfig {
+
+//    @Autowired
+//    CacheProperties cacheProperties;
+
+    /**
+     * 配置文件中的东西没有生效
+     *
+     * 1、原来和配合文件绑定的配置类是这样的
+     *      @ConfigurationProperties(prefix = "spring.cache")
+     *      public class CacheProperties
+     *
+     * 2、要让它生效
+     *      @EnableConfigurationProperties(CacheProperties.class)
+     * @return
+     */
+    @Bean
+    RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties) {
+
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+
+//        config = config.entryTtl();
+
+        config = config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
+        config = config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+
+        // 将配置文件中的所有配置都生效
+        CacheProperties.Redis redisProperties = cacheProperties.getRedis();
+        if (redisProperties.getTimeToLive() != null) {
+            config = config.entryTtl(redisProperties.getTimeToLive());
+        }
+        if (redisProperties.getKeyPrefix() != null) {
+            config = config.prefixCacheNameWith(redisProperties.getKeyPrefix());
+        }
+        if (!redisProperties.isCacheNullValues()) {
+            config = config.disableCachingNullValues();
+        }
+        if (!redisProperties.isUseKeyPrefix()) {
+            config = config.disableKeyPrefix();
+        }
+
+
+        return config;
+    }
+}
+```
+
+application.properties
+
+```properties
+spring.cache.type=redis
+
+#spring.cache.cache-names=qq
+spring.cache.redis.time-to-live=3600000
+#如果指定了前缀就用我们指定的前缀，如果没有就默认使用缓存的名字作为前缀
+spring.cache.redis.key-prefix=CACHE_
+spring.cache.redis.use-key-prefix=true
+#是否缓存空值，防止缓存穿透
+spring.cache.redis.cache-null-values=true
+```
+
+### @CacheEvict
+
+采用失效模式更新缓存
 
 # 附录：安装Nginx
 
