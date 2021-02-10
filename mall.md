@@ -1028,6 +1028,797 @@ export default {
 </style>
 ```
 
+#### 修改-基本修改效果完成
+
+<font color="gree">category.vue</font>
+
+```vue
+<template>
+  <div>
+    <el-tree
+      :data="menus"
+      :props="defaultProps"
+      :expand-on-click-node="false"
+      show-checkbox
+      node-key="catId"
+      :default-expanded-keys="expandedKey"
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            v-if="node.level <= 2"
+            type="text"
+            size="mini"
+            @click="() => append(data)"
+          >
+            Append
+          </el-button>
+          <el-button type="text" size="mini" @click="() => edit(data)">
+            edit
+          </el-button>
+          <el-button
+            v-if="node.childNodes == 0"
+            type="text"
+            size="mini"
+            @click="() => remove(node, data)"
+          >
+            Delete
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
+
+    <el-dialog
+      :title="title"
+      :visible.sync="dialogVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="category">
+        <el-form-item label="分类名称">
+          <el-input v-model="category.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="图标">
+          <el-input v-model="category.icon" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="计量单位">
+          <el-input
+            v-model="category.productUnit"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitData">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+//这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
+//例如：import 《组件名称》 from '《组件路径》';
+
+export default {
+  //import引入的组件需要注入到对象中才能使用
+  components: {},
+  props: {},
+  data() {
+    return {
+      title: "",
+      dialogType: "", // edit,add
+      category: {
+        name: "",
+        parentCid: 0,
+        catLevel: 0,
+        showStatus: 1,
+        sort: 0,
+        productUnit: "",
+        icon: "",
+        catId: null,
+      },
+      dialogVisible: false,
+      menus: [],
+      expandedKey: [],
+      defaultProps: {
+        children: "children",
+        label: "name",
+      },
+    };
+  },
+  methods: {
+    edit(data) {
+      console.log("要修改的数据", data);
+      this.dialogType = "edit";
+      this.title = "修改分类";
+      this.dialogVisible = true;
+
+      // 发送请求获取当前节点最新的数据
+      this.$http({
+        url: this.$http.adornUrl(`/product/category/info/${data.catId}`),
+        method: "get",
+      }).then(({ data }) => {
+        // 请求成功
+        console.log("要回显的数据: ", data);
+        this.category.name = data.data.name;
+        this.category.catId = data.data.catId;
+        this.category.icon = data.data.icon;
+        this.category.productUnit = data.data.productUnit;
+        this.category.parentCid = data.data.parentCid;
+      });
+    },
+    append(data) {
+      console.log("append", data);
+      this.dialogType = "add";
+      this.title = "添加分类";
+      this.dialogVisible = true;
+      this.category.parentCid = data.catId;
+      this.category.catLevel = data.catLevel * 1 + 1; // 防止是个字符串
+
+      this.category.name = "";
+      this.category.catId = null;
+      this.category.icon = "";
+      this.category.productUnit = "";
+      this.category.sort = 0;
+      this.category.showStatus = 1;
+    },
+    submitData() {
+      if (this.dialogType == "add") {
+        this.addCategory();
+      }
+      if (this.dialogType == "edit") {
+        this.editCategory();
+      }
+    },
+    // 修改三级分类
+    editCategory() {
+      var { catId, name, icon, productUnit } = this.category; // {}结构表达式
+      this.$http({
+        url: this.$http.adornUrl("/product/category/update"),
+        method: "post",
+        data: this.$http.adornData({ catId, name, icon, productUnit }, false),
+      }).then(({ data }) => {
+        this.$message({
+          message: "菜单修改成功",
+          type: "success",
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 刷新出新的菜单
+        this.getMenus();
+        // 设置需要默认展开的菜单
+        this.expandedKey = [this.category.parentCid];
+      });
+    },
+    // 添加三级分类
+    addCategory() {
+      console.log("提交的三级分类数据", this.category);
+      this.$http({
+        url: this.$http.adornUrl("/product/category/save"),
+        method: "post",
+        data: this.$http.adornData(this.category, false),
+      }).then(({ data }) => {
+        this.$message({
+          message: "菜单保存成功",
+          type: "success",
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 刷新出新的菜单
+        this.getMenus();
+        // 设置需要默认展开的菜单
+        this.expandedKey = [this.category.parentCid];
+      });
+    },
+    remove(node, data) {
+      console.log("remove", node, data);
+      var ids = [data.catId];
+      this.$confirm(`是否删除【${data.name}】菜单?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(ids, false),
+          }).then(({ data }) => {
+            this.$message({
+              message: "菜单删除成功",
+              type: "success",
+            });
+            // 刷新出新的菜单
+            this.getMenus();
+            // 设置需要默认展开的菜单
+            this.expandedKey = [node.parent.data.catId];
+          });
+        })
+        .catch(() => {});
+    },
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get",
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    },
+  },
+  //计算属性 类似于data概念
+  computed: {},
+  //监控data中的数据变化
+  watch: {},
+  //生命周期 - 创建完成（可以访问当前this实例）
+  created() {
+    this.getMenus();
+  },
+  //生命周期 - 挂载完成（可以访问DOM元素）
+  mounted() {},
+  beforeCreate() {}, //生命周期 - 创建之前
+  beforeMount() {}, //生命周期 - 挂载之前
+  beforeUpdate() {}, //生命周期 - 更新之前
+  updated() {}, //生命周期 - 更新之后
+  beforeDestroy() {}, //生命周期 - 销毁之前
+  destroyed() {}, //生命周期 - 销毁完成
+  activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
+};
+</script>
+<style scoped>
+</style>
+```
+
+#### 修改-拖拽效果
+
+#### 修改-拖拽数据收集
+
+#### 修改-拖拽功能完成
+
+#### 修改-批量拖拽效果
+
+#### 删除-批量删除&小结
+
+### 品牌管理
+
+#### 使用逆向工程的前后端代码
+
+![image-20210209215315820](/mall_images/image-20210209215315820.png)
+
+![image-20210210100828365](/mall_images/image-20210210100828365.png)
+
+![image-20210210100902753](/mall_images/image-20210210100902753.png)
+
+<font color="gree">brand.vue</font>
+
+```vue
+<template>
+  <div class="mod-config">
+    <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
+      <el-form-item>
+        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="getDataList()">查询</el-button>
+        <el-button v-if="isAuth('product:brand:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <el-button v-if="isAuth('product:brand:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table
+      :data="dataList"
+      border
+      v-loading="dataListLoading"
+      @selection-change="selectionChangeHandle"
+      style="width: 100%;">
+      <el-table-column
+        type="selection"
+        header-align="center"
+        align="center"
+        width="50">
+      </el-table-column>
+      <el-table-column
+        prop="brandId"
+        header-align="center"
+        align="center"
+        label="品牌id">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        header-align="center"
+        align="center"
+        label="品牌名">
+      </el-table-column>
+      <el-table-column
+        prop="logo"
+        header-align="center"
+        align="center"
+        label="品牌logo地址">
+      </el-table-column>
+      <el-table-column
+        prop="descript"
+        header-align="center"
+        align="center"
+        label="介绍">
+      </el-table-column>
+      <el-table-column
+        prop="showStatus"
+        header-align="center"
+        align="center"
+        label="显示状态[0-不显示；1-显示]">
+      </el-table-column>
+      <el-table-column
+        prop="firstLetter"
+        header-align="center"
+        align="center"
+        label="检索首字母">
+      </el-table-column>
+      <el-table-column
+        prop="sort"
+        header-align="center"
+        align="center"
+        label="排序">
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="操作">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.brandId)">修改</el-button>
+          <el-button type="text" size="small" @click="deleteHandle(scope.row.brandId)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      @size-change="sizeChangeHandle"
+      @current-change="currentChangeHandle"
+      :current-page="pageIndex"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="pageSize"
+      :total="totalPage"
+      layout="total, sizes, prev, pager, next, jumper">
+    </el-pagination>
+    <!-- 弹窗, 新增 / 修改 -->
+    <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+  </div>
+</template>
+
+<script>
+  import AddOrUpdate from './brand-add-or-update'
+  export default {
+    data () {
+      return {
+        dataForm: {
+          key: ''
+        },
+        dataList: [],
+        pageIndex: 1,
+        pageSize: 10,
+        totalPage: 0,
+        dataListLoading: false,
+        dataListSelections: [],
+        addOrUpdateVisible: false
+      }
+    },
+    components: {
+      AddOrUpdate
+    },
+    activated () {
+      this.getDataList()
+    },
+    methods: {
+      // 获取数据列表
+      getDataList () {
+        this.dataListLoading = true
+        this.$http({
+          url: this.$http.adornUrl('/product/brand/list'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'page': this.pageIndex,
+            'limit': this.pageSize,
+            'key': this.dataForm.key
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.dataList = data.page.list
+            this.totalPage = data.page.totalCount
+          } else {
+            this.dataList = []
+            this.totalPage = 0
+          }
+          this.dataListLoading = false
+        })
+      },
+      // 每页数
+      sizeChangeHandle (val) {
+        this.pageSize = val
+        this.pageIndex = 1
+        this.getDataList()
+      },
+      // 当前页
+      currentChangeHandle (val) {
+        this.pageIndex = val
+        this.getDataList()
+      },
+      // 多选
+      selectionChangeHandle (val) {
+        this.dataListSelections = val
+      },
+      // 新增 / 修改
+      addOrUpdateHandle (id) {
+        this.addOrUpdateVisible = true
+        this.$nextTick(() => {
+          this.$refs.addOrUpdate.init(id)
+        })
+      },
+      // 删除
+      deleteHandle (id) {
+        var ids = id ? [id] : this.dataListSelections.map(item => {
+          return item.brandId
+        })
+        this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http({
+            url: this.$http.adornUrl('/product/brand/delete'),
+            method: 'post',
+            data: this.$http.adornData(ids, false)
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              this.$message({
+                message: '操作成功',
+                type: 'success',
+                duration: 1500,
+                onClose: () => {
+                  this.getDataList()
+                }
+              })
+            } else {
+              this.$message.error(data.msg)
+            }
+          })
+        })
+      }
+    }
+  }
+</script>
+```
+
+<font color="gree">brand-add-or-update.vue</font>
+
+```vue
+<template>
+  <el-dialog
+    :title="!dataForm.id ? '新增' : '修改'"
+    :close-on-click-modal="false"
+    :visible.sync="visible">
+    <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
+    <el-form-item label="品牌名" prop="name">
+      <el-input v-model="dataForm.name" placeholder="品牌名"></el-input>
+    </el-form-item>
+    <el-form-item label="品牌logo地址" prop="logo">
+      <el-input v-model="dataForm.logo" placeholder="品牌logo地址"></el-input>
+    </el-form-item>
+    <el-form-item label="介绍" prop="descript">
+      <el-input v-model="dataForm.descript" placeholder="介绍"></el-input>
+    </el-form-item>
+    <el-form-item label="显示状态[0-不显示；1-显示]" prop="showStatus">
+      <el-input v-model="dataForm.showStatus" placeholder="显示状态[0-不显示；1-显示]"></el-input>
+    </el-form-item>
+    <el-form-item label="检索首字母" prop="firstLetter">
+      <el-input v-model="dataForm.firstLetter" placeholder="检索首字母"></el-input>
+    </el-form-item>
+    <el-form-item label="排序" prop="sort">
+      <el-input v-model="dataForm.sort" placeholder="排序"></el-input>
+    </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="visible = false">取消</el-button>
+      <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
+    </span>
+  </el-dialog>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        visible: false,
+        dataForm: {
+          brandId: 0,
+          name: '',
+          logo: '',
+          descript: '',
+          showStatus: '',
+          firstLetter: '',
+          sort: ''
+        },
+        dataRule: {
+          name: [
+            { required: true, message: '品牌名不能为空', trigger: 'blur' }
+          ],
+          logo: [
+            { required: true, message: '品牌logo地址不能为空', trigger: 'blur' }
+          ],
+          descript: [
+            { required: true, message: '介绍不能为空', trigger: 'blur' }
+          ],
+          showStatus: [
+            { required: true, message: '显示状态[0-不显示；1-显示]不能为空', trigger: 'blur' }
+          ],
+          firstLetter: [
+            { required: true, message: '检索首字母不能为空', trigger: 'blur' }
+          ],
+          sort: [
+            { required: true, message: '排序不能为空', trigger: 'blur' }
+          ]
+        }
+      }
+    },
+    methods: {
+      init (id) {
+        this.dataForm.brandId = id || 0
+        this.visible = true
+        this.$nextTick(() => {
+          this.$refs['dataForm'].resetFields()
+          if (this.dataForm.brandId) {
+            this.$http({
+              url: this.$http.adornUrl(`/product/brand/info/${this.dataForm.brandId}`),
+              method: 'get',
+              params: this.$http.adornParams()
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                this.dataForm.name = data.brand.name
+                this.dataForm.logo = data.brand.logo
+                this.dataForm.descript = data.brand.descript
+                this.dataForm.showStatus = data.brand.showStatus
+                this.dataForm.firstLetter = data.brand.firstLetter
+                this.dataForm.sort = data.brand.sort
+              }
+            })
+          }
+        })
+      },
+      // 表单提交
+      dataFormSubmit () {
+        this.$refs['dataForm'].validate((valid) => {
+          if (valid) {
+            this.$http({
+              url: this.$http.adornUrl(`/product/brand/${!this.dataForm.brandId ? 'save' : 'update'}`),
+              method: 'post',
+              data: this.$http.adornData({
+                'brandId': this.dataForm.brandId || undefined,
+                'name': this.dataForm.name,
+                'logo': this.dataForm.logo,
+                'descript': this.dataForm.descript,
+                'showStatus': this.dataForm.showStatus,
+                'firstLetter': this.dataForm.firstLetter,
+                'sort': this.dataForm.sort
+              })
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                this.$message({
+                  message: '操作成功',
+                  type: 'success',
+                  duration: 1500,
+                  onClose: () => {
+                    this.visible = false
+                    this.$emit('refreshDataList')
+                  }
+                })
+              } else {
+                this.$message.error(data.msg)
+              }
+            })
+          }
+        })
+      }
+    }
+  }
+</script>
+```
+
+#### 效果优化与快速显示开关
+
+#### 云存储开通与使用
+
+#### OSS整合测试
+
+#### OSS获取服务端签名
+
+流程
+
+![image-20210210113916547](/mall_images/image-20210210113916547.png)
+
+文档参考地址
+
+```java
+https://help.aliyun.com/document_detail/31926.html?spm=a2c4g.11174283.6.1739.673c7da23lY0jH
+```
+
+<font color="gree">**xmall-third-party**</font>
+
+<font color="gree">OssController.java</font>
+
+```java
+package com.lzd.xmall.thirdparty.controller;
+
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.common.utils.BinaryUtil;
+import com.aliyun.oss.model.MatchMode;
+import com.aliyun.oss.model.PolicyConditions;
+import com.lzd.common.utils.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@RestController
+public class OssController {
+
+    @Autowired
+    OSS ossClient;
+    @Value("spring.cloud.alicloud.oss.endpoint")
+    private String endpoint;
+    @Value("spring.cloud.alicloud.oss.bucket")
+    private String bucket;
+    @Value("spring.cloud.alicloud.access-key")
+    private String accessId;
+
+    @RequestMapping("/oss/policy")
+    public R policy() {
+//        String accessId = "<yourAccessKeyId>"; // 请填写您的AccessKeyId。
+//        String accessKey = "<yourAccessKeySecret>"; // 请填写您的AccessKeySecret。
+//        String endpoint = "oss-cn-hangzhou.aliyuncs.com"; // 请填写您的 endpoint。
+        String bucket = "xmall-hello"; // 请填写您的 bucketname 。
+        String host = "https://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint
+        // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
+//        String callbackUrl = "http://88.88.88.88:8888";
+        String format = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String dir = format + "/"; // 用户上传文件时指定的前缀。
+
+        Map<String, String> respMap = null;
+        // 创建OSSClient实例。
+        try {
+            long expireTime = 30;
+            long expireEndTime = System.currentTimeMillis() + expireTime * 1000;
+            Date expiration = new Date(expireEndTime);
+            // PostObject请求最大可支持的文件大小为5 GB，即CONTENT_LENGTH_RANGE为5*1024*1024*1024。
+            PolicyConditions policyConds = new PolicyConditions();
+            policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);
+            policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
+
+            String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
+            byte[] binaryData = postPolicy.getBytes("utf-8");
+            String encodedPolicy = BinaryUtil.toBase64String(binaryData);
+            String postSignature = ossClient.calculatePostSignature(postPolicy);
+
+            respMap = new LinkedHashMap<String, String>();
+            respMap.put("accessid", accessId);
+            respMap.put("policy", encodedPolicy);
+            respMap.put("signature", postSignature);
+            respMap.put("dir", dir);
+            respMap.put("host", host);
+            respMap.put("expire", String.valueOf(expireEndTime / 1000));
+            // respMap.put("expire", formatISO8601Date(expiration));
+
+            // 跨域在网关统一解决
+
+        } catch (Exception e) {
+            // Assert.fail(e.getMessage());
+            System.out.println(e.getMessage());
+        } finally {
+            ossClient.shutdown();
+        }
+        return R.ok().put("data", respMap);
+    }
+}
+```
+
+<font color="gree">application.yml</font>
+
+```yaml
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alicloud:
+      access-key: LTAI4G39RBs1snL8w6zSz6p3
+      secret-key: owsHFDxwpXZGOUD8Ngr4jpdBYL7OLg
+      oss:
+        endpoint: oss-cn-shenzhen.aliyuncs.com
+        bucket: xmall-hello
+  application:
+    name: xmall-third-party
+
+server:
+  port: 30000
+```
+
+<font color="gree">bootstrap.properties</font>
+
+```properties
+spring.application.name=xmall-third-party
+spring.cloud.nacos.config.server-addr=127.0.0.1:8848
+spring.cloud.nacos.config.namespace=72118ff9-72a6-4eb5-8b43-2c8c0ad133b7
+
+spring.cloud.nacos.config.ext-config[0].data-id=oss.yml
+spring.cloud.nacos.config.ext-config[0].group=DEFAULT_GROUP
+spring.cloud.nacos.config.ext-config[0].refresh=true
+```
+
+<font color="gree">**xmall-gateway**</font>
+
+<font color="gree">application.yml</font>
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: test_route
+          uri: https://www.baidu.com
+          predicates:
+            - Query=url,baidu
+
+        - id: qq_route
+          uri: https://www.qq.com
+          predicates:
+            - Query=url,qq
+
+        - id: product_route
+          uri: lb://xmall-product
+          predicates:
+          - Path=/api/product/**
+          filters:
+          - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: third_party_route
+          uri: lb://xmall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+
+        - id: admin_route
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+
+        - id: xmall_host_route
+          uri: lb://xmall-product
+          predicates:
+          - Host=**.xmall.com
+
+## 前端项目，/api
+## http://localhost:9999/api/captcha.jpg  http://localhost:8080/api/captcha.jpg
+## http://localhost:9999/api/product/category/list/tree http://localhost:8080/product/category/list/tree
+```
+
+访问地址
+
+```java
+http://localhost:9999/api/thirdparty/oss/policy
+```
+
+
+
+#### OSS前后联调测试上传
+
 
 
 
