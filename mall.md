@@ -1735,10 +1735,10 @@ spring:
       discovery:
         server-addr: 127.0.0.1:8848
     alicloud:
-      access-key: LTAI4G39RBs1snL8w6zSz6p3
-      secret-key: owsHFDxwpXZGOUD8Ngr4jpdBYL7OLg
+      access-key: 
+      secret-key: 
       oss:
-        endpoint: oss-cn-shenzhen.aliyuncs.com
+        endpoint: 
         bucket: xmall-hello
   application:
     name: xmall-third-party
