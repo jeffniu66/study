@@ -1669,11 +1669,11 @@ public class OssController {
 
     @Autowired
     OSS ossClient;
-    @Value("spring.cloud.alicloud.oss.endpoint")
+    @Value("${spring.cloud.alicloud.oss.endpoint}")
     private String endpoint;
-    @Value("spring.cloud.alicloud.oss.bucket")
+    @Value("${spring.cloud.alicloud.oss.bucket}")
     private String bucket;
-    @Value("spring.cloud.alicloud.access-key")
+    @Value("${spring.cloud.alicloud.access-key}")
     private String accessId;
 
     @RequestMapping("/oss/policy")
@@ -1819,9 +1819,464 @@ http://localhost:9999/api/thirdparty/oss/policy
 
 #### OSS前后联调测试上传
 
+![image-20210210184142874](/mall_images/image-20210210184142874.png)
+
+<font color="gree">**renren-fast-vue**</font>
+
+<font color="gree">singleUpload.vue</font>
+
+```vue
+<template>
+   
+  <div>
+    <el-upload
+      action="http://xmall-hello.oss-cn-shenzhen.aliyuncs.com"
+      :data="dataObj"
+      list-type="picture"
+      :multiple="false"
+      :show-file-list="showFileList"
+      :file-list="fileList"
+      :before-upload="beforeUpload"
+      :on-remove="handleRemove"
+      :on-success="handleUploadSuccess"
+      :on-preview="handlePreview"
+    >
+      <el-button size="small" type="primary">点击上传</el-button>
+      <div slot="tip" class="el-upload__tip">
+        只能上传jpg/png文件，且不超过10MB
+      </div>
+    </el-upload>
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="fileList[0].url" alt="" />
+    </el-dialog>
+  </div>
+</template>
+<script>
+import { policy } from "./policy";
+import { getUUID } from "@/utils";
+
+export default {
+  name: "singleUpload",
+  props: {
+    value: String,
+  },
+  computed: {
+    imageUrl() {
+      return this.value;
+    },
+    imageName() {
+      if (this.value != null && this.value !== "") {
+        return this.value.substr(this.value.lastIndexOf("/") + 1);
+      } else {
+        return null;
+      }
+    },
+    fileList() {
+      return [
+        {
+          name: this.imageName,
+          url: this.imageUrl,
+        },
+      ];
+    },
+    showFileList: {
+      get: function () {
+        return (
+          this.value !== null && this.value !== "" && this.value !== undefined
+        );
+      },
+      set: function (newValue) {},
+    },
+  },
+  data() {
+    return {
+      dataObj: {
+        policy: "",
+        signature: "",
+        key: "",
+        ossaccessKeyId: "",
+        dir: "",
+        host: "",
+        // callback:'',
+      },
+      dialogVisible: false,
+    };
+  },
+  methods: {
+    emitInput(val) {
+      this.$emit("input", val);
+    },
+    handleRemove(file, fileList) {
+      this.emitInput("");
+    },
+    handlePreview(file) {
+      this.dialogVisible = true;
+    },
+    beforeUpload(file) {
+      let _self = this;
+      return new Promise((resolve, reject) => {
+        policy()
+          .then((response) => {
+            console.log("响应的数据", response);
+            _self.dataObj.policy = response.data.policy;
+            _self.dataObj.signature = response.data.signature;
+            _self.dataObj.ossaccessKeyId = response.data.accessid;
+            _self.dataObj.key = response.data.dir + getUUID() + "_${filename}";
+            _self.dataObj.dir = response.data.dir;
+            _self.dataObj.host = response.data.host;
+            console.log("响应的数据2", _self.dataObj);
+            resolve(true);
+          })
+          .catch((err) => {
+            reject(false);
+          });
+      });
+    },
+    handleUploadSuccess(res, file) {
+      console.log("上传成功...");
+      this.showFileList = true;
+      this.fileList.pop();
+      this.fileList.push({
+        name: file.name,
+        url:
+          this.dataObj.host +
+          "/" +
+          this.dataObj.key.replace("${filename}", file.name),
+      });
+      this.emitInput(this.fileList[0].url);
+    },
+  },
+};
+</script>
+<style>
+</style>
+```
+
+```js
+import http from '@/utils/httpRequest.js'
+export function policy() {
+   return  new Promise((resolve,reject)=>{
+        http({
+            url: http.adornUrl("/thirdparty/oss/policy"),
+            method: "get",
+            params: http.adornParams({})
+        }).then(({ data }) => {
+            resolve(data);
+        })
+    });
+}
+```
+
+解决跨域问题
+
+参考地址
+
+```java
+https://help.aliyun.com/document_detail/91868.html?spm=a2c4g.11186623.2.10.4c397d9cvR8EXV
+```
+
+![image-20210210184334345](/mall_images/image-20210210184334345.png)
+
+#### 表单校验&自定义校验器
+
+#### JSR303数据校验
+
+1.给Bean添加校验注解:javax.validation.constraints, 并定义自己的message提示
+
+<font color="gree">BrandEntity.java</font>
+
+```java
+/**
+	 * 品牌名
+	 */
+	@NotBlank(message = "品牌名必须提交")
+	private String name;
+```
+
+2.开启校验注解@Valid
+
+效果：校验错误以后会有默认的响应。
+
+<font color="gree">BrandController.java</font>
+
+```java
+ /**
+     * 保存
+     */
+    @RequestMapping("/save")
+    //@RequiresPermissions("product:brand:save")
+    public R save(@Valid @RequestBody BrandEntity brand){
+		brandService.save(brand);
+
+        return R.ok();
+    }
+```
+
+3.给校验的bean后紧跟一个BindingResult，就可以获取到校验的结果
+
+<font color="gree">BrandController.java</font>
+
+```java
+/**
+     * 保存
+     */
+    @RequestMapping("/save")
+    //@RequiresPermissions("product:brand:save")
+    public R save(@Valid @RequestBody BrandEntity brand, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> map = new HashMap<>();
+            // 1.获取校验的错误结果
+            result.getFieldErrors().forEach((item) -> {
+                // FieldError 获取到错误提示
+                String message = item.getDefaultMessage();
+                // 获取错误的属性的名字
+                String field = item.getField();
+                map.put(field, message);
+            });
+
+            return R.error(400, "提交的数据不合法").put("data", map);
+        } else {
+            brandService.save(brand);
+        }
+
+        return R.ok();
+    }
+```
+
+4.分组校验
+
+给校验注解标注什么情况需要进行校验
+
+```java
+@NotBlank(message = "品牌名必须提交", groups = {AddGroup.class, UpdateGroup.class})
+```
+
+在具体的业务逻辑上指定校验组
+
+```java
+public R save(@Validated({AddGroup.class}) @RequestBody BrandEntity brand/*, BindingResult result*/) 
+```
+
+最后，基本的校验做完
+
+<font color="gree">BrandEntity.java</font>
+
+```java
+package com.lzd.xmall.product.entity;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.lzd.common.valid.AddGroup;
+import com.lzd.common.valid.ListValue;
+import com.lzd.common.valid.UpdateGroup;
+import com.lzd.common.valid.UpdateStatusGroup;
+import lombok.Data;
+import org.hibernate.validator.constraints.URL;
+
+import javax.validation.constraints.*;
+import java.io.Serializable;
+
+/**
+ * 品牌
+ *
+ * @author liuzhidong
+ * @email liuzhidong2016@gmail.com
+ * @date 2020-10-11 17:35:27
+ */
+@Data
+@TableName("pms_brand")
+public class BrandEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 品牌id
+     */
+    @NotNull(message = "修改必须指定品牌id", groups = {UpdateGroup.class})
+    @Null(message = "新增不能指定id", groups = {AddGroup.class})
+    @TableId
+    private Long brandId;
+    /**
+     * 品牌名
+     */
+    @NotBlank(message = "品牌名必须提交", groups = {AddGroup.class, UpdateGroup.class})
+    private String name;
+    /**
+     * 品牌logo地址
+     */
+    @NotBlank(groups = {AddGroup.class})
+    @URL(message = "logo必须是一个合法的url地址", groups = {AddGroup.class, UpdateGroup.class})
+    private String logo;
+    /**
+     * 介绍
+     */
+    private String descript;
+    /**
+     * 显示状态[0-不显示；1-显示]
+     */
+    @NotNull(groups = {AddGroup.class, UpdateStatusGroup.class})
+    @ListValue(vals = {0, 1}, groups = {AddGroup.class, UpdateStatusGroup.class})
+    private Integer showStatus;
+    /**
+     * 检索首字母
+     */
+    @NotEmpty(groups = {AddGroup.class})
+    @Pattern(regexp = "^[a-zA-Z]$", message = "检索首字母必须是一个字母", groups = {AddGroup.class, UpdateGroup.class})
+    private String firstLetter;
+    /**
+     * 排序
+     */
+    @NotNull(groups = {AddGroup.class})
+    @Min(value = 0, message = "排序必须大于等于0", groups = {AddGroup.class, UpdateGroup.class})
+    private Integer sort;
+
+}
+```
+
+#### 统一异常处理
+
+@ControllerAdvice
+
+1.编写异常处理类，使用@ControllerAdvice
+
+2.使用@ExceptionHandler标注方法可以处理的异常
+
+![image-20210213125053401](/mall_images/image-20210213125053401.png)
+
+<font color="gree">XmallExceptionControllerAdvice.java</font>
+
+```java
+package com.lzd.xmall.product.exception;
+
+import com.lzd.common.exception.BizCodeEnum;
+import com.lzd.common.utils.R;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 集中处理所有异常
+ */
+@Slf4j
+@RestControllerAdvice(basePackages = "com.lzd.xmall.product.controller")
+public class XmallExceptionControllerAdvice {
+
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public R handleValidException(MethodArgumentNotValidException e) {
+        log.error("数据校验出现问题{}, 异常类型: {}", e.getMessage(), e.getClass());
+        BindingResult bindingResult = e.getBindingResult();
+
+        Map<String, String> errorMap = new HashMap<>();
+        bindingResult.getFieldErrors().forEach((fieldError) -> {
+            errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+        });
+        return R.error(BizCodeEnum.VALID_EXCEPTION.getCode(), BizCodeEnum.VALID_EXCEPTION.getMsg()).put("data", errorMap);
+    }
+
+    @ExceptionHandler(value = Throwable.class)
+    public R handleException(Throwable throwable) {
+
+        return R.error(BizCodeEnum.UNKNOW_EXEPTION.getCode(), BizCodeEnum.UNKNOW_EXEPTION.getMsg());
+    }
+}
+```
+
+#### JSR303分组校验（多场景的复杂校验）
+
+参考JSR303数据校验之分组校验
+
+默认没有指定分组的校验注解@NotBlank，在分组校验情况@Validated({AddGroup.class})不生效，只会在@Validated不指定分组情况下生效。
+
+#### JSR303自定义校验注解
+
+1.自己编写一个自定义校验注解@ListValue
+
+2.编写一个自定义的校验器ConstraintValidator
+
+3.关联自定义校验器和自定义校验注解
+
+<font color="gree">**xmall-common**</font>
+
+<font color="gree">ListValue.java</font>
+
+```java
+package com.lzd.common.valid;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.*;
 
 
+@Documented
+@Constraint(
+        validatedBy = {ListValueConstraintValidator.class【可以指定多个不同的校验器，适配不同类型的校验】}
+)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ListValue {
 
+    String message() default "{com.lzd.common.valid.ListValue.message}";
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
+
+    int[] vals() default {};
+}
+```
+
+<font color="gree">ListValueConstraintValidator.java</font>
+
+```java
+package com.lzd.common.valid;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.HashSet;
+import java.util.Set;
+
+public class ListValueConstraintValidator implements ConstraintValidator<ListValue, Integer> {
+
+    private Set<Integer> set = new HashSet<>();
+
+    @Override
+    public void initialize(ListValue constraintAnnotation) {
+
+        int[] vals = constraintAnnotation.vals();
+        for (int val : vals) {
+            set.add(val);
+        }
+    }
+
+    // 判断是否校验成功
+
+    /**
+     * @param integer                    // 需要校验的值
+     * @param constraintValidatorContext
+     * @return
+     */
+    @Override
+    public boolean isValid(Integer integer, ConstraintValidatorContext constraintValidatorContext) {
+        return set.contains(integer);
+    }
+}
+```
+
+### 概念-SPU&SKU&规格参数&销售属性
+
+<font color="gree">SPU&SKU</font>
+
+![image-20210214103258255](/mall_images/image-20210214103258255.png)
+
+![image-20210214115920074](/mall_images/image-20210214115920074.png)
+
+### 属性分组
+
+#### 前端组件抽取&父子组件交互
 
 
 
@@ -2527,11 +2982,11 @@ lock.lock(10, TimeUnit.SECONDS); // 10秒自动解锁，自动解锁时间一定
 
 ![image-20210208082706761](/mall_images/image-20210208082706761.png)
 
-### 基础概念
+基础概念
 
 ![image-20210208084705514](/mall_images/image-20210208084705514.png)
 
-### 整合SpringCache简化缓存开发
+### 整合&体验@Cacheable
 
 #### 引入依赖
 
@@ -2703,7 +3158,311 @@ spring.cache.redis.cache-null-values=true
 
 ### @CacheEvict
 
-采用失效模式更新缓存
+采用失效模式更新缓存，从缓存里面删除数据
+
+1.同时进行多种缓存操作
+
+```java
+@Caching(evict = {
+            @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'"),
+            @CacheEvict(value = {"category"}, key = "'getCatelogJson'")
+    })
+```
+
+2.删除所有的分区缓存
+
+```java
+@CacheEvict(value = {"category"}, allEntries = true)
+```
+
+<font color="red">3.存储同一类型的数据，都可以指定成同一个分区，使用分区名作为前缀</font>
+
+<font color="gree">application.properties</font>
+
+```properties
+spring.cache.type=redis
+
+#spring.cache.cache-names=qq
+spring.cache.redis.time-to-live=3600000
+#如果指定了前缀就用我们指定的前缀，如果没有就默认使用缓存的名字作为前缀
+#spring.cache.redis.key-prefix=CACHE_
+spring.cache.redis.use-key-prefix=true
+#是否缓存空值，防止缓存穿透
+spring.cache.redis.cache-null-values=true
+```
+
+@CachePut
+
+支持双写模式，将方法返回的结果放入缓存（<font color="red">方法需要有返回值</font>）。
+
+### 原理与不足
+
+1.读模式
+
+缓存穿透
+
+```properties
+#是否缓存空值，防止缓存穿透
+spring.cache.redis.cache-null-values=true
+```
+
+缓存击穿
+
+默认是无加锁的，进行加锁解决击穿问题
+
+```properties
+@Cacheable(value = {"category"}, key = "#root.method.name", sync = true)
+```
+
+缓存雪崩
+
+```properties
+#加上过期时间
+spring.cache.redis.time-to-live=3600000
+```
+
+2.写模式（缓存与数据库一致）
+
+​	1）、读写加锁
+
+​	2）、引入Canal，感知到MySQL的更新去更新数据库
+
+​	3）、读多写多，直接去数据库查询
+
+<font color="red">原理</font>
+
+CacheManager(RedisCacheManager)->Cache(RedisCache)->Cache负责缓存的读写
+
+<font color="red">总结</font>
+
+常规数据（读多写少，即时性，一致性要求不高的数据）；完全可以使用SpringCache；写模式（只要缓存的数据有过期的时间就足够了）
+
+特殊数据：特殊设置
+
+# 商城业务
+
+## 检索服务
+
+### 搭建页面环境
+
+## 异步
+
+### 异步复习
+
+![image-20210215102909493](/mall_images/image-20210215102909493.png)
+
+<font color="red">**在以后的业务代码里，前三种方式都不用。【将所有的多线程异步任务都交给线程池执行】,保证当前系统中池只有一个。每个异步任务，直接提交给线程池让它自己去执行就行了。**</font>
+
+<font color="gree">**xmall-search**</font>
+
+<font color="gree">ThreadTest.java</font>
+
+```java
+package com.lzd.xmall.search.thread;
+
+import java.util.concurrent.*;
+
+public class ThreadTest {
+
+    public static ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main start...");
+
+        // 1.第一种方式
+//        new Thread01().start();
+
+        // 2.第二种方式
+//        new Thread(new Runable01()).start();
+
+        // 3.第三种方式
+//        FutureTask<Integer> futureTask = new FutureTask<>(new Callable01());
+//        new Thread(futureTask).start();
+//        Integer i = futureTask.get(); // 阻塞
+//        System.out.println("返回的结果：" + i);
+
+        // 4.线程池 给线程池直接提交任务 可以达到控制资源的效果 能保持性能稳定
+        executorService.execute(new Runable01());
+
+        System.out.println("main end...");
+    }
+
+    public static class Callable01 implements Callable<Integer> {
+
+        @Override
+        public Integer call() throws Exception {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+            return i;
+        }
+    }
+
+    public static class Runable01 implements Runnable {
+
+        @Override
+        public void run() {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+        }
+    }
+
+    public static class Thread01 extends Thread {
+
+        @Override
+        public void run() {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+        }
+    }
+}
+```
+
+### 线程池讲解
+
+```java
+// 原生创建线程池
+        /**
+         * 七大参数
+         * corePoolSize: 核心线程数(一直存在除非(allowCoreThreadTimeOut))，线程池创建好以后就准备就绪的线程数量，就等待来接收异步任务去执行
+         * maximumPoolSize: 最大线程数量，控制资源
+         * keepAliveTime: 存活时间，如果线程数量大于核心数量，释放空闲的线程（maximumPoolSize-corePoolSize）
+         * TimeUnit: 时间单位
+         * BlockingQueue<Runnable>: 阻塞队列，如果任务有很多，就会将多的任务放到队列里面。只要有线程空闲，就会去队列里面取出新的任务继续执行
+         * ThreadFactory: 线程的创建工厂
+         * RejectedExecutionHandler: 如果队列满了，按照指定的拒绝策略拒绝执行任务
+         *
+         * 工作顺序：
+         * 1.线程池创建了，准备好core数量的核心线程，准备接受任务
+         * 2.core满了，就将再进来的任务放入阻塞组队中。空闲的core就会自己去阻塞队列中获取任务执行
+         * 3.阻塞队列满了，就直接开新线程执行，最大只能开到max指定数量
+         * 4.max满了就用拒绝策略拒绝任务
+         * 5.max没满，执行完后，在指定的时间KeepAliveTime以后，释放max-core线程
+         *
+         */
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5,
+                200,
+                10,
+                TimeUnit.SECONDS, // 默认是Integer的最大值
+                new LinkedBlockingQueue<>(100000),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy());
+```
+
+![image-20210215162109776](/mall_images/image-20210215162109776.png)
+
+### CompletableFuture异步编排
+
+A, B, C三个任务，C要依赖于A的结果，这就要用到异步编排了。
+
+<font color="red">这是JDK1.8以后才提供的功能</font>
+
+### CompletableFuture-启动异步
+
+```java
+public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main start...");
+
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果：" + i);
+//        }, executorService);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+            return i;
+        }, excutor);
+        System.out.println(future.get());
+
+        System.out.println("main end...");
+    }
+```
+
+### 完成回调与异常感知
+
+![image-20210215190030194](/mall_images/image-20210215190030194.png)
+
+```java
+public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main start...");
+
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果：" + i);
+//        }, executorService);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 0;
+            System.out.println("运行结果：" + i);
+            return i;
+        }, excutor).whenComplete((result, exception) -> {
+            System.out.println("异步任务成功完成了...结果是：" + result + "；异常是：" + exception);
+        }).exceptionally(throwable -> {
+            // 可以感知异常，同时返回默认值
+            return 10;
+        });
+        System.out.println(future.get());
+
+        System.out.println("main end...");
+    }
+```
+
+### handle最终处理
+
+```java
+public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main start...");
+
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果：" + i);
+//        }, executorService);
+        // 方法完成后的感知
+//        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 0;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, excutor).whenComplete((result, exception) -> {
+//            System.out.println("异步任务成功完成了...结果是：" + result + "；异常是：" + exception);
+//        }).exceptionally(throwable -> {
+//            // 可以感知异常，同时返回默认值
+//            return 10;
+//        });
+
+        // 方法执行完成后的处理
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+            return i;
+        }, excutor).handle((result, exception) -> {
+            if (result != null) {
+                return result * 2;
+            }
+            if (exception != null) {
+                return 0;
+            }
+            return 0;
+        });
+
+        System.out.println(future.get());
+
+        System.out.println("main end...");
+    }
+```
+
+
 
 # 附录：安装Nginx
 
