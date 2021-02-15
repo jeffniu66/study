@@ -3462,6 +3462,10 @@ public static void main(String[] args) throws ExecutionException, InterruptedExc
     }
 ```
 
+### 线程串行化
+
+![image-20210215202048641](/mall_images/image-20210215202048641.png)
+
 
 
 # 附录：安装Nginx
