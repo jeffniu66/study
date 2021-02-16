@@ -3466,6 +3466,128 @@ public static void main(String[] args) throws ExecutionException, InterruptedExc
 
 ![image-20210215202048641](/mall_images/image-20210215202048641.png)
 
+```java
+public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main start...");
+//        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, excutor).thenRunAsync(() -> { // 不能获取到上一步的结果
+//            System.out.println("任务2启动了...");
+//        }, excutor);
+
+//        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, excutor).thenAcceptAsync(result -> { // 能接受上一步结果，但是无返回值
+//            System.out.println("任务2启动了..." + result);
+//        }, excutor);
+
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果：" + i);
+            return i;
+        }, excutor).thenApplyAsync(result -> { // 能接受上一步结果并且有返回值
+            System.out.println("任务2启动了..." + result);
+            return "Hello" + result;
+        }, excutor);
+
+        System.out.println(future.get());
+
+        System.out.println("main end...");
+    }
+```
+
+### 两任务组合-都要完成
+
+![image-20210216094204321](/mall_images/image-20210216094204321.png)
+
+![image-20210216094002583](/mall_images/image-20210216094002583.png)
+
+![image-20210216094435445](/mall_images/image-20210216094435445.png)
+
+```java
+CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务1线程开始：" + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("任务1结束：");
+            return i;
+        }, excutor);
+
+        CompletableFuture<String> future02 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务2线程开始：" + Thread.currentThread().getId());
+            System.out.println("任务2结束：");
+            return "Hello";
+        }, excutor);
+
+//        future01.runAfterBothAsync(future02, () -> { // 不能感知到结果
+////            System.out.println("任务3开始...");
+////        }, excutor);
+
+//        future01.thenAcceptBothAsync(future02, (f1, f2) -> {
+//            System.out.println("任务3开始...之前的结果: " + f1 + "=>" + f2);
+//        }, excutor);
+
+        CompletableFuture<String> future = future01.thenCombineAsync(future02, (f1, f2) -> {
+            return f1 + ": " + f2 + " Wolrd";
+        }, excutor);
+
+        System.out.println(future.get());
+```
+
+### 两任务组合-一个完成
+
+![image-20210216102146205](/mall_images/image-20210216102146205.png)
+
+![image-20210216100906793](/mall_images/image-20210216100906793.png)
+
+### 多任务组合
+
+![image-20210216104106449](/mall_images/image-20210216104106449.png)
+
+```java
+ CompletableFuture<String> futureImg = CompletableFuture.supplyAsync(() -> {
+            System.out.println("查询商品图片信息...");
+            return "hello.jpg";
+        }, excutor);
+
+        CompletableFuture<String> futureAttr = CompletableFuture.supplyAsync(() -> {
+            System.out.println("查询商品属性...");
+            return "黑色+256G";
+        }, excutor);
+
+        CompletableFuture<String> futureDesc = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(3000);
+                System.out.println("查询商品介绍...");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "华为";
+        }, excutor);
+
+//        CompletableFuture<Void> allOf = CompletableFuture.allOf(futureImg, futureAttr, futureDesc);
+//        allOf.get(); // 等待所有结果完成
+
+        CompletableFuture<Object> anyOf = CompletableFuture.anyOf(futureImg, futureAttr, futureDesc);
+        anyOf.get();
+
+//        System.out.println(futureImg.get() + "=>" + futureAttr.get() + "=>" + futureDesc.get());
+        System.out.println(anyOf.get());
+
+        System.out.println("main end...");
+```
+
+
+
+
+
 
 
 # 附录：安装Nginx
