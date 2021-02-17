@@ -334,5 +334,549 @@ public class Test {
 
 ![image-20210217103108694](/java_img/image-20210217103108694.png)
 
-![image-20210217103212356](/java_img/image-20210217103212356.png)
+```java
+/**
+     * 泛型可变参数定义
+     *
+     * @param e
+     * @param <E>
+     */
+    public static <E> void print(E... e) {
+        for (int i = 0; i < e.length; i++) {
+            System.out.println(e[i]);
+        }
+    }
+```
+
+```java
+package com.lzd.study.generic;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        ProductGetter.print(1, 2, 3, 4, 5);
+        ProductGetter.print("a", "b", "c", "d", "e");
+    }
+}
+```
+
+![image-20210217104212869](/java_img/image-20210217104212869.png)
+
+## 类型通配符
+
+![image-20210217104452784](/java_img/image-20210217104452784.png)
+
+```java
+package com.lzd.study.generic;
+
+public class Box<E> {
+
+    private E first;
+
+    public E getFirst() {
+        return first;
+    }
+
+    public void setFirst(E first) {
+        this.first = first;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Box<Number> box1 = new Box<>();
+        box1.setFirst(100);
+        showBox(box1);
+
+        Box<Integer> box2 = new Box<>();
+        box2.setFirst(200);
+        showBox(box2);
+    }
+
+
+    public static void showBox(Box<?> box) {
+        Object first = box.getFirst();
+        System.out.println(first);
+    }
+
+//    public static void showBox(Box<Integer> box) {
+//        Number first = box.getFirst();
+//        System.out.println(first);
+//    }
+}
+```
+
+## 类型通配符上限
+
+![image-20210217111350886](/java_img/image-20210217111350886.png)
+
+```java 
+package com.lzd.study.generic;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Box<Number> box1 = new Box<>();
+        box1.setFirst(100);
+        showBox(box1);
+
+        Box<Integer> box2 = new Box<>();
+        box2.setFirst(200);
+        showBox(box2);
+    }
+
+
+    public static void showBox(Box<? extends Number> box) {
+        Number first = box.getFirst();
+        System.out.println(first);
+    }
+
+//    public static void showBox(Box<Integer> box) {
+//        Number first = box.getFirst();
+//        System.out.println(first);
+//    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.util.ArrayList;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        ArrayList<Animal> animals = new ArrayList<>();
+        ArrayList<Cat> cats = new ArrayList<>();
+        ArrayList<MiniCat> miniCats = new ArrayList<>();
+
+//        showAnimal(animals);
+        showAnimal(cats);
+        showAnimal(miniCats);
+    }
+
+    /**
+     * 泛型上限通配符，传递的集合类型，只能是Cat或Cat的子类类型
+     *
+     * @param list
+     */
+    public static void showAnimal(ArrayList<? extends Cat> list) {
+        // 采用上限是不能添加元素的
+//        list.add(new Animal());
+//        list.add(new Cat());
+//        list.add(new MiniCat());
+        for (int i = 0; i < list.size(); i++) {
+            Cat cat = list.get(i);
+            System.out.println(cat);
+        }
+    }
+}
+```
+
+## 类型通配符下限-1
+
+![image-20210217142835891](/java_img/image-20210217142835891.png)
+
+```java
+package com.lzd.study.generic;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        ArrayList<Animal> animals = new ArrayList<>();
+        ArrayList<Cat> cats = new ArrayList<>();
+        ArrayList<MiniCat> miniCats = new ArrayList<>();
+
+        showAnimal(animals);
+        showAnimal(cats);
+//        showAnimal(miniCats);
+    }
+
+    /**
+     * 类型通配符下限，要求集合只能是Cat或Cat的父类
+     *
+     * @param list
+     */
+    public static void showAnimal(List<? super Cat> list) {
+//        list.add(new Animal());
+        list.add(new Cat());
+        list.add(new MiniCat());
+        for (Object o : list) {
+            System.out.println(o);
+        }
+    }
+}
+```
+
+## 类型通配符下限-2
+
+```java
+package com.lzd.study.generic;
+
+import java.util.Comparator;
+import java.util.TreeSet;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        TreeSet<Cat> treeSet = new TreeSet<>(new Comparator1());
+        treeSet.add(new Cat("jerry", 20));
+        treeSet.add(new Cat("amy", 22));
+        treeSet.add(new Cat("frank", 35));
+        treeSet.add(new Cat("jim", 15));
+        for (Cat cat : treeSet) {
+            System.out.println(cat);
+        }
+    }
+
+}
+
+class Comparator1 implements Comparator<Animal> {
+
+    @Override
+    public int compare(Animal o1, Animal o2) {
+        return o1.name.compareTo(o2.name);
+    }
+}
+
+class Comparator2 implements Comparator<Cat> {
+
+    @Override
+    public int compare(Cat o1, Cat o2) {
+        return o1.age - o2.age;
+    }
+}
+
+class Comparator3 implements Comparator<MiniCat> {
+
+    @Override
+    public int compare(MiniCat o1, MiniCat o2) {
+        return o1.level - o2.level;
+    }
+}
+```
+
+## 类型擦除
+
+![image-20210217151430079](/java_img/image-20210217151430079.png)
+
+### 无限制类型擦除
+
+![image-20210217152004393](/java_img/image-20210217152004393.png)
+
+```java
+package com.lzd.study.generic;
+
+public class Erasure<T> {
+
+    private T key;
+
+    public T getKey() {
+        return key;
+    }
+
+    public void setKey(T key) {
+        this.key = key;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Field;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Erasure<Integer> erasure = new Erasure<>();
+        // 利用反射，获取Erasure类的字节码文件的Class类对象
+        Class<? extends Erasure> clz = erasure.getClass();
+        Field[] fields = clz.getDeclaredFields();
+        for (Field field : fields) {
+            System.out.println(field.getName() + ":" + field.getType().getSimpleName());
+        }
+    }
+
+}
+
+// 输出
+key:Object
+```
+
+### 有限制类型擦除
+
+![image-20210217153539631](/java_img/image-20210217153539631.png)
+
+```java
+package com.lzd.study.generic;
+
+public class Erasure<T extends Number> {
+
+    private T key;
+
+    public T getKey() {
+        return key;
+    }
+
+    public void setKey(T key) {
+        this.key = key;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Field;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Erasure<Integer> erasure = new Erasure<>();
+        // 利用反射，获取Erasure类的字节码文件的Class类对象
+        Class<? extends Erasure> clz = erasure.getClass();
+        Field[] fields = clz.getDeclaredFields();
+        for (Field field : fields) {
+            System.out.println(field.getName() + ":" + field.getType().getSimpleName());
+        }
+    }
+
+}
+
+// 输出
+key:Number
+```
+
+### 擦除方法中类型定义的参数
+
+![image-20210217154511367](/java_img/image-20210217154511367.png)
+
+```java
+package com.lzd.study.generic;
+
+import java.util.List;
+
+public class Erasure<T extends Number> {
+
+    private T key;
+
+    public T getKey() {
+        return key;
+    }
+
+    public void setKey(T key) {
+        this.key = key;
+    }
+
+    public <T extends List> T show(T t) {
+        return t;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Method;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Erasure<Integer> erasure = new Erasure<>();
+        // 利用反射，获取Erasure类的字节码文件的Class类对象
+        Class<? extends Erasure> clz = erasure.getClass();
+        Method[] methods = clz.getDeclaredMethods();
+        for (Method method : methods) {
+            System.out.println(method.getName() + ":" + method.getReturnType().getSimpleName());
+        }
+    }
+
+}
+
+// 输出
+getKey:Number
+setKey:void
+show:List
+```
+
+### 桥接方法
+
+![image-20210217155546938](/java_img/image-20210217155546938.png)
+
+```java
+package com.lzd.study.generic;
+
+public interface Info<T> {
+
+    T info(T t);
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+public class InfoImpl implements Info<Integer> {
+
+    @Override
+    public Integer info(Integer value) {
+        return value;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Method;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Class<InfoImpl> infoClass = InfoImpl.class;
+        Method[] methods = infoClass.getDeclaredMethods();
+        for (Method method : methods) {
+            System.out.println(method.getName() + ":" + method.getReturnType().getSimpleName());
+        }
+    }
+}
+
+// 输出
+info:Integer
+info:Object
+```
+
+## 泛型与数组
+
+![image-20210217161823082](/java_img/image-20210217161823082.png)
+
+<font color=gree>第一种情况</font>
+
+```java
+package com.lzd.study.generic;
+
+import java.util.ArrayList;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+//        ArrayList[] arr = new ArrayList[5];
+//        ArrayList<String>[] listArr = arr;
+//        ArrayList<String>[] listArr = new ArrayList<>[5]; // 报错
+        ArrayList<String>[] listArr = new ArrayList[5];
+
+        ArrayList<String> strList = new ArrayList<>();
+        strList.add("abc");
+        listArr[0] = strList;
+
+//        arr[0] = intList;
+        String s = listArr[0].get(0);
+        System.out.println(s);
+    }
+}
+```
+
+<font color=gree>第二种情况</font>
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Array;
+
+public class Fruit<T> {
+
+    //    private T[] array = new T[3];
+    private T[] array;
+
+    public Fruit(Class<T> clz, int len) {
+        // 通过Array.newInstance()创建泛型数组
+        array = (T[]) Array.newInstance(clz, len);
+    }
+
+    /**
+     * 填充数组
+     *
+     * @param index
+     * @param t
+     */
+    public void put(int index, T t) {
+        array[index] = t;
+    }
+
+    public T get(int index) {
+        return array[index];
+    }
+
+    public T[] getArray() {
+        return array;
+    }
+}
+```
+
+```java
+package com.lzd.study.generic;
+
+import java.util.Arrays;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        Fruit<String> fruit = new Fruit<>(String.class, 3);
+        fruit.put(0, "苹果");
+        fruit.put(1, "西瓜");
+        fruit.put(2, "香蕉");
+
+        System.out.println(Arrays.toString(fruit.getArray()));
+    }
+}
+```
+
+## 泛型和反射
+
+![image-20210217170222871](/java_img/image-20210217170222871.png)
+
+```java
+package com.lzd.study.generic;
+
+import java.lang.reflect.Constructor;
+
+public class Test {
+
+    public static void main(String[] args) throws Exception {
+
+//        Class<Person> personClass = Person.class;
+//        Constructor<Person> constructor = personClass.getConstructor(personClass);
+//        Person person = constructor.newInstance();
+        Class personClass = Person.class;
+        Constructor constructor = personClass.getConstructor();
+        Object o = constructor.newInstance();
+    }
+}
+```
+
+# 反射
+
+
+
+
 
