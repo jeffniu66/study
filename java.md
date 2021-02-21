@@ -904,3 +904,592 @@ public class Test {
 
 ![image-20210218075210508](/java_img/image-20210218075210508.png)
 
+## 获得反射对象
+
+![image-20210218165702489](/java_img/image-20210218165702489.png)
+
+![image-20210218165826656](/java_img/image-20210218165826656.png)
+
+![image-20210218165925216](/java_img/image-20210218165925216.png)
+
+![image-20210218171304248](/java_img/image-20210218171304248.png)
+
+```java
+package com.lzd.study.reflection;
+
+public class Test2 {
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        Class clz = Class.forName("com.lzd.study.reflection.User");
+        System.out.println(clz);
+
+
+        // 一个类在内存中只有一个Class对象
+        // 一个类被加载后，类的整个结构都会被封装在Class对象中
+        Class c2 = Class.forName("com.lzd.study.reflection.User");
+        Class c3 = Class.forName("com.lzd.study.reflection.User");
+        Class c4 = Class.forName("com.lzd.study.reflection.User");
+        System.out.println(c2.hashCode());
+        System.out.println(c3.hashCode());
+        System.out.println(c4.hashCode());
+    }
+}
+
+class User {
+
+    private String name;
+    private int id;
+    private int age;
+
+    public User() {
+    }
+
+    public User(String name, int id, int age) {
+        this.name = name;
+        this.id = id;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+## 得到Class类的几种方式
+
+![image-20210218171939688](/java_img/image-20210218171939688.png)
+
+![image-20210218172329107](/java_img/image-20210218172329107.png)
+
+![image-20210218172522250](/java_img/image-20210218172522250.png)
+
+## 所有类型的Class对象
+
+![image-20210218173703859](/java_img/image-20210218173703859.png)
+
+## 类加载内存分析
+
+![image-20210218175009527](/java_img/image-20210218175009527.png)
+
+类的加载
+
+![image-20210218175444319](/java_img/image-20210218175444319.png)
+
+![image-20210218183905301](/java_img/image-20210218183905301.png)
+
+## 分析类初始化
+
+![image-20210219073916542](/java_img/image-20210219073916542.png)
+
+## 类加载器
+
+![image-20210219074823486](/java_img/image-20210219074823486.png)
+
+![image-20210219075055620](/java_img/image-20210219075055620.png)
+
+## 获取类的运行时结构
+
+## 动态创建对象执行方法
+
+## 获取泛型信息
+
+![image-20210221093343663](/java_img/image-20210221093343663.png)
+
+![image-20210221100511963](/java_img/image-20210221100511963.png)
+
+## 获取注解信息
+
+# JDK8
+
+## 简介
+
+![image-20210221104802589](/java_img/image-20210221104802589.png)
+
+![image-20210221104925548](/java_img/image-20210221104925548.png)
+
+## Lambda表达式
+
+![image-20210221112449713](/java_img/image-20210221112449713.png)
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.Comparator;
+import java.util.TreeSet;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        // 原来的匿名内部类
+        Comparator<Integer> com = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(o1, o2);
+            }
+        };
+        TreeSet<Integer> ts = new TreeSet<>(com);
+
+        // Lambda表达式
+        Comparator<Integer> com2 = (x, y) -> Integer.compare(x, y);
+        TreeSet<Integer> ts2 = new TreeSet<>(com);
+    }
+}
+```
+
+## Lambda基础语法
+
+```java
+// 语法格式一：无参数，无返回值
+        int num = 0; // jdk1.7之前，必须加final，1.8以后默认是final
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Hello" + num);
+            }
+        };
+        r.run();
+
+        Runnable r1 = () -> System.out.println("Hello");
+        r1.run();
+
+        // 语法格式二：有一个参数，并且无返回值
+        Consumer<String> con = (x) -> System.out.println(x);
+        con.accept("World");
+
+        // 语法格式三：有一个参数，小括号可以不写
+        Consumer<String> con1 = x -> System.out.println(x);
+        con1.accept("Lambda");
+
+        // 语法格式四：有两个以上参数，有返回值，并且Lambda体中有多条语句
+        Comparator<Integer> com = (x, y) -> {
+            System.out.println("函数式接口");
+            return Integer.compare(x, y);
+        };
+
+        // 语法格式五：有两个以上参数，有返回值，如果只有一条语句，大括号都可以省略
+        Comparator<Integer> com1 = (x, y) -> Integer.compare(x, y);
+
+        // 语法格式六：Lambda表达式的参数列表的数据类型可以省略不写，因为JVM编译器通过上下文推断出数据类型，即"类型推断"
+```
+
+<font color=gree>Lambda表达式需要“函数式接口”支持，接口中只有一个抽象方法的接口，称为函数式接口。</font>
+
+## Lambda练习
+
+1.调用Collections.sort()方法，通过定制排序比较两个Employee（先按年龄比，年龄相同按姓名比），使用Lambda作为参数传递。
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        List<Employee> emps = Arrays.asList(
+                new Employee(101, "张三", 10, 10000.11),
+                new Employee(102, "李四", 30, 80000.11),
+                new Employee(103, "王五", 20, 30000.11),
+                new Employee(104, "赵六", 50, 20000.11)
+        );
+
+        Collections.sort(emps, (e1, e2) -> {
+            if (e1.getAge() == e2.getAge()) {
+                return e1.getName().compareTo(e2.getName());
+            }
+            return Integer.compare(e1.getAge(), e2.getAge());
+        });
+
+        for (Employee emp : emps) {
+            System.out.println(emp);
+        }
+    }
+}
+
+class Employee {
+
+    private int id;
+    private String name;
+    private int age;
+    private double salary;
+
+    public Employee() {
+    }
+
+    public Employee(int id, String name, int age, double salary) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", salary=" + salary +
+                '}';
+    }
+}
+```
+
+2.声明一个函数式接口，操作字符串
+
+```java
+package com.lzd.study.lambda;
+
+@FunctionalInterface
+public interface MyFun {
+
+    String getValue(String s);
+}
+```
+
+```java
+package com.lzd.study.lambda;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        String str = strHandler("\t\t\t 大Java威武", s -> s.trim());
+        System.out.println(str);
+
+        str = strHandler("abcd", s -> s.toUpperCase());
+        System.out.println(str);
+    }
+
+    public static String strHandler(String s, MyFun mf) {
+        return mf.getValue(s);
+    }
+}
+```
+
+3.①声明一个带两个泛型的函数式接口，泛型类型为<T,R> T为参数，R为返回值
+
+②接口中声明对应抽象方法
+
+③在TestLambda类中声明方法，使用接口作为参数，计算两个long型参数的和
+
+④再计算两个long型参数的乘积
+
+ ```java
+package com.lzd.study.lambda;
+
+@FunctionalInterface
+public interface MyFun<T, R> {
+
+    R getValue(T t1, T t2);
+}
+ ```
+
+```java
+package com.lzd.study.lambda;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        op(100L, 200L, (x, y) -> x * y);
+    }
+
+    public static void op(Long l1, Long l2, MyFun<Long, Long> mf) {
+        System.out.println(mf.getValue(l1, l2));
+    }
+}
+```
+
+## 四大内置核心函数式接口
+
+```java
+// 消费型接口
+@FunctionalInterface
+public interface Consumer<T> {
+	void accept(T t);
+}
+
+// 供给型接口
+@FunctionalInterface
+public interface Supplier<T> {
+  T get();
+}
+
+// 函数型接口
+@FunctionalInterface
+public interface Function<T, R> {
+    R apply(T t);
+}
+
+// 断言型接口
+@FunctionalInterface
+public interface Predicate<T> {
+    boolean test(T t);
+}
+```
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+public class Test {
+
+    public static void main(String[] args) {
+
+        happy(10000, (m) -> System.out.println("吃饭" + m + "元"));
+
+        List<Integer> numList = getNumList(10, () -> (int) (Math.random() * 100));
+
+        for (Integer integer : numList) {
+            System.out.println(integer);
+        }
+
+        System.out.println(strHanlder("\t\t\t大java威武", s -> s.trim()));
+
+        List<String> list = Arrays.asList("Hello", "java", "Lambda", "ok");
+        List<String> strings = filterStr(list, s -> s.length() > 3);
+        for (String s : strings) {
+            System.out.println(s);
+        }
+
+    }
+
+    public static List<String> filterStr(List<String> list, Predicate<String> pre) {
+        List<String> strList = new ArrayList<>();
+
+        for (String s : list) {
+            if (pre.test(s)) {
+                strList.add(s);
+            }
+        }
+
+        return strList;
+    }
+
+    public static String strHanlder(String s, Function<String, String> f) {
+        return f.apply(s);
+    }
+
+    public static List<Integer> getNumList(int num, Supplier<Integer> sup) {
+        List<Integer> list = new ArrayList<>();
+
+        for (int i = 0; i < num; i++) {
+            list.add(sup.get());
+        }
+        return list;
+    }
+
+    public static void happy(double money, Consumer<Double> con) {
+        con.accept(money);
+    }
+}
+
+// 输出
+吃饭10000.0元
+51
+49
+92
+71
+24
+32
+48
+76
+46
+27
+大java威武
+Hello
+java
+Lambda
+```
+
+## 方法引用与构造器引用
+
+<font color=gree>***方法引用***</font>：若Lambda体中的内容有方法已经实现了，我们可以使用“方法引用”（可以理解为方法引用是Lambda表达式的另外一种表现形式）。
+
+主要有三种语法格式：
+
+<font color=gree>对象::实例方法名</font>
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+
+        Consumer<String> con = System.out::println;
+        con.accept("abc");
+
+        Employee emp = new Employee();
+        Supplier<String> sup = emp::getName;
+        String s = sup.get();
+        System.out.println(s);
+    }
+}
+```
+
+<font color=gree>类::静态方法名</font>
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.Comparator;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+
+//        Comparator<Integer> com = (x, y) -> Integer.compare(x, y);
+        Comparator<Integer> com = Integer::compare;
+    }
+}
+```
+
+<font color=gree>类::实例方法名</font>
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.function.BiPredicate;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+
+//        BiPredicate<String, String> bp = (x, y) -> x.equals(y);
+        BiPredicate<String, String> bp = String::equals;
+        System.out.println(bp.test("a", "A"));
+    }
+}
+```
+
+<font color=red>注意：1.Lambda体中调用方法的参数列表与返回值类型，要与函数式接口中抽象方法的函数列表和返回值类型返回一致</font>
+
+<font color=red>2.若Lambda参数列表中的第一参数是实例方法的调用者，而第二个参数是实例方法的参数时，可以使用ClassName::method</font>
+
+<font color=gree>***构造器引用***</font>：
+
+格式：ClassName::new
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+
+//        Supplier<Employee> sup = () -> new Employee();
+        Supplier<Employee> sup = Employee::new;
+
+//        Function<Integer, Employee> fun = (x) -> new Employee(x);
+        Function<Integer, Employee> fun = Employee::new; // 调用的哪个构造方法取决于方Function方法传入的参数
+        System.out.println(fun.apply(100));
+    }
+}
+```
+
+<font color=red>注意：1.需要调用的构造器的参数列表要与函数式接口中抽象方法的参数列表保持一致！</font>
+
+<font color=gree>***数组引用***</font>：
+
+```java
+package com.lzd.study.lambda;
+
+import java.util.function.Function;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+
+//        Function<Integer, String[]> fun = (x) -> new String[x];
+        Function<Integer, String[]> fun = String[]::new;
+        System.out.println(fun.apply(10).length);
+    }
+}
+```
+
+
+
+
+
