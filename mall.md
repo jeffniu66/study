@@ -3586,7 +3586,29 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
 
 
 
+# k8s
 
+## 简介
+
+kubernetes简称k8s。是用于自动部署，扩展和管理容器化应用程序的开源系统。
+中文官网：https://kubernetes.io/Zh/
+中文社区：https://www.kubernetes.org.cn/
+官方文档：https://kubernetes.io/zh/docs/home/
+社区文档：https://docs.kubernetes.org.cn/
+
+调度
+
+![image-20210225225228410](/mall_images/image-20210225225228410.png)
+
+![image-20210225225436863](/mall_images/image-20210225225436863.png)
+
+## 架构
+
+### 整体主从方式
+
+![image-20210225230027512](/mall_images/image-20210225230027512.png)
+
+![image-20210225230106399](/mall_images/image-20210225230106399.png)
 
 
 
