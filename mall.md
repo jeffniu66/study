@@ -1,5 +1,6 @@
 ---
 typora-root-url: ../study
+typora-copy-images-to: ./mall_images
 ---
 
 # 1. SpringCloud Alibaba
@@ -3609,6 +3610,12 @@ kubernetes简称k8s。是用于自动部署，扩展和管理容器化应用程�
 ![image-20210225230027512](/mall_images/image-20210225230027512.png)
 
 ![image-20210225230106399](/mall_images/image-20210225230106399.png)
+
+### master节点架构
+
+![image-20210227120236064](/mall_images/image-20210227120236064.png)
+
+
 
 
 
