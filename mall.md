@@ -3611,11 +3611,50 @@ kubernetes简称k8s。是用于自动部署，扩展和管理容器化应用程�
 
 ![image-20210225230106399](/mall_images/image-20210225230106399.png)
 
-### master节点架构
+### Master节点架构
 
 ![image-20210227120236064](/mall_images/image-20210227120236064.png)
 
+![image-20210227120741264](/mall_images/image-20210227120741264.png)
 
+![image-20210227121018488](/mall_images/image-20210227121018488.png)
+
+### Node节点架构
+
+![image-20210227121128167](/mall_images/image-20210227121128167.png)
+
+![image-20210227121453012](/mall_images/image-20210227121453012.png)
+
+## 概念
+
+![image-20210227122750760](/mall_images/image-20210227122750760.png)
+
+![image-20210227123957573](/mall_images/image-20210227123957573.png)
+
+![image-20210227124137347](/mall_images/image-20210227124137347.png)
+
+![image-20210227124503453](/mall_images/image-20210227124503453.png)
+
+![image-20210227135425038](/mall_images/image-20210227135425038.png)
+
+![image-20210227140251359](/mall_images/image-20210227140251359.png)
+
+![image-20210227140321802](/mall_images/image-20210227140321802.png)
+
+![image-20210227140522918](/mall_images/image-20210227140522918.png)
+
+![image-20210227140600007](/mall_images/image-20210227140600007.png)
+
+## 快速体验
+
+### 1. 安装minikube
+
+https://github.com/kubernetes/minikube/releases
+下载minikuber-windows-amd64.exe 改名为minikube.exe
+打开virtualBox，打开cmd
+运行
+minikube start --vm-driver=virtualbox --registry-mirror=https://registry.docker-cn.com
+等待20分钟即可。
 
 
 
