@@ -3,13 +3,15 @@ typora-root-url: ../study
 typora-copy-images-to: ./memory_img
 ---
 
-Go语言内存模型
-
 参考OS虚拟内存 物理内存映射算法
 
 跟Java不同，不用挪对象（Java会挪对象，由年轻代挪到老年代），这是Go的优点
 
 什么时候开始GC？
+
+<font color=red>内存访问流程</font>
+
+![image-20210330110203813](/memory_img/image-20210330110203813.png)
 
 
 
