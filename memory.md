@@ -13,6 +13,8 @@ typora-copy-images-to: ./memory_img
 
 什么时候开始GC？
 
+CPU三级缓存，最初只有L1，后面增加到L3 
+
 <font color=red>内存访问流程</font>
 
 ![image-20210330110203813](/memory_img/image-20210330110203813.png)
@@ -42,6 +44,12 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 ## Runtime发展历程
 
 ![image-20210321190659317](/memory_img/image-20210321190659317.png)
+
+## 堆内存管理
+
+​	![image-20210330115441018](/memory_img/image-20210330115441018.png)
+
+
 
 ## 内存管理组件
 
