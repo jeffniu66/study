@@ -17,7 +17,7 @@ CPU三级缓存，最初只有L1，后面增加到L3
 
 ![image-20210401123109349](/memory_img/image-20210401123109349.png)
 
-这里又涉及到<font color=red>伪共享</font>，说说伪共享
+这里又涉及到<font color=red>伪共享</font>，说说伪共享。。。
 
 <font color=red>内存访问流程</font>
 
@@ -53,7 +53,19 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 
 ​	![image-20210330115441018](/memory_img/image-20210330115441018.png)
 
+## 栈内存
 
+每个goroutine都有自己的栈，栈的初始大小是2KB，100万的goroutine会占用2G，但goroutine的栈会在2KB不够用时自动扩容，当扩容为4KB的时候，百万goroutine会占用4GB。
+
+## go内存分配
+
+![image-20210331193422810](/memory_img/image-20210331193422810.png)
+
+小对象是在mcache中分配的，而大对象是直接从mheap分配的，从小对象的内存分配看起。
+
+### 小对象分配
+
+![image-20210331180034517](/memory_img/image-20210331180034517.png)
 
 <font color=red>堆和栈形象比喻</font>
 
@@ -69,15 +81,25 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 
 ![image-20210321215114648](/memory_img/image-20210321215114648.png)
 
-### mcache
+### <font color=red>mcache</font>
+
+mcache与TCMalloc中的ThreadCache类似，**mcache保存的是各种大小的Span，并按Span class分类，小对象直接从mcache分配内存，它起到了缓存的作用，并且可以无锁访问**。
+
+但mcache与ThreadCache也有不同点，TCMalloc中是每个线程1个ThreadCache，Go中是**每个P拥有1个mcache**，因为在Go程序中，当前最多有GOMAXPROCS个线程在运行，所以最多需要GOMAXPROCS个mcache就可以保证各线程对mcache的无锁访问，线程的运行又是与P绑定的，把mcache交给P刚刚好。
+
+### <font color=red>mcentral</font>
+
+mcentral与TCMalloc中的CentralCache类似，**是所有线程共享的缓存，需要加锁访问**，它按Span class对Span分类，串联成链表，当mcache的某个级别Span的内存被分配光时，它会向mcentral申请1个当前级别的Span。
+
+但mcentral与CentralCache也有不同点，CentralCache是每个级别的Span有1个链表，mcache是每个级别的Span有2个链表，这和mcache申请内存有关，稍后我们再解释。
+
+### <font color=red>mheap</font>
+
+mheap与TCMalloc中的PageHeap类似，**它是堆内存的抽象，把从OS申请出的内存页组织成Span，并保存起来**。当mcentral的Span不够用时会向mheap申请，mheap的Span不够用时会向OS申请，向OS的内存申请是按页来的，然后把申请来的内存页生成Span组织起来，同样也是需要加锁访问的。
+
+但mheap与PageHeap也有不同点：mheap把Span组织成了树结构，而不是链表，并且还是2棵树，然后把Span分配到heapArena进行管理，它包含地址映射和span是否包含指针等位图，这样做的主要原因是为了更高效的利用内存：分配、回收和再利用。
 
 
-
-### mcentral
-
-
-
-### mheap
 
 
 
@@ -136,7 +158,14 @@ Go的内存分配器在分配对象时，根据对象的大小，分成三类：
 
 - 如果mheap中也没有合适大小的mspan，则向操作系统申请；
 
-  
+
+TCMalloc的定义：
+
+1. 小对象大小：0~256KB
+2. 中对象大小：257KB~1MB
+3. 大对象大小：>1MB
+
+
 
 ## 总结
 
