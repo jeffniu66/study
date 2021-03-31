@@ -15,6 +15,10 @@ typora-copy-images-to: ./memory_img
 
 CPU三级缓存，最初只有L1，后面增加到L3 
 
+![image-20210401123109349](/memory_img/image-20210401123109349.png)
+
+这里又涉及到<font color=red>伪共享</font>，说说伪共享
+
 <font color=red>内存访问流程</font>
 
 ![image-20210330110203813](/memory_img/image-20210330110203813.png)
@@ -51,6 +55,14 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 
 
 
+<font color=red>堆和栈形象比喻</font>
+
+```go
+通俗比喻的说，栈就如我们去饭馆吃饭，只需要点菜（发出申请）--》吃吃吃（使用内存）--》吃饱就跑剩下的交给饭馆（操作系统自动回收），而堆就如在家里做饭，大到家，小到买什么菜，每一个环节都需要自己来实现，但是自由度会大很多。
+```
+
+
+
 ## 内存管理组件
 
 内存分配由内存分配器完成。分配器由3种组件构成：<font color=red>`mcache`， `mcentral`, `mheap`</font>。
@@ -71,12 +83,40 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 
 ## 分配流程
 
-变量是在栈上分配还是在堆上分配，是由<font color=red>逃逸分析</font>的结果决定的。通常情况下，编译器是倾向于将变量分配到栈上的，因为它的开销小，最极端的就是"zero garbage"，所有的变量都会在栈上分配，这样就不会存在内存碎片，垃圾回收之类的东西。
+变量是在栈上分配还是在堆上分配，是由<font color=red>逃逸分析</font>的结果决定的。Go是通过在编译器里做逃逸分析（escape analysis）来决定一个对象放栈上还是放堆上，不逃逸的对象放栈上，可能逃逸的放堆上；通常情况下，编译器是倾向于将变量分配到栈上的，因为它的开销小，最极端的就是"zero garbage"，所有的变量都会在栈上分配，这样就不会存在内存碎片，垃圾回收之类的东西。
 
-```go
-// 逃逸分析
+<font color=red>逃逸分析</font>
 
+```java
+public void test(){
+    List<Integer> a = new ArrayList<>();
+    a.add(1); // a 未发生逃逸，因此在栈上分配
+}
+
+public List<Integer> test1(){
+    List<Integer> a = new ArrayList<>();
+    a.add(1);
+    return a  // a 发生逃逸，因此分配在堆上
+}
+
+public void initResource(List<Resource> resources) {
+    if (resource != null) {
+        // resource对象通过传入的参数逃逸
+        Resource resource = new Resource();
+        resources.add(resource);
+    }
+}
 ```
+
+首先在栈上分配，对于未发生逃逸的变量，则直接在栈上分配内存。因为栈上内存由在函数返回时自动回收，因此能减小gc压力。<font color=red>栈是线程私有的，栈上没有内存碎片</font>
+
+不同于jvm的运行时逃逸分析，golang的逃逸分析是在编译期完成的。
+
+<font color=red>逃逸分析总结：</font>
+
+<font color=gree>不要盲目使用变量的指针作为函数参数，虽然它会减少复制操作。但其实当参数为变量自身的时候，复制是在栈上完成的操作，开销远比变量逃逸后动态地在堆上分配内存少的多。</font>
+
+
 
 
 
