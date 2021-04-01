@@ -11,8 +11,6 @@ typora-copy-images-to: ./memory_img
 
 跟Java不同，不用挪对象（Java会挪对象，由年轻代挪到老年代），这是Go的优点
 
-什么时候开始GC？
-
 CPU三级缓存，最初只有L1，后面增加到L3 
 
 ![image-20210401123109349](/memory_img/image-20210401123109349.png)
@@ -83,19 +81,19 @@ Go运行时的内存分配算法主要源自 Google 为 C 语言开发的<font c
 
 ### <font color=red>mcache</font>
 
-mcache与TCMalloc中的ThreadCache类似，**mcache保存的是各种大小的Span，并按Span class分类，小对象直接从mcache分配内存，它起到了缓存的作用，并且可以无锁访问**。
+mcache与TCMalloc中的ThreadCache类似，<font color=red>**mcache保存的是各种大小的Span，并按Span class分类，小对象直接从mcache分配内存，它起到了缓存的作用，并且可以无锁访问**。</font>
 
-但mcache与ThreadCache也有不同点，TCMalloc中是每个线程1个ThreadCache，Go中是**每个P拥有1个mcache**，因为在Go程序中，当前最多有GOMAXPROCS个线程在运行，所以最多需要GOMAXPROCS个mcache就可以保证各线程对mcache的无锁访问，线程的运行又是与P绑定的，把mcache交给P刚刚好。
+但mcache与ThreadCache也有不同点，TCMalloc中是每个线程1个ThreadCache，Go中是<font color=red>**每个P拥有1个mcache**</font>，因为在Go程序中，当前最多有GOMAXPROCS个线程在运行，所以最多需要GOMAXPROCS个mcache就可以保证各线程对mcache的无锁访问，线程的运行又是与P绑定的，把mcache交给P刚刚好。
 
 ### <font color=red>mcentral</font>
 
-mcentral与TCMalloc中的CentralCache类似，**是所有线程共享的缓存，需要加锁访问**，它按Span class对Span分类，串联成链表，当mcache的某个级别Span的内存被分配光时，它会向mcentral申请1个当前级别的Span。
+mcentral与TCMalloc中的CentralCache类似，<font color=red>**是所有线程共享的缓存，需要加锁访问**</font>，它按Span class对Span分类，串联成链表，当mcache的某个级别Span的内存被分配光时，它会向mcentral申请1个当前级别的Span。
 
 但mcentral与CentralCache也有不同点，CentralCache是每个级别的Span有1个链表，mcache是每个级别的Span有2个链表，这和mcache申请内存有关，稍后我们再解释。
 
 ### <font color=red>mheap</font>
 
-mheap与TCMalloc中的PageHeap类似，**它是堆内存的抽象，把从OS申请出的内存页组织成Span，并保存起来**。当mcentral的Span不够用时会向mheap申请，mheap的Span不够用时会向OS申请，向OS的内存申请是按页来的，然后把申请来的内存页生成Span组织起来，同样也是需要加锁访问的。
+mheap与TCMalloc中的PageHeap类似，<font color=red>**它是堆内存的抽象，把从OS申请出的内存页组织成Span，并保存起来**</font>。当mcentral的Span不够用时会向mheap申请，mheap的Span不够用时会向OS申请，向OS的内存申请是按页来的，然后把申请来的内存页生成Span组织起来，同样也是需要加锁访问的。
 
 但mheap与PageHeap也有不同点：mheap把Span组织成了树结构，而不是链表，并且还是2棵树，然后把Span分配到heapArena进行管理，它包含地址映射和span是否包含指针等位图，这样做的主要原因是为了更高效的利用内存：分配、回收和再利用。
 
