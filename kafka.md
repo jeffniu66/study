@@ -1,6 +1,6 @@
 ---
 typora-copy-images-to: ./kafka_img
-typora-root-url: ./kafka_img
+typora-root-url: ../study
 ---
 
 # 面试题
@@ -27,5 +27,7 @@ typora-root-url: ./kafka_img
 
 <font color=red>5.Kafka生产者客户端的整体结构是什么样子的？使用了几个线程来处理？分别是什么？</font>
 
-![image-20210411095414410](/image-20210411095414410.png)
+![image-20210411095713948](/kafka_img/image-20210411095713948.png)
+
+
 
