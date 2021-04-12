@@ -56,7 +56,9 @@ print binary_search([1, 2, 3, 4, 5], 4)
 
 # 2. 算法题
 
-##  2.1 TwoSum(简单)
+##  2.1 数组
+
+###  2.1.1 TwoSum（第1题-简单）
 
 ```
 描述：
@@ -80,6 +82,8 @@ def twoSum(nums: List[int], target: int) -> List[int]:
 print(twoSum([2, 7, 11, 15], 9))
 # 输出：[0, 1]
 ```
+
+### 2.2.2 最大子序和
 
 
 
