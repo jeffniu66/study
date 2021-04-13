@@ -1029,7 +1029,7 @@ class User {
 
 ## 获取注解信息
 
-# JDK8
+# Java8
 
 ## 简介
 
@@ -1485,6 +1485,66 @@ public class Test2 {
 //        Function<Integer, String[]> fun = (x) -> new String[x];
         Function<Integer, String[]> fun = String[]::new;
         System.out.println(fun.apply(10).length);
+    }
+}
+```
+
+## 创建Stream
+
+<font color=red>集合讲的是数据，流讲的是计算</font>
+
+<font color=red>注意</font>
+
+<font color=gree>1.Stream自己不会存储元素。</font>
+
+<font color=gree>2.Stream不会改变源对象。相反，他们会返回一个持有结果的新Stream。</font>
+
+<font color=gree>3.Stream操作是延迟执行的。这意味着他们会等到需要结果的时候才执行。</font>
+
+```java
+package com.lzd.study.stream;
+
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * 一、Stream 的三个操作步骤
+ * <p>
+ * 1. 创建 Stream
+ * <p>
+ * 2. 中间操作
+ * <p>
+ * 3. 终止操作（终端操作）
+ */
+public class TestStreamAPI1 {
+
+
+    // 创建Stream
+    @Test
+    public void test1() {
+
+        // 1. 可以通过Collection系列集合提供的stream()或parallelStream()
+        List<String> list = new ArrayList<>();
+        Stream<String> stream = list.stream();
+
+        // 2. 通过Arrays中的静态方法stream()获取数组流
+        Integer[] arr = new Integer[10];
+        Stream<Integer> stream1 = Arrays.stream(arr);
+
+        // 3. 通过Stream类中的静态方法of()
+        Stream<String> stream2 = Stream.of("aa", "bb", "cc");
+
+        // 4. 创建无限流
+        // 迭代
+        Stream<Integer> stream3 = Stream.iterate(0, (x) -> x + 2);
+        stream3.limit(10).forEach(System.out::println);
+
+        // 生成
+        Stream.generate(Math::random).limit(5).forEach(System.out::println);
     }
 }
 ```
