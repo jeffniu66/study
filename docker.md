@@ -61,8 +61,6 @@ docekr pull redis
 
 mkdir -p /mydata/redis/conf
 
-touch /mydata/redis/conf/redis.conf
-
 ```shell
 docker run -p 6379:6379 --name redis -v /mydata/redis/data:/data \
 -v /mydata/redis/conf/redis.conf:/etc/redis/redis.conf \
@@ -70,4 +68,38 @@ docker run -p 6379:6379 --name redis -v /mydata/redis/data:/data \
 ```
 
 有坑，/etc/redis/下的redis.conf并不存在，需要预先创建好
+
+touch /mydata/redis/conf/redis.conf
+
+查看docker进程
+
+```shell
+docker ps
+```
+
+使用docker进入redis客户端
+
+```shell
+docker exec -it redis redis-cli
+```
+
+docker重启redis
+
+```shell
+docker restart redis
+```
+
+配置redis以AOF方式持久化
+
+```shell
+appendonly yes
+```
+
+
+
+
+
+
+
+
 
