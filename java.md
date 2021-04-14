@@ -1549,6 +1549,76 @@ public class TestStreamAPI1 {
 }
 ```
 
+## 筛选与切片
+
+![image-20210414235232727](/java_img/image-20210414235232727.png)
+
+```java
+package com.lzd.study.stream;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class TestStreamAPI2 {
+
+    List<Employee> list = Arrays.asList(
+            new Employee(1, "张三", 18, 999),
+            new Employee(2, "李四", 58, 555),
+            new Employee(3, "王五", 68, 666),
+            new Employee(3, "王五", 68, 666),
+            new Employee(3, "王五", 68, 666)
+    );
+
+    /**
+     * 筛选与切片
+     * filter——接收Lambda，从流中排除元素。
+     * limit——截断流，使其元素不超过给定数量。
+     * skip(n)——跳过元素，返回一个扔掉了前n个元素的流。若流中元素不足n个，则返回一个空流。与limit(n)互补。
+     * distinct——筛选，通过流所生成元素的hashCode()和equals()去除重复元素。
+     */
+    @Test
+    public void test4() {
+        list.stream().filter((e) -> {
+            System.out.println("短路");
+            return e.getSalary() > 555;
+        }).skip(1).distinct().forEach(System.out::println);
+    }
+
+    @Test
+    public void test3() {
+        list.stream().filter((e) -> {
+            System.out.println("短路");
+            return e.getSalary() > 555;
+        }).limit(2).forEach(System.out::println);
+    }
+
+    // 内部迭代：迭代操作由Stream API完成
+    @Test
+    public void test1() {
+        // 中间操作：不会执行任何操作
+        Stream<Employee> stream = list.stream().filter((e) -> {
+            System.out.println("Stream API 的中间操作"); // 如果没有终止操作 即第28行 这里根本不会打印
+            return e.getAge() > 35;
+        });
+        // 终止操作：一次性执行全部内容，即"惰性求值"
+        stream.forEach(System.out::println);
+    }
+
+    // 外部迭代：
+    @Test
+    public void test2() {
+        Iterator<Employee> it = list.iterator();
+        while (it.hasNext()) {
+            System.out.println(it.next());
+        }
+    }
+}
+```
+
 
 
 
