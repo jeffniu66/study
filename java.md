@@ -1989,6 +1989,567 @@ java8之后的并行流
     }
 ```
 
+## Optional容器类
+
+<font color=red>尽量避免空指针异常</font>
+
+```java
+package com.lzd.study.stream;
+
+import org.junit.Test;
+
+import java.util.Optional;
+
+public class TestOptional {
+
+    /**
+     * Optional容器类的常用方法:
+     * Optional.of(T t): 创建一个Optional实例
+     */
+    @Test
+    public void test() {
+        Optional<Employee> op = Optional.of(new Employee());
+
+        Employee emp = op.get();
+        System.out.println(emp);
+    }
+
+    /**
+     * Optional.empty(): 创建一个空的Optional实例
+     */
+    @Test
+    public void test1() {
+        Optional<Object> op = Optional.empty();
+        System.out.println(op.get());
+    }
+
+    /**
+     * Optional.ofNullable(T t): 若t不为null, 创建Optional实例，否则创建空实例
+     */
+    @Test
+    public void test2() {
+        Optional<Employee> op = Optional.ofNullable(null);
+        System.out.println(op.get());
+    }
+
+    /**
+     * isPresent(): 判断是否包含值
+     * orElse(T t): 如果调用对象包含值，返回该值，否则返回t
+     * orElseGet(Supplier s): 如果调用对象包含值，返回该值，否则返回s获取的值
+     */
+    @Test
+    public void test3() {
+        Optional<Object> op = Optional.ofNullable(null);
+
+//        if (op.isPresent()) {
+//            System.out.println(op.get());
+//        }
+
+//        Employee emp = (Employee) op.orElse(new Employee(7, "田七", 30, 20000, Employee.Status.FREE));
+//        System.out.println(emp);
+
+        Employee emp = (Employee) op.orElseGet(() -> new Employee());
+        System.out.println(emp);
+    }
+
+    /**
+     * map(Function f): 如果有值对其处理，并返回处理后的Optional，否则返回Optional.empty()
+     * flatMap(Function mapper): 与map类似，要求返回值必须是Optional
+     */
+    @Test
+    public void test4() {
+        Optional<Employee> op = Optional.ofNullable(new Employee(7, "田七", 30, 20000, Employee.Status.FREE));
+
+//        Optional<String> s = op.map((e) -> e.getName());
+//        System.out.println(s.get());
+
+        Optional<String> s = op.flatMap((e) -> Optional.of(e.getName()));
+        System.out.println(s.get());
+    }
+}
+```
+
+## 接口中的默认方法与静态方法
+
+![image-20210418153114458](/java_img/image-20210418153114458.png)
+
+```java
+package com.lzd.study.java8;
+
+public interface MyFun {
+
+    default String getName() {
+        return "哈哈哈";
+    }
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+public class MyClass {
+
+    public String getName() {
+        return "嘿嘿嘿";
+    }
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+public class SubClass extends MyClass implements MyFun {
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+public class TestInterface {
+
+    public static void main(String[] args) {
+
+        SubClass sc = new SubClass();
+        System.out.println(sc.getName());
+    }
+}
+
+// 输出
+嘿嘿嘿
+```
+
+```java
+package com.lzd.study.java8;
+
+public interface MyFun {
+
+    default String getName() {
+        return "哈哈哈";
+    }
+
+    public static void show() {
+        System.out.println("接口中的静态方法");
+    }
+}
+```
+
+## 传统时间格式化的线程安全问题
+
+```java
+package com.lzd.study.java8;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.*;
+
+public class TestSimpleDateFormat {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+        Callable<Date> task = () -> sdf.parse("20161218");
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<Date>> results = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<Date> future : results) {
+            System.out.println(future.get());
+        }
+    }
+}
+
+// 输出
+java.util.concurrent.ExecutionException: java.lang.NumberFormatException: For input string: ".2200166E.22001664E4"
+	at java.util.concurrent.FutureTask.report(FutureTask.java:122)
+	at java.util.concurrent.FutureTask.get(FutureTask.java:192)
+	at com.lzd.study.java8.TestSimpleDateFormat.main(TestSimpleDateFormat.java:26)
+Caused by: java.lang.NumberFormatException: For input string: ".2200166E.22001664E4"
+	at sun.misc.FloatingDecimal.readJavaFormatString(FloatingDecimal.java:2043)
+	at sun.misc.FloatingDecimal.parseDouble(FloatingDecimal.java:110)
+	at java.lang.Double.parseDouble(Double.java:538)
+	at java.text.DigitList.getDouble(DigitList.java:169)
+	at java.text.DecimalFormat.parse(DecimalFormat.java:2056)
+	at java.text.SimpleDateFormat.subParse(SimpleDateFormat.java:1867)
+	at java.text.SimpleDateFormat.parse(SimpleDateFormat.java:1514)
+	at java.text.DateFormat.parse(DateFormat.java:364)
+	at com.lzd.study.java8.TestSimpleDateFormat.lambda$main$0(TestSimpleDateFormat.java:15)
+	at com.lzd.study.java8.TestSimpleDateFormat$$Lambda$1/1066516207.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+```
+
+以前的解决办法
+
+```java
+package com.lzd.study.java8;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class DateFormatThreadLocal {
+
+    private static final ThreadLocal<DateFormat> df = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMMdd");
+        }
+    };
+
+    public static Date convert(String source) throws ParseException {
+        return df.get().parse(source);
+    }
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.*;
+
+public class TestSimpleDateFormat {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+        Callable<Date> task = () -> DateFormatThreadLocal.convert("20161218");
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<Date>> results = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<Date> future : results) {
+            System.out.println(future.get());
+        }
+
+        pool.shutdown();
+    }
+}
+
+// 输出
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+```
+
+java8以后的解决方法
+
+```java
+package com.lzd.study.java8;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
+public class TestSimpleDateFormat {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+//        Callable<Date> task = () -> DateFormatThreadLocal.convert("20161218");
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        Callable<LocalDate> task = () -> LocalDate.parse("20161218", dtf);
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<LocalDate>> results = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<LocalDate> future : results) {
+            System.out.println(future.get());
+        }
+
+        pool.shutdown();
+    }
+}
+```
+
+## 新时间与日期API-本地时间与时间戳
+
+![image-20210418164006952](/java_img/image-20210418164006952.png)
+
+```java
+/**
+     * 1. LocalDate LocalTime LocalDateTime
+     */
+    @Test
+    public void test() {
+        LocalDateTime ldt = LocalDateTime.now();
+        System.out.println(ldt);
+
+        LocalDateTime ldt1 = LocalDateTime.of(2021, 1, 1, 14, 59, 59);
+        System.out.println(ldt1);
+
+        LocalDateTime ldt2 = ldt1.plusYears(2);
+        System.out.println(ldt2);
+
+        LocalDateTime ldt3 = ldt1.minusMonths(2);
+        System.out.println(ldt3);
+    }
+```
+
+```java
+/**
+     * 2. Instant: 时间戳（以Unix元年：1970年1月1日00:00:00到某个时间之间的毫秒值）
+     */
+    @Test
+    public void test1() {
+        Instant ins = Instant.now(); // 默认获取UTC时区
+        System.out.println(ins);
+
+        OffsetDateTime odt = ins.atOffset(ZoneOffset.ofHours(8));
+        System.out.println(odt);
+
+        System.out.println(ins.toEpochMilli());
+
+        Instant ins1 = Instant.ofEpochSecond(60);
+        System.out.println(ins1);
+    }
+```
+
+```java
+/**
+     * 3. Duration: 计算两个"时间"之间的间隔
+     */
+    @Test
+    public void test2() throws InterruptedException {
+        Instant ins1 = Instant.now();
+
+        Thread.sleep(1000);
+
+        Instant ins2 = Instant.now();
+
+        Duration duration = Duration.between(ins1, ins2);
+        System.out.println(duration.toMillis());
+
+        System.out.println("---------------------------------");
+
+        LocalTime lt1 = LocalTime.now();
+
+        Thread.sleep(1000);
+
+        LocalTime lt2 = LocalTime.now();
+        
+        Duration d2 = Duration.between(lt1, lt2);
+        System.out.println(d2.toMillis());
+    }
+```
+
+```java
+/**
+     * 4. Period: 计算两个"日期"之间的间隔
+     */
+    @Test
+    public void test3() {
+        LocalDate ld1 = LocalDate.of(2016, 12, 18);
+        LocalDate ld2 = LocalDate.now();
+
+        Period period = Period.between(ld1, ld2);
+        System.out.println(period);
+
+        System.out.println(period.getYears());
+        System.out.println(period.getMonths());
+        System.out.println(period.getDays());
+    }
+```
+
+## 新时间与日期API-时间校正器
+
+![image-20210418174810324](/java_img/image-20210418174810324.png)
+
+```java
+/**
+     * TemporalAdjust: 时间校正器
+     */
+    @Test
+    public void test4() {
+        LocalDateTime ldt = LocalDateTime.now();
+        System.out.println(ldt);
+
+        LocalDateTime ldt2 = ldt.withDayOfMonth(10);
+        System.out.println(ldt2);
+
+        LocalDateTime ldt3 = ldt.with(TemporalAdjusters.next(DayOfWeek.FRIDAY));
+        System.out.println(ldt3);
+
+        // 自定义：下一个工作日
+        LocalDateTime ldt5 = ldt.with((l) -> {
+            LocalDateTime ldt4 = (LocalDateTime) l;
+
+            DayOfWeek dayOfWeek = ldt4.getDayOfWeek();
+
+            if (dayOfWeek.equals(DayOfWeek.FRIDAY)) {
+                return ldt4.plusDays(3);
+            }
+            return ldt4.plusDays(1);
+        });
+        System.out.println(ldt5);
+    }
+```
+
+## 新时间与日期API-时间格式化与时区的处理
+
+```java
+/**
+     * DateTimeFormatter: 格式化时间/日期
+     */
+    @Test
+    public void test5() {
+        DateTimeFormatter dtf = DateTimeFormatter.ISO_DATE;
+        LocalDateTime ldt = LocalDateTime.now();
+
+        String strDate = ldt.format(dtf);
+        System.out.println(strDate);
+
+        System.out.println("------------------------");
+
+        DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String strDate2 = dtf2.format(ldt);
+        System.out.println(strDate2);
+
+        LocalDateTime newDate = ldt.parse(strDate2, dtf2);
+        System.out.println(newDate);
+    }
+```
+
+![image-20210418190812146](/java_img/image-20210418190812146.png)
+
+```java
+/**
+     * ZonedDate、ZonedTime、ZonedDateTime
+     */
+    @Test
+    public void test6() {
+        Set<String> set = ZoneId.getAvailableZoneIds();
+        System.out.println(set);
+    }
+```
+
+```java
+		@Test
+    public void test7() {
+        LocalDateTime ldt = LocalDateTime.now(ZoneId.of("Asia/Singapore"));
+        System.out.println(ldt);
+
+        LocalDateTime ldt2 = LocalDateTime.now(ZoneId.of("Asia/Singapore"));
+        ZonedDateTime zdt = ldt2.atZone(ZoneId.of("Asia/Singapore"));
+        System.out.println(zdt);
+    }
+```
+
+## 重复注解与类型注解
+
+![image-20210418192130084](/java_img/image-20210418192130084.png)
+
+```java
+package com.lzd.study.java8;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation {
+
+    String value() default "jeffrey";
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+
+@Repeatable(MyAnnotations.class)
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, TYPE_PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation {
+
+    String value() default "jeffrey";
+}
+```
+
+```java
+package com.lzd.study.java8;
+
+import org.junit.Test;
+
+import java.lang.reflect.Method;
+
+/**
+ * 重复注解与类型注解
+ */
+public class TestAnnotation {
+
+    @MyAnnotation("Hello")
+    @MyAnnotation("World")
+    public void show(@MyAnnotation("abc") String str) {
+
+    }
+
+    @Test
+    public void test() throws NoSuchMethodException {
+
+        Class<TestAnnotation> clazz = TestAnnotation.class;
+        Method m = clazz.getMethod("show");
+
+        MyAnnotation[] mas = m.getAnnotationsByType(MyAnnotation.class);
+
+        for (MyAnnotation myAnnotation : mas) {
+            System.out.println(myAnnotation.value());
+        }
+
+    }
+}
+```
+
+
+
+
+
 
 
 
