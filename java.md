@@ -1549,7 +1549,7 @@ public class TestStreamAPI1 {
 }
 ```
 
-## 筛选与切片
+## Stream-筛选与切片
 
 ![image-20210414235232727](/java_img/image-20210414235232727.png)
 
@@ -1618,6 +1618,378 @@ public class TestStreamAPI2 {
     }
 }
 ```
+
+## Stream-映射
+
+```java
+    /**
+     * 映射
+     * map-接收Lambda，将元素转换成其他形式或提取信息。接收一个函数作为参数，该函数会被应用到每个元素上，并将其映射成一个新元素。
+     * flatMap-接收一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连成一个流
+     */
+    @Test
+    public void test5() {
+        List<String> list2 = Arrays.asList("aaa", "bbb", "ccc", "ddd");
+        list2.stream().map((x) -> x.toUpperCase()).forEach(System.out::println);
+
+        System.out.println("----------------------------------");
+
+        list.stream().map(Employee::getName).forEach(System.out::println);
+
+        System.out.println("----------------------------------");
+
+        /*
+        Stream<Stream<Character>> stream = list2.stream().map(TestStreamAPI2::filterCharacter); // {{a, a, a}, {b, b, b}}
+        stream.forEach((sm) -> {
+            sm.forEach(System.out::println);
+        });
+        */
+
+        System.out.println("----------------------------------");
+
+        Stream<Character> sm = list2.stream().flatMap(TestStreamAPI2::filterCharacter); // {a, a, a, b, b, b}
+
+        sm.forEach(System.out::println);
+
+    }
+```
+
+## Stream-排序
+
+```java
+		List<Employee> list = Arrays.asList(
+            new Employee(1, "张三", 18, 999),
+            new Employee(2, "李四", 58, 555),
+            new Employee(3, "王五", 68, 666),
+            new Employee(3, "王五", 68, 666),
+            new Employee(3, "王五", 68, 666)
+    );    
+
+		/**
+     * 排序
+     * sort()——自然排序（Comparable）
+     * sorted(Comparator com)——订制排序（Comparator）
+     */
+    @Test
+    public void test6() {
+        List<String> list2 = Arrays.asList("ccc", "aaa", "bbb", "ddd");
+
+        list2.stream().sorted().forEach(System.out::println);
+
+        System.out.println("----------------------------------");
+
+        list.stream().sorted((e1, e2) -> {
+            if (e1.getAge().equals(e2.getAge())) {
+                return e1.getName().compareTo(e2.getName());
+            }
+            return e2.getAge().compareTo(e1.getAge());
+        }).forEach(System.out::println);
+    }
+```
+
+## Stream-查找与匹配
+
+```java
+package com.lzd.study.stream;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * 终止操作
+ */
+public class TestStreamAPI3 {
+
+    List<Employee> empList = Arrays.asList(
+            new Employee(1, "张三", 18, 999, Employee.Status.FREE),
+            new Employee(2, "李四", 58, 555, Employee.Status.BUSY),
+            new Employee(3, "王五", 68, 666, Employee.Status.VOCATION),
+            new Employee(3, "王五", 68, 666, Employee.Status.FREE),
+            new Employee(3, "王五", 68, 666, Employee.Status.BUSY)
+    );
+
+    /**
+     * 查找与匹配
+     * allMatch——检查是否匹配所有元素
+     * anyMatch——检查是否匹配至少一个元素
+     * noneMatch——检查是否没有匹配所有元素
+     * findFirst——返回第一个元素
+     * findAny——返回当前流中的任意元素
+     */
+    @Test
+    public void test1() {
+        boolean b1 = empList.stream().allMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b1);
+
+        boolean b2 = empList.stream().anyMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b2);
+
+        boolean b3 = empList.stream().noneMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b3);
+
+        Optional<Employee> op = empList.stream().sorted((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary())).findFirst();
+        System.out.println(op.get());
+
+        Optional<Employee> op1 = empList.parallelStream().filter((e) -> e.getStatus().equals(Employee.Status.FREE)).findAny();
+        System.out.println(op1.get());
+    }
+
+    /**
+     * count——返回流中元素的总个数
+     * max——返回流中最大值
+     * min——返回流中最小值
+     */
+    @Test
+    public void test2() {
+        Long count = empList.stream().count();
+        System.out.println(count);
+
+        Optional<Employee> op = empList.stream().max((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(op.get());
+
+        long t1 = System.currentTimeMillis();
+        Optional<Double> op1 = empList.stream().map(Employee::getSalary).min(Double::compare);
+        System.out.println(op1.get());
+        System.out.println(System.currentTimeMillis() - t1);
+
+        long t2 = System.currentTimeMillis();
+        Optional<Employee> op2 = empList.stream().min((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(op2.get().getSalary());
+        System.out.println(System.currentTimeMillis() - t2);
+    }
+  
+  // 输出
+  5
+	Employee{id=1, name='张三', age=18, salary=999.0, status=FREE}
+	555.0
+	3
+	555.0
+	1
+}
+
+```
+
+## Stream-规约与收集
+
+![image-20210417133756847](/java_img/image-20210417133756847.png)
+
+```java
+    /**
+     * 规约
+     * reduce(T identity, BinaryOperator) / reduce(BinaryOperator) ——可以将流中元素反复结合起来，得到一个值
+     */
+    @Test
+    public void test3() {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Integer sum = list.stream().reduce(0, (x, y) -> x + y);
+        System.out.println(sum);
+
+        System.out.println("--------------------------");
+
+        Optional<Double> op = empList.stream().map(Employee::getSalary).reduce(Double::sum);
+        System.out.println(op.get());
+    }
+```
+
+```java
+/**
+     * 收集
+     * collect——将流转换为其他形式。接收一个Collector接口的实现，用于给Stream中元素做汇总的方法
+     */
+    @Test
+    public void test4() {
+        List<String> list = empList.stream().map(Employee::getName).collect(Collectors.toList());
+        list.forEach(System.out::println);
+
+        System.out.println("--------------------------");
+
+        HashSet<String> hs = empList.stream().map(Employee::getName).collect(Collectors.toCollection(HashSet::new));
+        hs.forEach(System.out::println);
+
+        // 总数
+        Long sum = empList.stream().collect(Collectors.counting());
+        System.out.println(sum);
+
+        System.out.println("--------------------------");
+
+        // 平均值
+        Double avg = empList.stream().collect(Collectors.averagingDouble(Employee::getSalary));
+        System.out.println(avg);
+
+        // 总和
+        Double sum2 = empList.stream().collect(Collectors.summingDouble(Employee::getSalary));
+        System.out.println(sum2);
+
+        // 最大值
+        Optional<Employee> max = empList.stream().collect(Collectors.maxBy((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary())));
+        System.out.println(max.get());
+
+        // 最小值
+        Optional<Double> min = empList.stream().map(Employee::getSalary).collect(Collectors.minBy(Double::compareTo));
+        System.out.println(min.get());
+    }
+```
+
+```java
+    @Test
+    public void test8() {
+        DoubleSummaryStatistics dss = empList.stream().collect(Collectors.summarizingDouble(Employee::getSalary));
+        System.out.println(dss.getSum());
+        System.out.println(dss.getAverage());
+        System.out.println(dss.getMax());
+    }
+// 输出
+3552.0
+710.4
+999.0
+```
+
+```java
+ /**
+     * 分组
+     */
+    @Test
+    public void test5() {
+        Map<Employee.Status, List<Employee>> map = empList.stream().collect(Collectors.groupingBy(Employee::getStatus));
+        System.out.println(map);
+    }
+
+// 输出
+{VOCATION=[Employee{id=3, name='王五', age=68, salary=666.0, status=VOCATION}], FREE=[Employee{id=1, name='张三', age=18, salary=999.0, status=FREE}, Employee{id=3, name='王五', age=68, salary=666.0, status=FREE}], BUSY=[Employee{id=2, name='李四', age=58, salary=555.0, status=BUSY}, Employee{id=3, name='王五', age=68, salary=666.0, status=BUSY}]}
+```
+
+```java
+/**
+     * 多级分组
+     */
+    @Test
+    public void test6() {
+        Map<Employee.Status, Map<String, List<Employee>>> mapMap = empList.stream().collect(Collectors.groupingBy(Employee::getStatus, Collectors.groupingBy((e) -> {
+            if (e.getAge() > 35) {
+                return "青年";
+            }
+            if (e.getAge() <= 50) {
+                return "中年";
+            }
+            return "老年";
+        })));
+        System.out.println(mapMap);
+    }
+
+// 输出
+{BUSY={青年=[Employee{id=2, name='李四', age=58, salary=555.0, status=BUSY}, Employee{id=3, name='王五', age=68, salary=666.0, status=BUSY}]}, VOCATION={青年=[Employee{id=3, name='王五', age=68, salary=666.0, status=VOCATION}]}, FREE={青年=[Employee{id=3, name='王五', age=68, salary=666.0, status=FREE}], 中年=[Employee{id=1, name='张三', age=18, salary=999.0, status=FREE}]}}
+```
+
+```java
+/**
+     * 分区
+     */
+    @Test
+    public void test7() {
+        Map<Boolean, List<Employee>> map = empList.stream().collect(Collectors.partitioningBy((e) -> e.getSalary() > 8000));
+        System.out.println(map);
+    }
+
+// 输出
+{false=[Employee{id=1, name='张三', age=18, salary=999.0, status=FREE}, Employee{id=2, name='李四', age=58, salary=555.0, status=BUSY}, Employee{id=3, name='王五', age=68, salary=666.0, status=VOCATION}, Employee{id=3, name='王五', age=68, salary=666.0, status=FREE}, Employee{id=3, name='王五', age=68, salary=666.0, status=BUSY}], true=[]}
+```
+
+```java
+    @Test
+    public void test9() {
+        String s = empList.stream().map(Employee::getName).collect(Collectors.joining(","));
+        System.out.println(s);
+    }
+// 输出
+张三,李四,王五,王五,王五
+```
+
+## 并行流与串行流
+
+java8之前并行流
+
+```java
+package com.lzd.study.stream;
+
+import java.util.concurrent.RecursiveTask;
+
+public class ForkJoinCalculate extends RecursiveTask<Long> {
+
+    private long start;
+    private long end;
+
+    private static final long THRESHOLD = 10000;
+
+    public ForkJoinCalculate() {
+    }
+
+    public ForkJoinCalculate(long start, long end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Long compute() {
+
+        long length = end - start;
+
+        if (length < THRESHOLD) {
+
+            long sum = 0;
+
+            for (long i = start; i <= end; i++) {
+                sum += i;
+            }
+
+            return sum;
+        }
+
+        long middle = (start + end) / 2;
+
+        ForkJoinCalculate left = new ForkJoinCalculate(start, middle);
+        left.fork();
+
+        ForkJoinCalculate right = new ForkJoinCalculate(middle + 1, end);
+        right.fork();
+
+        return left.join() + right.join();
+    }
+}
+```
+
+```java
+package com.lzd.study.stream;
+import org.junit.Test;
+
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+
+public class TestForkJoin {
+
+    @Test
+    public void test() {
+        ForkJoinPool pool = new ForkJoinPool();
+        ForkJoinTask<Long> task = new ForkJoinCalculate(0, 100000000);
+        Long sum = pool.invoke(task);
+        System.out.println(sum);
+    }
+}
+```
+
+java8之后的并行流
+
+```java
+		@Test
+    public void test1() {
+        long sum = LongStream.rangeClosed(0, 100000000).parallel().reduce(0, Long::sum);
+        System.out.println(sum);
+    }
+```
+
+
 
 
 
