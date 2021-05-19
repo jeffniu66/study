@@ -3585,6 +3585,44 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
         System.out.println("main end...");
 ```
 
+## 商品详情
+
+### 环境搭建
+
+使用SwitchHosts软件进行域名设置
+
+![image-20210519222245577](/mall_images/image-20210519222245577.png)
+
+修改nginx配置/mydata/nginx/conf/conf.d/xmall.conf，匹配上item.xmall.com
+
+![image-20210519223155602](/mall_images/image-20210519223155602.png)
+
+修改网关配置
+
+![image-20210519224010763](/mall_images/image-20210519224010763.png)
+
+把商品详情页复制到项目里，修改名为item.html
+
+![image-20210519230021144](/mall_images/image-20210519230021144.png)
+
+![image-20210519230036682](/mall_images/image-20210519230036682.png)
+
+把静态资源放入nginx里
+
+![image-20210519230542626](/mall_images/image-20210519230542626.png)
+
+![image-20210519230558929](/mall_images/image-20210519230558929.png)
+
+修改item.html文件的访问路径
+
+![image-20210519232635475](/mall_images/image-20210519232635475.png)
+
+![image-20210519233619220](/mall_images/image-20210519233619220.png)
+
+修改nginx配置
+
+![image-20210519233040105](/mall_images/image-20210519233040105.png)
+
 
 
 # k8s
