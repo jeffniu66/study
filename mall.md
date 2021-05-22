@@ -2880,15 +2880,15 @@ POST _analyze
 
 ## Elasticsearch-Rest-Client
 
-9300:	TCP端口
+1）、9300:	TCP端口
 
-spring-data-elasticsearch-transport-api.jar
+spring-data-elasticsearch:transport-api.jar
 
 ​	springboot版本不同，**transport-api.jar**不同，不能适配es版本
 
 ​	7.x 已经不建议使用，8以后就要废弃
 
-9200:	HTTP
+2）、9200:	HTTP
 
 JestClient:	非官方，更新慢
 
