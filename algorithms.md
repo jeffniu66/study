@@ -83,7 +83,58 @@ print(twoSum([2, 7, 11, 15], 9))
 # 输出：[0, 1]
 ```
 
-### 2.2.2 最大子序和
+### 2.2.2 最大子序和（第53题-简单）
+
+```java
+描述：
+输入：nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出：6
+解释：连续子数组 [4,-1,2,1] 的和最大，为 6 。
+```
+
+#### 暴力法
+
+```java
+package com.lzd.algorithms;
+
+public class MaxSubArray {
+
+    public static void main(String[] args) {
+
+        int[] nums = new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4};
+
+        System.out.println(maxSubArray(nums));
+    }
+
+    private static int maxSubArray(int[] nums) {
+
+        int max = nums[0];
+
+        for (int i = 0; i < nums.length; i++) {
+
+            int sum = 0;
+
+            for (int j = i; j < nums.length; j++) {
+
+                sum += nums[j];
+
+                max = Math.max(max, sum);
+            }
+
+        }
+
+        return max;
+    }
+}
+```
+
+#### 分治法
+
+```java
+
+```
+
+
 
 
 
