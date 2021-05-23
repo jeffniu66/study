@@ -3244,6 +3244,10 @@ CacheManager(RedisCacheManager)->Cache(RedisCache)->Cache负责缓存的读写
 
 ## 商品上架
 
+### 129、商城业务-商品上架-nested数据类型场景
+
+![image-20210523122359160](/mall_images/image-20210523122359160.png)
+
 
 
 ## 检索服务
@@ -3663,7 +3667,7 @@ docker run -p 80:80 --name nginx \
  -d nginx:1.10
 ```
 
-## 
+
 
 
 
