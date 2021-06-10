@@ -2275,6 +2275,14 @@ public class ListValueConstraintValidator implements ConstraintValidator<ListVal
 
 ![image-20210214115920074](/mall_images/image-20210214115920074.png)
 
+![image-20210609222101374](/mall_images/image-20210609222101374.png)
+
+![image-20210609232727866](/mall_images/image-20210609232727866.png)
+
+![image-20210609233536299](/mall_images/image-20210609233536299.png)
+
+
+
 ### 属性分组
 
 #### 前端组件抽取&父子组件交互
