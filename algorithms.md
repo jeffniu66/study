@@ -1,5 +1,6 @@
 ---
 typora-root-url: ../study
+typora-copy-images-to: ./algo_images
 ---
 
 # 1. 算法与数据结构
@@ -51,6 +52,207 @@ print binary_search([1, 2, 3, 4, 5], 4)
 时间复杂度
 
 ![image-20210124170515129](/algo_images/image-20210124170515129.png)
+
+## 1.4 线性结构与非线性结构
+
+线性结构：数组、栈、队列、链表
+
+非线性结构：二维数组、多维数组、广义表、树结构、图结构
+
+## 1.5 稀疏数组
+
+当一个数组中大部分元素为0，或者为同一个值的数组时，可以使用稀疏数组来保存该数组。
+
+稀疏数组的处理方式是：
+
+1）记录数组<font color=red>一共有几行几列，有多少个不同</font>的值
+
+2）把具有不同值的元素的行列及值记录在一个小规模的数组中，从而<font color=red>缩小程序</font>的规模
+
+![image-20210627112655453](/algo_images/image-20210627112655453.png)
+
+### 1.5.1 二维数组转稀疏数组的思路
+
+1、遍历原始的二维数组，得到有效数据的个数sum
+
+2、根据sum就可以创建稀疏数组sparseArr 它的大小int[sum + 1] [3]
+
+3、将二维数组的有效数据存入到稀疏数组中
+
+### 1.5.2 稀疏数组转原始二维数组的思路
+
+1、先读取稀疏数组的第一行，根据第一行的数据创建原始的二维数组
+
+2、在读取稀疏数组后几行的数据，并赋给原始的二维数组即可
+
+### 1.5.3 稀疏数组的代码实现
+
+```java
+package com.lzd.algorithms;
+
+public class SparseArray {
+
+    public static void main(String[] args) {
+
+        // 创建一个原始的二维数组 11 * 11
+        // 表示没有棋子，1表示黑子 2表示蓝子
+        int chessArr1[][] = new int[11][11];
+        chessArr1[1][2] = 1;
+        chessArr1[2][3] = 2;
+        chessArr1[4][5] = 1;
+        // 输出原始的二维数组
+        System.out.println("原始的二维数组~~");
+        for (int[] row : chessArr1) {
+            for (int data : row) {
+                System.out.printf("%d\t", data);
+            }
+            System.out.println();
+        }
+
+        // 二维数组转成稀疏数组
+        // 1.先遍历二维数组 得到非0数据的个数
+        int sum = 0;
+        for (int i = 0; i < 11; i++) {
+            for (int j = 0; j < 11; j++) {
+                if (chessArr1[i][j] != 0) {
+                    sum++;
+                }
+            }
+        }
+
+        // 2.创建对应的稀疏数组
+        int sparseArr[][] = new int[sum + 1][3];
+        // 3.给稀疏矩阵赋值
+        sparseArr[0][0] = 11;
+        sparseArr[0][1] = 11;
+        sparseArr[0][2] = sum;
+        // 4.遍历二维数组，将非0的值存放到sparseArr中
+        int count = 0; // 用于记录是第几个非0数据
+        for (int i = 0; i < 11; i++) {
+            for (int j = 0; j < 11; j++) {
+                if (chessArr1[i][j] != 0) {
+                    count++; // 为什么不用i，因为i会遍历每一行，但不一定每一行都有值
+                    sparseArr[count][0] = i;
+                    sparseArr[count][1] = j;
+                    sparseArr[count][2] = chessArr1[i][j];
+                }
+            }
+        }
+
+        // 输出稀疏数组的形式
+        System.out.println();
+        System.out.println("得到稀疏数组为~~~");
+        for (int[] aSparseArr : sparseArr) {
+            System.out.printf("%d\t%d\t%d\t\n", aSparseArr[0], aSparseArr[1], aSparseArr[2]);
+        }
+        System.out.println();
+
+        // 将稀疏数组恢复成原始的二维数组
+        int chessArr2[][] = new int[sparseArr[0][0]][sparseArr[0][1]];
+
+        for (int i = 1; i < sparseArr.length; i++) {
+            chessArr2[sparseArr[i][0]][sparseArr[i][1]] = sparseArr[i][2];
+        }
+
+        System.out.println();
+        System.out.println("恢复后的二维数组");
+
+        for (int[] row : chessArr2) {
+            for (int data : row) {
+                System.out.printf("%d\t", data);
+            }
+            System.out.println();
+        }
+    }
+}
+```
+
+## 1.6 队列
+
+队列是一个有序列表，可以用<font color=red>数组</font>或是<font color=red>链表</font>来实现
+
+### 1.6.1 数组模拟队列代码实现
+
+![image-20210627213753440](/algo_images/image-20210627213753440.png)
+
+```java
+package com.lzd.algorithms;
+
+public class ArrayQueue {
+
+    public static void main(String[] args) {
+    }
+}
+
+// 使用数组模拟队列-编写一个ArrayQueue类
+class Queue {
+    private int maxSize; // 表示数组的最大容量
+    private int front; // 队列头
+    private int rear; // 队列尾
+    private int[] arr; // 该数据用于存放数据，模拟队列
+
+    // 创建队列的构造器
+    public Queue(int arrMaxSize) {
+        maxSize = arrMaxSize;
+        arr = new int[maxSize];
+        front = -1;
+        rear = -1;
+    }
+
+    // 判断队列是否满
+    public boolean isFull() {
+        return rear == maxSize - 1;
+    }
+
+    // 判断队列是否为空
+    public boolean isEmpty() {
+        return rear == front;
+    }
+
+    // 添加数据到队列
+    public void addQueue(int n) {
+        if (isFull()) {
+            System.out.println("队列满，不能加入数据~");
+            return;
+        }
+        rear++;
+        arr[rear] = n;
+    }
+
+    public int getQueue() {
+        if (isEmpty()) {
+            throw new RuntimeException("队列空，不能取数据");
+        }
+        front++;
+        return arr[front];
+    }
+
+    // 显示队列的所有数据
+    public void showQueue() {
+        if (isEmpty()) {
+            System.out.println("队列为空，没有数据");
+            return;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            System.out.printf("arr[%d]=[%d]\n", i, arr[i]);
+        }
+    }
+
+    // 显示队列的头数据，注意不是取出数据
+    public int headQueue() {
+        if (isEmpty()) {
+            throw new RuntimeException("队列为空，没有数据~~");
+        }
+        return arr[front + 1];
+    }
+}
+```
+
+<font color=red>问题分析并优化</font>
+
+1）目前数组使用一次就不能用，没有达到复用的效果
+
+2）将这个数组使用算法，改进成一个<font color=red>环形的队列</font> 取模：%
 
 
 
