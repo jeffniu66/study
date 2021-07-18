@@ -189,7 +189,7 @@ class Queue {
     private int maxSize; // 表示数组的最大容量
     private int front; // 队列头
     private int rear; // 队列尾
-    private int[] arr; // 该数据用于存放数据，模拟队列
+    private int[] arr; // 该数组用于存放数据，模拟队列
 
     // 创建队列的构造器
     public Queue(int arrMaxSize) {
@@ -1248,6 +1248,10 @@ class HeroNode2 {
     }
 }
 ```
+
+### 1.7.8 环形链表介绍和约瑟夫问题
+
+![image-20210718222615145](/algo_images/image-20210718222615145.png)
 
 
 
