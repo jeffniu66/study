@@ -151,3 +151,8 @@ show global status like '%Slow_queries%'
 
 ![image-20210530180925366](/mysql_img/image-20210530180925366.png)
 
+# 3. 各种经验问题
+
+## 3.1 mysql迁移数据
+
+<font color=red>修改/etc/my.conf文件下的数据存放文件，把/var/lib/mysql文件下的数据迁移到其它目录，同时也要把socket位置迁移，否则不成功</font>
