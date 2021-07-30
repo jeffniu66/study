@@ -2546,6 +2546,12 @@ public class TestAnnotation {
 }
 ```
 
+# JUC
+
+## CountDownLatch与CyclicBarrier区别
+
+![image-20210730163954779](/java_img/image-20210730163954779.png)
+
 
 
 
