@@ -3639,6 +3639,30 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
 
 ![image-20210519233040105](/mall_images/image-20210519233040105.png)
 
+## 认证服务
+
+### 单点登录
+
+![image-20210725204954694](/mall_images/image-20210725204954694.png)
+
+![image-20210725214351003](/mall_images/image-20210725214351003.png)
+
+![image-20210726233542216](/mall_images/image-20210726233542216.png)
+
+![image-20210726234700045](/mall_images/image-20210726234700045.png)
+
+![image-20210726235531706](/mall_images/image-20210726235531706.png)
+
+### 核心
+
+<font color=red>1.给登录服务器留下登录痕迹</font>
+
+<font color=red>2.登录服务器要将token信息重定向的时候，带到url地址上</font>
+
+<font color=red>3.其它系统要处理url地址上的关键token，只要有，将token保存到自己的session中</font>
+
+<font color=red>4.自己系统将用户保存在自己的会话中</font>
+
 # 附录：安装Nginx
 
 随便启动一个nginx实例，只是为了复制出配置

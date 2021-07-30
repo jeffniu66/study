@@ -3,13 +3,15 @@ typora-root-url: ../study
 typora-copy-images-to: ./design_img
 ---
 
-# 命令模式
+# 行为模式
 
-## 类图代码
+## 命令模式
+
+### 类图代码
 
 ![image-20210628220421289](/design_img/image-20210628220421289.png)
 
-### Command.java
+#### Command.java
 
 ```java
 package com.lzd.designmode.command;
@@ -22,7 +24,7 @@ public interface Command {
 }
 ```
 
-### LightOnCommand.java
+#### LightOnCommand.java
 
 ```java
 package com.lzd.designmode.command;
@@ -47,7 +49,7 @@ public class LightOnCommand implements Command {
 }
 ```
 
-### LightOffCommand.java
+#### LightOffCommand.java
 
 ```java
 package com.lzd.designmode.command;
@@ -72,7 +74,7 @@ public class LightOffCommand implements Command {
 }
 ```
 
-### LightReceive.java
+#### LightReceive.java
 
 ```java
 package com.lzd.designmode.command;
@@ -89,7 +91,7 @@ public class LightReceiver {
 }
 ```
 
-### NoCommand.java
+#### NoCommand.java
 
 ```java
 package com.lzd.designmode.command;
@@ -112,7 +114,7 @@ public class NoCommand implements Command {
 }
 ```
 
-### RemoteController.java
+#### RemoteController.java
 
 ```java
 package com.lzd.designmode.command;
@@ -166,7 +168,7 @@ public class RemoteController {
 }
 ```
 
-### Client.java
+#### Client.java
 
 ```java
 package com.lzd.designmode.command;
@@ -195,7 +197,7 @@ public class Client {
 }
 ```
 
-## 命令模式在Spring框架JdbcTemplate应用的源码分析
+### 命令模式在Spring框架JdbcTemplate应用的源码分析
 
 StatementCallback接口，类似命令接口（Command）
 
@@ -211,27 +213,29 @@ class QueryStatementCallback implements StatementCallback<T>, SqlProvider
 
 ![image-20210629232440295](/design_img/image-20210629232440295.png)
 
-## 命令模式的注意事项和细节
+### 命令模式的注意事项和细节
 
 ![image-20210629233910530](/design_img/image-20210629233910530.png)
 
-# 中介者模式
+## 中介者模式
 
 ![image-20210630220322727](/design_img/image-20210630220322727.png)
 
-## 类图
+#### 类图
 
 ![image-20210630221808164](/design_img/image-20210630221808164.png)
 
 ![image-20210630222023353](/design_img/image-20210630222023353.png)
 
-## 代码案例
+#### 代码案例
 
 ### ![image-20210630225354371](/design_img/image-20210630225354371.png)
 
 ![image-20210630231159325](/design_img/image-20210630231159325.png)
 
-# 装饰者模式
+# 结构型模式
+
+## 装饰者模式
 
 ![image-20210703101712714](/design_img/image-20210703101712714.png)
 
@@ -239,13 +243,13 @@ class QueryStatementCallback implements StatementCallback<T>, SqlProvider
 
 
 
-## 装饰者模式解决星巴克咖啡订单
+### 装饰者模式解决星巴克咖啡订单
 
 ![image-20210703172631162](/design_img/image-20210703172631162.png)
 
-## 代码
+### 代码
 
-### Drink.java
+#### Drink.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -277,7 +281,7 @@ public abstract class Drink {
 }
 ```
 
-### Coffee.java
+#### Coffee.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -291,7 +295,7 @@ public class Coffee extends Drink {
 }
 ```
 
-### Espresso.java
+#### Espresso.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -305,7 +309,7 @@ public class Espresso extends Coffee {
 }
 ```
 
-### LongBlack.java
+#### LongBlack.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -319,7 +323,7 @@ public class LongBlack extends Coffee {
 }
 ```
 
-### ShortBlack.java
+#### ShortBlack.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -333,7 +337,7 @@ public class ShortBlack extends Coffee {
 }
 ```
 
-### Decorator.java
+#### Decorator.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -359,7 +363,7 @@ public class Decorator extends Drink {
 }
 ```
 
-### Chocolate.java
+#### Chocolate.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -375,7 +379,7 @@ public class Chocolate extends Decorator {
 }
 ```
 
-### Milk.java
+#### Milk.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -390,7 +394,7 @@ public class Milk extends Decorator {
 }
 ```
 
-### Soy.java
+#### Soy.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -405,7 +409,7 @@ public class Soy extends Decorator {
 }
 ```
 
-### CoffeeBar.java
+#### CoffeeBar.java
 
 ```java
 package com.lzd.designpattern.decorator;
@@ -433,7 +437,7 @@ public class CoffeeBar {
 }
 ```
 
-## IO源码
+### IO源码
 
 1. InputStream是抽象类，类似我们前面讲的Drink
 2. FileInputStream是InputStream子类，类似我们前面的Decaf，LongBlack
@@ -459,7 +463,226 @@ public class DecoratorIo {
 }
 ```
 
+## 组合模式
 
+### 代码
+
+#### OrganizationComponent
+
+```java
+package com.lzd.designpattern.composite;
+
+public abstract class OrganizationComponent {
+
+    private String name; // 名字
+    private String des; // 说明
+
+    public OrganizationComponent(String name, String des) {
+        super();
+        this.name = name;
+        this.des = des;
+    }
+
+    protected void add(OrganizationComponent organizationComponent) {
+        // 默认实现
+        throw new UnsupportedOperationException();
+    }
+
+    protected void remove(OrganizationComponent organizationComponent) {
+        // 默认实现
+        throw new UnsupportedOperationException();
+    }
+
+    // 方法print，做成抽象的，子类都需要实现
+    protected abstract void print();
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDes() {
+        return des;
+    }
+
+    public void setDes(String des) {
+        this.des = des;
+    }
+}
+```
+
+#### University
+
+```java
+package com.lzd.designpattern.composite;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// University就是Composite，可以管理College
+public class University extends OrganizationComponent {
+
+    List<OrganizationComponent> organizationComponents = new ArrayList<>();
+
+    public University(String name, String des) {
+        super(name, des);
+    }
+
+    @Override
+    protected void add(OrganizationComponent organizationComponent) {
+        organizationComponents.add(organizationComponent);
+    }
+
+    @Override
+    protected void remove(OrganizationComponent organizationComponent) {
+        organizationComponents.remove(organizationComponent);
+    }
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
+    @Override
+    public String getDes() {
+        return super.getDes();
+    }
+
+    /**
+     * 输出University包含的学院
+     */
+    @Override
+    protected void print() {
+        System.out.println("----------------" + getName() + "--------------");
+        for (OrganizationComponent organizationComponent : organizationComponents) {
+            organizationComponent.print();
+        }
+    }
+
+}
+```
+
+#### Department
+
+```java
+package com.lzd.designpattern.composite;
+
+public class Department extends OrganizationComponent {
+
+    public Department(String name, String des) {
+        super(name, des);
+    }
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
+    @Override
+    public String getDes() {
+        return super.getDes();
+    }
+
+    @Override
+    protected void print() {
+        System.out.println(getName());
+    }
+}
+```
+
+#### College
+
+```java
+package com.lzd.designpattern.composite;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class College extends OrganizationComponent {
+
+    // 存放的Department
+    List<OrganizationComponent> organizationComponents = new ArrayList<>();
+
+    public College(String name, String des) {
+        super(name, des);
+    }
+
+    @Override
+    protected void add(OrganizationComponent organizationComponent) {
+        organizationComponents.add(organizationComponent);
+    }
+
+    @Override
+    protected void remove(OrganizationComponent organizationComponent) {
+        organizationComponents.remove(organizationComponent);
+    }
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
+    @Override
+    public String getDes() {
+        return super.getDes();
+    }
+
+    /**
+     * 输出University包含的学院
+     */
+    @Override
+    protected void print() {
+        System.out.println("----------------" + getName() + "--------------");
+        for (OrganizationComponent organizationComponent : organizationComponents) {
+            organizationComponent.print();
+        }
+    }
+
+}
+```
+
+#### Client
+
+```java
+package com.lzd.designpattern.composite;
+
+public class Client {
+
+    public static void main(String[] args) {
+
+        // 从大到小创建对象 学校
+        OrganizationComponent university = new University("清华大学", "中国顶级大学");
+
+        // 创建学院
+        OrganizationComponent computerCollege = new College("计算机学院", "计算机学院");
+        OrganizationComponent infoEngineerCollege = new College("信息工程学院", "信息工程学院");
+
+        // 创建各个学院下面的系（专业）
+        computerCollege.add(new Department("软件工程", "软件工程不错"));
+        computerCollege.add(new Department("网络工程", "网络工程不错"));
+        computerCollege.add(new Department("计算机科学与技术", "计算机科学与技术是一个老牌专业"));
+
+        infoEngineerCollege.add(new Department("通信工程", "通信工程不好学"));
+        infoEngineerCollege.add(new Department("信息工程", "信息工程好学"));
+
+        university.add(computerCollege);
+        university.add(infoEngineerCollege);
+
+        university.print();
+    }
+}
+```
+
+### JDK源码使用了组合模式
+
+<font color=red>AbstractMap和Map相当于Component，HashMap相当于Composite，Node是静态内部类，相当于叶子节点Leaf</font>
+
+### 组合模式的注意事项和细节
+
+![image-20210724145908475](/design_img/image-20210724145908475.png)
 
 
 
