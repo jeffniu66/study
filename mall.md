@@ -3663,6 +3663,14 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
 
 <font color=red>4.自己系统将用户保存在自己的会话中</font>
 
+## 购物车
+
+### 购物车数据结构
+
+![image-20210728220853891](/mall_images/image-20210728220853891.png)
+
+
+
 # 附录：安装Nginx
 
 随便启动一个nginx实例，只是为了复制出配置
