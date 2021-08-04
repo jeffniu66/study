@@ -3671,6 +3671,14 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
 
 
 
+## 分布式事务
+
+@Transactional属于本地事务，在分布式系统中，只能控制自己的回滚，控制不了其它服务的回滚
+
+<font color=red>分布式事务：最大原因：网络问题+分布式机器</font>
+
+
+
 # 附录：安装Nginx
 
 随便启动一个nginx实例，只是为了复制出配置
