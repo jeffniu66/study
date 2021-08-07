@@ -3,6 +3,496 @@ typora-root-url: ../study
 typora-copy-images-to: ./design_img
 ---
 
+# 创建型模式
+
+## 简单工厂（静态工厂）
+
+### 传统写法
+
+#### 代码
+
+##### Pizza.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.pizza;
+
+public abstract class Pizza {
+
+    protected String name;
+
+    // 准备原材料，不同的披萨不一样，因此，我们做成抽象方法
+    public abstract void prepare();
+
+    public void bake() {
+        System.out.println(name + " baking");
+    }
+
+    public void cut() {
+        System.out.println(name + "cutting");
+    }
+
+    public void box() {
+        System.out.println(name + " boxing");
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+##### GreekPizza.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.pizza;
+
+public class GreekPizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        System.out.println("给希腊披萨 准备原材料");
+    }
+}
+```
+
+##### CheesePizza.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.pizza;
+
+public class CheesePizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        System.out.println("给制作奶酪披萨 准备原材料");
+    }
+}
+```
+
+##### OrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.CheesePizza;
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.GreekPizza;
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.Pizza;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class OrderPizza {
+
+    public OrderPizza() {
+        Pizza pizza;
+        String orderType; // 订购披萨类型
+        do {
+            orderType = getType();
+            if ("greek".equals(orderType)) {
+                pizza = new GreekPizza();
+                pizza.setName(" 希腊披萨 ");
+            } else if ("cheese".equals(orderType)) {
+                pizza = new CheesePizza();
+                pizza.setName(" 奶酪披萨 ");
+            } else {
+                break;
+            }
+            // 输出pizza制作过程
+            pizza.prepare();
+            pizza.bake();
+            pizza.cut();
+            pizza.box();
+        } while (true);
+    }
+
+    // 获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader strin = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza type: ");
+            return strin.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
+```
+
+##### PizzaStore.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.order;
+
+public class PizzaStore {
+
+    public static void main(String[] args) {
+        new OrderPizza();
+    }
+}
+```
+
+#### 存在的问题
+
+如果存在到处创建pizza的代码，即多个OrderPizza，那么每一处都需要修改，违法了OCP原则，考虑把创建pizza对象封装到一个类中。
+
+### 介绍
+
+<font color=gree>1.简单工厂模式是由一个工厂对象决定创建出哪一种产品类的实例，通常是一类对象。简单工厂模式是工厂模式家族中最实用且用得最多的模式。</font>
+
+<font color=gree>2.简单工厂模式：定义了一个创建对象的类，由这个类来封装实例化对象的行为（代码）</font>
+
+<font color=gree>3.在软件开发中，当我们会用到大量的创建某种，某类或者谋批对象时，就会使用到工厂模式</font>
+
+### 代码
+
+#### SimpleFactory.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.CheesePizza;
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.GreekPizza;
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.Pizza;
+
+public class SimpleFactory {
+
+    public Pizza createPizza(String orderType) { // 也可以写成静态方法 静态工厂
+
+        Pizza pizza = null;
+
+        System.out.println("使用简单工厂模式");
+
+        if ("greek".equals(orderType)) {
+            pizza = new GreekPizza();
+            pizza.setName(" 希腊披萨 ");
+        } else if ("cheese".equals(orderType)) {
+            pizza = new CheesePizza();
+            pizza.setName(" 奶酪披萨 ");
+        }
+
+        return pizza;
+    }
+}
+```
+
+#### OrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.simplefactory.pizzastore.pizza.Pizza;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class OrderPizza {
+
+//    public OrderPizza() {
+//        Pizza pizza;
+//        String orderType; // 订购披萨类型
+//        do {
+//            orderType = getType();
+//            if ("greek".equals(orderType)) {
+//                pizza = new GreekPizza();
+//                pizza.setName(" 希腊披萨 ");
+//            } else if ("cheese".equals(orderType)) {
+//                pizza = new CheesePizza();
+//                pizza.setName(" 奶酪披萨 ");
+//            } else {
+//                break;
+//            }
+//            // 输出pizza制作过程
+//            pizza.prepare();
+//            pizza.bake();
+//            pizza.cut();
+//            pizza.box();
+//        } while (true);
+//    }
+
+    // 定义一个简单工厂对象
+    SimpleFactory simpleFactory;
+    Pizza pizza;
+
+    public OrderPizza(SimpleFactory simpleFactory) {
+        setFactory(simpleFactory);
+    }
+
+    public void setFactory(SimpleFactory simpleFactory) {
+
+        String orderType; // 用户输入的
+
+        this.simpleFactory = simpleFactory;
+
+        do {
+            orderType = getType();
+            pizza = this.simpleFactory.createPizza(orderType);
+
+            // 输出pizza
+            if (pizza != null) { // 订购成功
+                pizza.prepare();
+                pizza.bake();
+                pizza.cut();
+                pizza.box();
+            } else {
+                System.out.println(" 订购披萨失败 ");
+                break;
+            }
+        } while (true);
+    }
+
+
+    // 获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader strin = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza type: ");
+            return strin.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
+```
+
+#### PizzaStore.java
+
+```java
+package com.lzd.designpattern.factory.simplefactory.pizzastore.order;
+
+public class PizzaStore {
+
+    public static void main(String[] args) {
+//        new OrderPizza();
+        new OrderPizza(new SimpleFactory());
+        System.out.println("退出了程序");
+    }
+}
+```
+
+
+
+## 工厂方法模式
+
+### 介绍
+
+定义了一个创建对象的抽象方法，由子类决定要实例化的类。工厂方法模式将<font color=red>对象的实例化推迟到子类</font>
+
+### 代码
+
+#### Pizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.pizza;
+
+public abstract class Pizza {
+
+    protected String name;
+
+    // 准备原材料，不同的披萨不一样，因此，我们做成抽象方法
+    public abstract void prepare();
+
+    public void bake() {
+        System.out.println(name + " baking");
+    }
+
+    public void cut() {
+        System.out.println(name + "cutting");
+    }
+
+    public void box() {
+        System.out.println(name + " boxing");
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+```
+
+#### BJCheesePizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.pizza;
+
+public class BJCheesePizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        setName("北京奶酪pizza");
+        System.out.println(" 北京的奶酪pizza 准备原材料");
+    }
+}
+
+```
+
+#### BJPepperPizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.pizza;
+
+public class BJPepperPizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        setName("北京胡椒pizza");
+        System.out.println(" 北京的胡椒pizza 准备原材料");
+    }
+}
+
+```
+
+#### LDCheesePizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.pizza;
+
+public class LDCheesePizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        setName("伦敦奶酪pizza");
+        System.out.println(" 伦敦的奶酪pizza 准备原材料");
+    }
+}
+
+```
+
+LDPepperPizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.pizza;
+
+public class LDPepperPizza extends Pizza {
+
+    @Override
+    public void prepare() {
+        setName("伦敦胡椒pizza");
+        System.out.println(" 伦敦的胡椒pizza 准备原材料");
+    }
+}
+
+```
+
+#### OrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.order;
+
+import com.lzd.designpattern.factory.factorymethod.pizza.Pizza;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public abstract class OrderPizza {
+
+    // 定义一个抽象方法，createPizza，让各个工厂子类自己实现
+    abstract Pizza createPizza(String orderType);
+
+    public OrderPizza() {
+        Pizza pizza;
+        String orderType; // 订购披萨类型
+        do {
+            orderType = getType();
+            pizza = createPizza(orderType);
+            // 输出pizza制作过程
+            pizza.prepare();
+            pizza.bake();
+            pizza.cut();
+            pizza.box();
+        } while (true);
+    }
+
+    // 获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader strin = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza type: ");
+            return strin.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
+
+```
+
+#### BJOrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.order;
+
+import com.lzd.designpattern.factory.factorymethod.pizza.BJCheesePizza;
+import com.lzd.designpattern.factory.factorymethod.pizza.BJPepperPizza;
+import com.lzd.designpattern.factory.factorymethod.pizza.Pizza;
+
+public class BJOrderPizza extends OrderPizza {
+
+    @Override
+    Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if ("cheese".equals(orderType)) {
+            pizza = new BJCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new BJPepperPizza();
+        }
+        return pizza;
+    }
+}
+
+```
+
+#### LDOrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.order;
+
+import com.lzd.designpattern.factory.factorymethod.pizza.LDCheesePizza;
+import com.lzd.designpattern.factory.factorymethod.pizza.LDPepperPizza;
+import com.lzd.designpattern.factory.factorymethod.pizza.Pizza;
+
+public class LDOrderPizza extends OrderPizza {
+
+    @Override
+    Pizza createPizza(String orderType) {
+        Pizza pizza = null;
+        if ("cheese".equals(orderType)) {
+            pizza = new LDCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new LDPepperPizza();
+        }
+        return pizza;
+    }
+}
+
+```
+
+#### PizzaStore.java
+
+```java
+package com.lzd.designpattern.factory.factorymethod.order;
+
+public class PizzaStore {
+
+    public static void main(String[] args) {
+//        new BJOrderPizza();
+        new LDOrderPizza();
+    }
+}
+
+```
+
+### 核心
+
+<font color=red>主要是要把创建pizza对象的方法抽象出来，让子类去实现</font>
+
+## 抽象工厂
+
+
+
 # 行为模式
 
 ## 命令模式
