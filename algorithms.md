@@ -1253,6 +1253,232 @@ class HeroNode2 {
 
 ![image-20210718222615145](/algo_images/image-20210718222615145.png)
 
+### 1.7.9 约瑟夫问题分析图解和实现
+
+#### 1.7.9.1 单向循环链表的构建与遍历
+
+![image-20210808170947207](/algo_images/image-20210808170947207.png)
+
+```java
+package com.lzd.algorithms.linkedlist;
+
+public class Josepfu {
+
+    public static void main(String[] args) {
+        CircleSingleLinkedList list = new CircleSingleLinkedList();
+        list.addBoy(5);
+        list.showBoy();
+    }
+}
+
+class CircleSingleLinkedList {
+
+    private Boy first = null;
+
+    public void addBoy(int nums) {
+        if (nums < 1) {
+            return;
+        }
+
+        Boy curBoy = null;
+
+        for (int i = 1; i <= nums; i++) {
+            Boy boy = new Boy(i);
+            if (i == 1) {
+                first = boy;
+                first.setNext(first);
+                curBoy = first;
+            } else {
+                curBoy.setNext(boy);
+                boy.setNext(first);
+                curBoy = boy; // cuyBoy后移
+            }
+        }
+    }
+
+    public void showBoy() {
+        if (first == null) {
+            return;
+        }
+
+        Boy curBoy = first;
+
+        while (true) {
+            System.out.printf("小孩的编号 %d \n", curBoy.getNo());
+
+            if (curBoy.getNext() == first) {
+                break;
+            }
+
+            curBoy = curBoy.getNext(); // 后移
+        }
+    }
+}
+
+class Boy {
+    private int no;
+    private Boy next;
+
+    public Boy(int no) {
+        this.no = no;
+    }
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+
+    public Boy getNext() {
+        return next;
+    }
+
+    public void setNext(Boy next) {
+        this.next = next;
+    }
+}
+```
+
+#### 1.7.9.2 约瑟夫出圈
+
+![image-20210808211932572](/algo_images/image-20210808211932572.png)
+
+```java
+package com.lzd.algorithms.linkedlist;
+
+public class Josepfu {
+
+    public static void main(String[] args) {
+        CircleSingleLinkedList list = new CircleSingleLinkedList();
+        list.addBoy(5);
+        list.showBoy();
+
+        //测试一把小孩出圈是否正确
+        list.countBoy(1, 2, 5); // 2->4->1->5->3
+    }
+}
+
+class CircleSingleLinkedList {
+
+    private Boy first = null;
+
+    public void addBoy(int nums) {
+        if (nums < 1) {
+            return;
+        }
+
+        Boy curBoy = null;
+
+        for (int i = 1; i <= nums; i++) {
+            Boy boy = new Boy(i);
+            if (i == 1) {
+                first = boy;
+                first.setNext(first);
+                curBoy = first;
+            } else {
+                curBoy.setNext(boy);
+                boy.setNext(first);
+                curBoy = boy; // cuyBoy后移
+            }
+        }
+    }
+
+    public void showBoy() {
+        if (first == null) {
+            return;
+        }
+
+        Boy curBoy = first;
+
+        while (true) {
+            System.out.printf("小孩的编号 %d \n", curBoy.getNo());
+
+            if (curBoy.getNext() == first) {
+                break;
+            }
+
+            curBoy = curBoy.getNext(); // 后移
+        }
+    }
+
+    // 根据用户的输入，计算出小孩出圈的顺序
+
+    /**
+     * @param startNo  表示从第几个小孩开始数数
+     * @param countNum 表示数几下
+     * @param nums     表示最初有多少小孩在圈中
+     */
+    public void countBoy(int startNo, int countNum, int nums) {
+        // 先对数据进行校验
+        if (first == null || startNo < 1 || startNo > nums) {
+            System.out.println("参数输入有误， 请重新输入");
+            return;
+        }
+        // 创建要给辅助指针,帮助完成小孩出圈
+        Boy helper = first;
+        // 需求创建一个辅助指针(变量) helper , 事先应该指向环形链表的最后这个节点
+        while (true) {
+            if (helper.getNext() == first) { // 说明helper指向最后小孩节点
+                break;
+            }
+            helper = helper.getNext();
+        }
+        //小孩报数前，先让 first 和  helper 移动 k - 1次
+        for (int j = 0; j < startNo - 1; j++) {
+            first = first.getNext();
+            helper = helper.getNext();
+        }
+        //当小孩报数时，让first 和 helper 指针同时 的移动  m  - 1 次, 然后出圈
+        //这里是一个循环操作，知道圈中只有一个节点
+        while (true) {
+            if (helper == first) { //说明圈中只有一个节点
+                break;
+            }
+            //让 first 和 helper 指针同时 的移动 countNum - 1
+            for (int j = 0; j < countNum - 1; j++) {
+                first = first.getNext();
+                helper = helper.getNext();
+            }
+            //这时first指向的节点，就是要出圈的小孩节点
+            System.out.printf("小孩%d出圈\n", first.getNo());
+            //这时将first指向的小孩节点出圈
+            first = first.getNext();
+            helper.setNext(first); //
+
+        }
+        System.out.printf("最后留在圈中的小孩编号%d \n", first.getNo());
+
+    }
+}
+
+class Boy {
+    private int no;
+    private Boy next;
+
+    public Boy(int no) {
+        this.no = no;
+    }
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+
+    public Boy getNext() {
+        return next;
+    }
+
+    public void setNext(Boy next) {
+        this.next = next;
+    }
+}
+```
+
 
 
 
