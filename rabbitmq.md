@@ -53,7 +53,39 @@ Java里面也提供了Queue，但是是内存级别的，很受限制。分布�
 
 ![image-20210808115525219](/rabbitmq_img/image-20210808115525219.png)
 
+# RabbitMQ工作流程
 
+![image-20210809225143209](/rabbitmq_img/image-20210809225143209.png)
+
+# RabbitMQ安装
+
+![image-20210809231220100](/rabbitmq_img/image-20210809231220100.png)
+
+```java
+https://rabbitmq.com/networking.html
+```
+
+创建并启动
+
+```shell
+docker run -d --name rabbitmq -p 5671:5671 \
+-p 5672:5672 -p 4369:4369 -p 25672:25672 -p 15671:15671 -p 15672:15672 \
+rabbitmq:management
+```
+
+设置开机启动
+
+```shell
+docker update rabbitmq --restart=always
+```
+
+访问地址
+
+```java
+192.168.8.136:15672
+```
+
+账号密码一致 guest
 
 
 
