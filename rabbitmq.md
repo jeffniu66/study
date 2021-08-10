@@ -87,5 +87,17 @@ docker update rabbitmq --restart=always
 
 账号密码一致 guest
 
+# Exchange类型
+
+![image-20210810223043117](/rabbitmq_img/image-20210810223043117.png)
+
+![image-20210810224551099](/rabbitmq_img/image-20210810224551099.png)
+
+![image-20210810224406332](/rabbitmq_img/image-20210810224406332.png)
+
+# Direct-Exchange
+
+![image-20210810225747633](/rabbitmq_img/image-20210810225747633.png)
+
 
 
