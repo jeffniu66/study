@@ -372,6 +372,8 @@ public class MyRabbitConfig {
 }
 ```
 
+# 可靠投递-消费端确认
+
 
 
 
