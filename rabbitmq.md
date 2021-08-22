@@ -554,6 +554,24 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
 }
 ```
 
+# RabbitMQ延时队列
+
+![image-20210821142327485](/rabbitmq_img/image-20210821142327485.png)
+
+![image-20210821143021191](/rabbitmq_img/image-20210821143021191.png)
+
+![image-20210821142933347](/rabbitmq_img/image-20210821142933347.png)
+
+![image-20210821143638641](/rabbitmq_img/image-20210821143638641.png)
+
+![image-20210821143703283](/rabbitmq_img/image-20210821143703283.png)
+
+![image-20210821144244700](/rabbitmq_img/image-20210821144244700.png)
+
+![image-20210821145136697](/rabbitmq_img/image-20210821145136697.png)
+
+![image-20210821152351462](/rabbitmq_img/image-20210821152351462.png)
+
 
 
 
