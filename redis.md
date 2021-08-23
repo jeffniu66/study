@@ -50,7 +50,7 @@ typora-root-url: ../study
 
 2.利用互斥锁保证同一时刻只有一个客户端可以查询底层数据库的这个数据，一旦查到数据就缓存至redis内，避免其他大量请求同时穿透redis访问底层数据库；
 
-![image-20201107002917107](/Users/liuzhidong/Documents/md/study/redis_images/image-20201107002917107.png)
+![image-20201107002917107](/redis_images/image-20201107002917107.png)
 
 在使用互斥锁的时候需要**避免出现死锁或者锁过期**的情况：
 
