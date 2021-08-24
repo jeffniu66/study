@@ -1,3 +1,8 @@
+---
+typora-root-url: ../study
+typora-copy-images-to: ./interview_img
+---
+
 # 1. JAVA
 
 ## 1.1 字符串常量Java内部加载
@@ -106,4 +111,56 @@ public class TwoSum {
     }
 }
 ```
+
+## 1.3 CAS
+
+AtomicInteger为什么要用CAS而不是用synchronized?
+
+synchronized太重了，杀鸡焉用牛刀
+
+![image-20210824225859988](/interview_img/image-20210824225859988.png)
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class CasDemo {
+
+    public static void main(String[] args) {
+
+        AtomicInteger atomicInteger = new AtomicInteger(5);
+
+        System.out.println(atomicInteger.compareAndSet(5, 2020) + "\t current data: " + atomicInteger.get());
+
+        System.out.println(atomicInteger.compareAndSet(5, 2021) + "\t current data: " + atomicInteger.get());
+    }
+}
+
+// 输出
+true	 current data: 2020
+false	 current data: 2020
+```
+
+底层原理是怎样的？
+
+1.自旋锁
+
+2.Unsafe类
+
+![image-20210824232618706](/interview_img/image-20210824232618706.png)
+
+![image-20210824232901840](/interview_img/image-20210824232901840.png)
+
+![image-20210824233219837](/interview_img/image-20210824233219837.png)
+
+![image-20210824233525502](/interview_img/image-20210824233525502.png)
+
+![image-20210824234828561](/interview_img/image-20210824234828561.png)
+
+![image-20210825000027141](/interview_img/image-20210825000027141.png)
+
+
+
+
 
