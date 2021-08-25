@@ -572,6 +572,130 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
 
 ![image-20210821152351462](/rabbitmq_img/image-20210821152351462.png)
 
+![image-20210825225030412](/rabbitmq_img/image-20210825225030412.png)
+
+MyMQConfig.java
+
+```java
+package com.lzd.xmall.order.config;
+
+import com.lzd.xmall.order.entity.OrderEntity;
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+public class MyMQConfig {
+
+    @RabbitListener(queues = "order.release.order.queue")
+    public void listener(OrderEntity entity, Channel channel, Message message) throws IOException {
+        System.out.println("收到过期的订单信息：准备关闭订单" + entity.getOrderSn());
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+    }
+
+    // @Bean Binding Queue Exchange
+
+    /**
+     * 容器中的Binding，Queue，Exchange都会自动创建（RabbitMQ没有的情况）
+     * RabbitMQ只要有。@Bean声明属性发生变化也不会覆盖
+     */
+    @Bean
+    public Queue orderDelayQueue() {
+
+        Map<String, Object> arguments = new HashMap<>();
+        //死信交换机
+        arguments.put("x-dead-letter-exchange", "order-event-exchange");
+        //死信路由键
+        arguments.put("x-dead-letter-routing-key", "order.release.order");
+        arguments.put("x-message-ttl", 60000); // 消息过期时间 1分钟
+
+        // String name, boolean durable, boolean exclusive, boolean autoDelete, @Nullable Map<String, Object> arguments
+        return new Queue("order.delay.queue", true, false, false, arguments);
+    }
+
+    @Bean
+    public Queue orderReleaseOrderQueue() {
+        return new Queue("order.release.order.queue", true, false, false);
+    }
+
+    @Bean
+    public Exchange orderEventExchange() {
+        /**
+         *   String name,
+         *   boolean durable,
+         *   boolean autoDelete,
+         *   Map<String, Object> arguments
+         */
+        return new TopicExchange("order-event-exchange", true, false);
+    }
+
+    @Bean
+    public Binding orderCreateOrderBinding() {
+        /**
+         * String destination, 目的地（队列名或者交换机名字）
+         * DestinationType destinationType, 目的地类型（Queue、Exhcange）
+         * String exchange,
+         * String routingKey,
+         * Map<String, Object> arguments
+         * */
+        return new Binding("order.delay.queue", Binding.DestinationType.QUEUE, "order-event-exchange", "order.create.order", null);
+    }
+
+    @Bean
+    public Binding orderReleaseOrderBinding() {
+        return new Binding("order.release.order.queue",
+                Binding.DestinationType.QUEUE,
+                "order-event-exchange",
+                "order.release.order",
+                null);
+    }
+}
+
+```
+
+HelloController.java
+
+```java
+package com.lzd.xmall.order.web;
+
+import com.lzd.xmall.order.entity.OrderEntity;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
+import java.util.UUID;
+
+@Controller
+public class HelloController {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @ResponseBody
+    @GetMapping("/test/createOrder")
+    public String testOrderTest() {
+
+        //订单下单成功
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setOrderSn(UUID.randomUUID().toString());
+        orderEntity.setModifyTime(new Date());
+
+        rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", orderEntity);
+        return "ok";
+    }
+}
+
+```
+
 
 
 
