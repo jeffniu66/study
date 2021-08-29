@@ -360,7 +360,7 @@ public class LDCheesePizza extends Pizza {
 
 ```
 
-LDPepperPizza.java
+#### LDPepperPizza.java
 
 ```java
 package com.lzd.designpattern.factory.factorymethod.pizza;
@@ -490,6 +490,155 @@ public class PizzaStore {
 <font color=red>主要是要把创建pizza对象的方法抽象出来，让子类去实现</font>
 
 ## 抽象工厂
+
+### 介绍
+
+![image-20210829182133195](/design_img/image-20210829182133195.png)
+
+![image-20210829183529698](/design_img/image-20210829183529698.png)
+
+### 代码
+
+#### AbsFactory.java
+
+```java
+package com.lzd.designpattern.factory.absfactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.Pizza;
+
+// 一个抽象工厂模式的抽象层（接口）
+public interface AbsFactory {
+
+    Pizza createPizza(String orderType);
+}
+```
+
+#### BJFactory.java
+
+```java
+package com.lzd.designpattern.factory.absfactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.BJCheesePizza;
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.BJPepperPizza;
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.Pizza;
+
+public class BJFactory implements AbsFactory {
+
+    @Override
+    public Pizza createPizza(String orderType) {
+        System.out.println("使用的是抽象工厂模式");
+        Pizza pizza = null;
+        if ("cheese".equals(orderType)) {
+            pizza = new BJCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new BJPepperPizza();
+        }
+        return pizza;
+    }
+}
+```
+
+#### LDFactory.java
+
+```java
+package com.lzd.designpattern.factory.absfactory.pizzastore.order;
+
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.LDCheesePizza;
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.LDPepperPizza;
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.Pizza;
+
+public class LDFactory implements AbsFactory {
+
+    @Override
+    public Pizza createPizza(String orderType) {
+        System.out.println("使用的是抽象工厂模式");
+        Pizza pizza = null;
+        if ("cheese".equals(orderType)) {
+            pizza = new LDCheesePizza();
+        } else if ("pepper".equals(orderType)) {
+            pizza = new LDPepperPizza();
+        }
+        return pizza;
+    }
+}
+```
+
+#### OrderPizza.java
+
+```java
+package com.lzd.designpattern.factory.absfactory.pizzastore.order;
+
+
+import com.lzd.designpattern.factory.absfactory.pizzastore.pizza.Pizza;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class OrderPizza {
+
+    AbsFactory factory;
+
+    // 构造器
+    public OrderPizza(AbsFactory factory) {
+        setAbsFactory(factory);
+    }
+
+    private void setAbsFactory(AbsFactory factory) {
+        Pizza pizza;
+        String orderType; // 订购披萨类型
+        this.factory = factory;
+        do {
+            orderType = getType();
+            pizza = factory.createPizza(orderType);
+            if (pizza != null) {
+                // 输出pizza制作过程
+                pizza.prepare();
+                pizza.bake();
+                pizza.cut();
+                pizza.box();
+            } else {
+                System.out.println("订购失败");
+                break;
+            }
+        } while (true);
+    }
+
+    // 获取客户希望订购的披萨种类
+    private String getType() {
+        try {
+            BufferedReader strin = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("input pizza type: ");
+            return strin.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
+```
+
+#### PizzaStore.java
+
+```java
+package com.lzd.designpattern.factory.absfactory.pizzastore.order;
+
+public class PizzaStore {
+
+    public static void main(String[] args) {
+
+//        new OrderPizza(new BJFactory());
+        new OrderPizza(new LDFactory());
+    }
+}
+```
+
+### JDK源码分析
+
+![image-20210829222904603](/design_img/image-20210829222904603.png)
+
+### 工厂模式小节
+
+![image-20210829223410403](/design_img/image-20210829223410403.png)
 
 
 
