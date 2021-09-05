@@ -160,6 +160,114 @@ false	 current data: 2020
 
 ![image-20210825000027141](/interview_img/image-20210825000027141.png)
 
+## 1.4 JUC
+
+### 1.4.1 线程通信
+
+传统版
+
+![image-20210902221837767](/interview_img/image-20210902221837767.png)
+
+口诀：线程操作资源类，判断干活通知，防止虚假唤醒机制
+
+while不能用if代替，会有虚假唤醒的可能，需要放到循环里
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class ShareData { // 资源类
+
+    private int number = 0;
+    private Lock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
+
+    public void increment() throws Exception {
+        lock.lock();
+        try {
+            // 1. 判断
+            while (number != 0) {
+                // 等待 不能生产
+                condition.await();
+            }
+            // 2. 干活
+            number++;
+            System.out.println(Thread.currentThread().getName() + "\t" + number);
+            // 3. 通知唤醒
+            condition.signalAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void decrement() throws Exception {
+        lock.lock();
+        try {
+            // 1. 判断
+            while (number == 0) {
+                // 等待 不能生产
+                condition.await();
+            }
+            // 2. 干活
+            number--;
+            System.out.println(Thread.currentThread().getName() + "\t" + number);
+            // 3. 通知唤醒
+            condition.signalAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+/**
+ * 题目：一个初始值为0的变量，两个线程对其交替操作，一个加1一个减1，来5轮
+ * 1. 线程    操作（方法）   资源类
+ * 2. 判断    干活          通知
+ */
+public class AwaitSignalDemo {
+
+    public static void main(String[] args) {
+        ShareData shareData = new ShareData();
+
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    shareData.increment();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "AA").start();
+
+
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    shareData.decrement();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "BB").start();
+    }
+}
+```
+
+### 1.4.2 synchronizd和Lock有什么区别
+
+1）、synchronized是关键字属于JVM层面
+
+​		 monitorenter（底层是通过monitor对象来完成，其实wait/notify等方法也依赖于monitor对象只有在同步块或方法中才能调用wait/notify等方法）
+
+​		 monitorexit
+
 
 
 
