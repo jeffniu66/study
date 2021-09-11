@@ -3770,6 +3770,26 @@ public class MyRabbitConfig {
 }
 ```
 
+### 定时关单完成
+
+![image-20210910223938295](/mall_images/image-20210910223938295.png)
+
+![image-20210911110333350](/mall_images/image-20210911110333350.png)
+
+![image-20210911110308062](/mall_images/image-20210911110308062.png)
+
+### 消息积压、积压、重复等解决方案
+
+![image-20210911182716763](/mall_images/image-20210911182716763.png)
+
+![image-20210911184854270](/mall_images/image-20210911184854270.png)
+
+![image-20210911184915396](/mall_images/image-20210911184915396.png)
+
+![image-20210911185557457](/mall_images/image-20210911185557457.png)
+
+
+
 
 
 # 附录：安装Nginx
