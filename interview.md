@@ -10,7 +10,7 @@ typora-copy-images-to: ./interview_img
 ```java
 package com.lzd.interview;
 
-public class StringPool58Demo {
+public class StringPool58Demo { 
 
     public static void main(String[] args) {
 
