@@ -868,7 +868,7 @@ class QueryStatementCallback implements StatementCallback<T>, SqlProvider
 
 #### 代码案例
 
-### ![image-20210630225354371](/design_img/image-20210630225354371.png)
+###### ![image-20210630225354371](/design_img/image-20210630225354371.png)
 
 ![image-20210630231159325](/design_img/image-20210630231159325.png)
 
