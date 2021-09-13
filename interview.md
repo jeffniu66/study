@@ -504,9 +504,118 @@ class MyResource {
 }
 ```
 
+## 1.5 Java基础
 
+### 1.5.1 ==和equals比较
 
+==对比的是栈中的值，基本数据类型是变量值，引用类型是堆中内存对象的地址
 
+equals: object中默认也是采用==比较，通常会重写
+
+### 1.5.2 final
+
+修饰类：表示不可被继承
+
+修饰方法：表示方法不可被子类覆盖，但是可以重载
+
+修饰变量：表示变量一旦被赋值就不可以更改它的值
+
+（1）修饰成员变量
+
+*如果final修饰的是类变量（static变量），只能在静态初始化代码块中指定初始值或者声明该变量时指定初始值
+
+*如果final修饰的是成员变量，可以在非静态初始化代码块、声明该变量或者构造器中执行初始值
+
+（2）修饰局部变量
+
+系统不会为局部变量进行初始化，局部变量必须由程序员显示初始化。因此使用final修饰局部变量时，即可以在定义时指定默认值（后面的代码不能对变量再赋值），也可以不指定默认值，而在后面的代码中对final变量赋初始值（仅一次）
+
+```java
+public class FinalVal {
+  final static int a = 0; // 再声明的时候就需要赋值 或者静态代码块赋值
+  /**
+  	static {
+  		a = 0;
+  	}
+  */
+  final int b = 0; // 再声明的时候就需要赋值 或者代码块中赋值  或者构造器赋值
+  /*
+  	{
+  		b = 0;
+  	}
+  */
+  public static void main(String[] args) {
+    final int localA;	// 局部变量只声明没有初始化，不会报错，与final无关
+    localA = 0;	// 	在使用之前一定要赋值
+    // localA = 1;	但是不允许第二次赋值
+  }
+}
+```
+
+（3）修饰基本类型数据和引用类型数据
+
+*如果是基本数据类型的变量，则与数值一旦在初始化之后便不能更改；
+
+*如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。<font color=red>但是引用的值是可变的。</font>
+
+```java
+public class FinalReferenceTest {
+  public static void main(String[] args) {
+    final int[] iArr = {1, 2, 3, 4};
+    iArr[2] = -3; // 合法
+    iArr = null; // 非法，对iArr不能重新赋值
+    
+    final Person p = new Person(25)；
+    p.setAge(24); // 合法
+    p = null; // 非法
+  }
+}
+```
+
+为什么局部内部类和匿名内部类只能访问局部final变量？
+
+编译之后会生成两个class文件，Test.class Test1.class
+
+```java
+public class Test {
+  public static void main(String[] args) {
+    
+  }
+  // 局部final变量a, b
+  public void test(final int b) {
+    final int a = 10;
+    // 匿名内部类
+    new Thread() {
+      public void run() {
+        System.out.println(a);
+        System.out.println(b);
+      }
+    }.start();
+  }
+}
+
+class OutClass {
+  private int age = 12;
+  
+  public void outPrint(final int x) {
+    	class InClass {
+        	public void InPrint() {
+            	System.out.println(x);
+            	System.out.println(age);
+          }
+      }
+    	new InClass.InPrint();
+  }
+}
+```
+
+首先要知道的一点是：内部类和外部类是处于同一个级别的，内部类不会因为定义在方法中就会随着方法的执行完毕就被销毁。
+
+这里就会产生问题：当外部类的方法结束时，局部变量就会被销毁了，但是内部类对象可能还存在（只有没有人再引用它时，才会死亡）。这里就出现了一个矛盾：内部类对象访问了一个不存在的变量。为了解决这个问题，就将局部变量复制了一份作为内部类的成员变量，这样当局部变量死亡后，内部类仍可以访问它，实际访问的是局部变量的"copy"。这样就好像延长了局部变量的生命周期
+
+将局部变量复制为内部类的成员变量时，必须保证两个变量是一样的，也就是如果我们在内部类中修改了成员变量，方法中的局部变量也得跟着改变，怎么解决问题呢？
+
+就将局部变量设置为final，对它初始化后，我就不让你再去修改这个变量，就保证了内部类的成员变量和方法的局部变量的一致性。这实质上也是一种妥协。使得局部变量与内部类建立的拷贝保持一致。
 
 
 
