@@ -3790,6 +3790,16 @@ public class MyRabbitConfig {
 
 
 
+## 支付
+
+1.进入“蚂蚁金服开放平台”
+
+```java
+https://open.alipay.com/platform/home.htm
+```
+
+![image-20210913224837549](/mall_images/image-20210913224837549.png)
+
 
 
 # 附录：安装Nginx
