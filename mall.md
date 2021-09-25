@@ -3800,6 +3800,12 @@ https://open.alipay.com/platform/home.htm
 
 ![image-20210913224837549](/mall_images/image-20210913224837549.png)
 
+## 秒杀
+
+![image-20210923225253630](/mall_images/image-20210923225253630.png)
+
+
+
 
 
 # 附录：安装Nginx
