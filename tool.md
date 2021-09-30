@@ -23,5 +23,16 @@ typora-root-url: ./
 
    ![image-20210927194517386](/tool_img/image-20210927194517386.png)
 
-   
+
+# 2. maven
+
+## 2.1 maven导包不成功
+
+当各种reimport还是失效之后，只能自己把jar包下载下来，然后使用命令安装，一个spring-sessio-data-redis的包折腾了2天，记录一下
+
+```shell
+mvn install:install-file -Dfile=/Users/liuzhidong/Documents/spring-session-data-redis-2.3.1.RELEASE.jar -DgroupId=org.springframework.session -DartifactId=spring-session-data-redis -Dversion=2.3.1.RELEASE -Dpackaging=jar
+```
+
+
 
