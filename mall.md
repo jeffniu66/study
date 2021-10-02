@@ -3804,6 +3804,10 @@ https://open.alipay.com/platform/home.htm
 
 ![image-20210925164852318](/mall_images/image-20210925164852318.png)
 
+面对超高并发
+
+![image-20210930205516149](/mall_images/image-20210930205516149.png)
+
 
 
 
