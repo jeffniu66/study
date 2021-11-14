@@ -373,6 +373,32 @@ GET /bank/_search
 }
 ```
 
+match_phrase与match "address.keyword"区别
+
+```java
+GET bank/_search
+{
+  "query": {
+    "match_phrase": { 
+      "address": "132 Gunnison" // 包含132 Gunnison的都能查出来
+    }
+  }
+}
+
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address.keyword": "132 Gunnison" // 等值匹配查询 等于132 Gunnison才能查出来
+    }
+  }
+}
+```
+
+<font color=red>总结：值为文本的用match查询，非文本则用term查询，比如年龄，薪资</font>
+
+![image-20211114172935984](img/image-20211114172935984.png)
+
 #### aggregations【聚合】
 
 聚合提供了从数据中分组和提取数据的能力。最简单的聚合方法大致等于**SQL GROUP BY**和**SQL**聚合函数。在**Elasticsearch**中，您有执行搜索返回**hits**（命中结果），并且同时返回聚合结果，把一个响应中的所有**hits**（命中结果）分隔开的能力。这是非常强大且有效的，您可以执行查询和多个聚合，并且在一次使用中得到各自的（任何一个的）返回结果，使用一次简洁和简化的API来避免网络往返。
@@ -391,7 +417,7 @@ GET bank/_search
     "ageAgg": {
       "terms": {
         "field": "age",
-        "size": 10
+        "size": 10 // 如果有100种可能，只取前10种可能
       }
     },
     "ageAvg":{
@@ -405,7 +431,7 @@ GET bank/_search
       }
     }
   },
-  "size": 0
+  "size": 0 // 不看hits结果，只看聚合结果
 }
 ```
 
@@ -452,7 +478,7 @@ GET bank/_search
       "aggs": {
         "genderAgg": {
           "terms": {
-            "field": "gender.keyword",
+            "field": "gender.keyword", // 文本字段聚合的时候，需要写上keyword进行精确匹配
             "size": 10
           },
           "aggs": {
