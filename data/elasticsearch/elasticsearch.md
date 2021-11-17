@@ -584,6 +584,8 @@ POST _analyze
 
 #### 安装ik分词器
 
+es默认都是对英文进行分词，中文分词需要安装自己的分词器
+
 **注意**:	不能用默认 elasticsearch-plugin install xxx.zip 进行自动安装
 
 ```java
@@ -602,7 +604,7 @@ rm -rf *.zip
 mv elasticsearch/ik
 可以确认是否安装好了分词器
 cd ../bin
-elasticsearch plugin list:	即可列出系统的分词器
+elasticsearch-plugin list:	即可列出系统的分词器
 ```
 
 ```java
