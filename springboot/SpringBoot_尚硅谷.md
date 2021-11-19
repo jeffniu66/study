@@ -101,7 +101,7 @@ http://www.gulixueyuan.com/ 谷粒学院
 
 ```java
 
-/**
+/** 
  *  @SpringBootApplication 来标注一个主程序类，说明这是一个Spring Boot应用
  */
 @SpringBootApplication
