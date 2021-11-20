@@ -100,7 +100,6 @@ http://www.gulixueyuan.com/ 谷粒学院
 ### 3、编写一个主程序；启动Spring Boot应用
 
 ```java
-
 /**
  *  @SpringBootApplication 来标注一个主程序类，说明这是一个Spring Boot应用
  */
