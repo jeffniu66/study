@@ -18,7 +18,7 @@ REST API：天然的跨平台。
 
 名词，相当于MySQL中的Database
 
-2、Type（类型）
+2、Type（类型）<font color=red>7.0版本以后去掉了type</font>
 
 在Index（索引）中，可以定义一个或多个类型。
 
