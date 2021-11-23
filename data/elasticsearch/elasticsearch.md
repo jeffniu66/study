@@ -642,3 +642,189 @@ RestTemplate:	模拟发HTTP请求，ES很多操作需要自己封装，麻烦
 HttpClient：同上
 
 Elasticsearch-Rest-Client：官方RestClient，封装了ES操作，API层次分明，上手简单
+
+### SpringBoot整合high-level-client
+
+1.导入依赖
+
+```xml
+<dependency>
+  <groupId>org.elasticsearch.client</groupId>
+  <artifactId>elasticsearch-rest-high-level-client</artifactId>
+  <version>7.4.2</version>
+</dependency>
+```
+
+2.编写配置，给容器注入一个RestHighLevelClient
+
+```java
+package com.lzd.xmall.search.config;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * 1、导入依赖
+ * 2、编写配置，给容器注入一个RestHighLevelClient
+ * 3、参照API https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high.html
+ */
+@Configuration
+public class XmallElasticSearchConfig {
+
+  public static final RequestOptions COMMON_OPTIONS;
+
+  static {
+    RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+    //        builder.addHeader("Authorization", "Bearer " + TOKEN);
+    //        builder.setHttpAsyncResponseConsumerFactory(
+    //                new HttpAsyncResponseConsumerFactory
+    //                        .HeapBufferedResponseConsumerFactory(30 * 1024 * 1024 * 1024));
+    COMMON_OPTIONS = builder.build();
+  }
+
+  @Bean
+  public RestHighLevelClient esRestClient() {
+    return new RestHighLevelClient(
+      RestClient.builder(
+        new HttpHost("192.168.8.136", 9200, "http")));
+  }
+}
+
+```
+
+3.参照API https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high.html
+
+### 测试保存
+
+```java
+/**
+     * 测试存储数据到es
+     * 更新也可以
+     */
+    @Test
+    void indexData() throws IOException {
+        IndexRequest request = new IndexRequest("users");
+        request.id("1"); // 数据的id
+//        request.source("userName", "zhangsan", "age", 18, "gender", "男");
+        User user = new User();
+        user.setUserName("lisi");
+        user.setAge(18);
+        user.setGender("男");
+        String jsonString = JSON.toJSONString(user);
+        request.source(jsonString, XContentType.JSON); // 要保存的内容
+
+        // 执行操作
+        IndexResponse index = client.index(request, XmallElasticSearchConfig.COMMON_OPTIONS);
+
+        // 提取有用的响应数据
+        System.out.println(index);
+    }
+```
+
+### 测试复杂检索
+
+```java
+/**
+     * （1）、方便检索
+     *  {
+     *      skuId:1
+     *      spuId:11
+     *      skuTitle:华为xx
+     *      price:998
+     *      saleCount:99
+     *      attrs:[
+     *          {尺寸:5寸}
+     *          {CPU:高通945}
+     *          {分辨率:全高清}
+     *      ]
+     *  }
+     *  冗余（spuId11的attrs属性可能完全一致）：
+     *  100万商品 * 20个属性 = 1000000 * 2KB = 2000MB = 2GB
+     *
+     *  （2）、
+     *      sku索引
+     *      {
+     *          skuId:1
+     *          spuId:11
+     *          xxxxx
+     *      }
+     *
+     *      attr索引
+     *      {
+     *          spuId:11
+     *          attrs:[
+     *              {尺寸:5寸}
+     *              {CPU:高通945}
+     *              {分辨率:全高清}
+     *          ]
+     *      }
+     *
+     *    第二种方案可能会出现的问题：因为页面上每一列规则选项都是根据attr属性动态计算出来的
+     *
+     *    搜索小米：粮食，手机，电器。
+     *    10000个，4000个spu
+     *    分布查询，4000个spu对应的所有可能属性：
+     *    esClient: spuId:[4000个spuId] 4000 * 8byte = 32000byte = 32kb
+     *
+     *    32kb * 10000个并发 = 320mb
+     */
+    @Test
+    void searchData() throws IOException {
+        // 1、创建检索请求
+        SearchRequest searchRequest = new SearchRequest();
+        // 指定在哪检索
+        searchRequest.indices("bank");
+
+        // 指定DSL，检索条件
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        // 1.1）、构造检索条件
+//        sourceBuilder.from();
+//        sourceBuilder.size();
+//        sourceBuilder.aggregation()
+        sourceBuilder.query(QueryBuilders.matchQuery("address", "mill"));
+
+        // 1.2）、按照年龄的值分布进行聚合
+        TermsAggregationBuilder ageAgg = AggregationBuilders.terms("ageAgg").field("age").size(10);
+        sourceBuilder.aggregation(ageAgg);
+
+        // 1.3）、计算平均薪资
+        AvgAggregationBuilder balanceAvg = AggregationBuilders.avg("balanceAvg").field("balance");
+        sourceBuilder.aggregation(balanceAvg);
+
+        System.out.println("检索条件: " + sourceBuilder.toString());
+        searchRequest.source(sourceBuilder);
+
+        // 2、执行检索
+        SearchResponse searchResponse = client.search(searchRequest, XmallElasticSearchConfig.COMMON_OPTIONS);
+
+        // 3、分析结果
+        System.out.println(searchResponse.toString());
+//        Map map = JSON.parseObject(searchResponse.toString(), Map.class);
+
+        // 3.1）、获取所有查到的数据
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        for (SearchHit hit : searchHits) {
+            String s = hit.getSourceAsString();
+            System.out.println("s: " + s);
+        }
+
+        // 3.2）、获取检索到的分析信息
+        Aggregations aggregations = searchResponse.getAggregations();
+//        for (Aggregation aggregation : aggregations) {
+//            System.out.println("当前聚合：" + aggregation.getName());
+//        }
+        Terms ageAgg1 = aggregations.get("ageAgg");
+        for (Terms.Bucket bucket : ageAgg1.getBuckets()) {
+            System.out.println("年龄: " + bucket.getKeyAsString() + "===>" + bucket.getDocCount());
+        }
+
+        Avg balanceAvg1 = aggregations.get("balanceAvg");
+        System.out.println("平均薪资: " + balanceAvg1.getValue());
+    }
+```
+
