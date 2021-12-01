@@ -4,7 +4,7 @@
 
 ![image-20210208082706761](img/image-20210208082706761.png)
 
-基础概念
+### 基础概念
 
 ![image-20210208084705514](img/image-20210208084705514.png)
 
@@ -191,7 +191,7 @@ spring.cache.redis.cache-null-values=true
     })
 ```
 
-2.删除所有的分区缓存
+2.指定删除某个分区下的所有数据
 
 ```java
 @CacheEvict(value = {"category"}, allEntries = true)
@@ -261,4 +261,3 @@ CacheManager(RedisCacheManager)->Cache(RedisCache)->Cache负责缓存的读写
 
 特殊数据：特殊设置
 
-# 
