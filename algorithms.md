@@ -1485,6 +1485,173 @@ class Boy {
 
 ![image-20211010211535279](/algo_images/image-20211010211535279.png)
 
+## 排序算法
+
+### 排序算法的介绍
+
+![image-20211204164805482](/algo_images/image-20211204164805482.png)
+
+### 时间复杂度
+
+#### 忽略常数项
+
+![image-20211204175110901](/algo_images/image-20211204175110901.png)
+
+#### 忽略低次项
+
+![image-20211204175327188](/algo_images/image-20211204175327188.png)
+
+#### 忽略系数
+
+![image-20211204180030258](/algo_images/image-20211204180030258.png)
+
+这里可能有问题？
+
+### 常见的算法复杂度
+
+![image-20211204190516239](/algo_images/image-20211204190516239.png)
+
+#### 常数阶O(1)
+
+![image-20211204190945323](/algo_images/image-20211204190945323.png)
+
+#### 对数阶O($\log_2n$)
+
+![image-20211204191205026](/algo_images/image-20211204191205026.png)
+
+#### 线性阶O(n)
+
+![image-20211204195142607](/algo_images/image-20211204195142607.png)
+
+#### 线性对数阶O($nlogN$)
+
+![image-20211204195246638](/algo_images/image-20211204195246638.png)
+
+#### 平方阶O($n^2$)
+
+![image-20211204195459160](/algo_images/image-20211204195459160.png)
+
+
+
+#### 	平均时间复杂度和最坏时间复杂度
+
+![image-20211205105643634](/algo_images/image-20211205105643634.png)
+
+### 空间复杂度
+
+![image-20211205110005573](/algo_images/image-20211205110005573.png)
+
+### 种类
+
+#### 冒泡排序
+
+##### 基本介绍
+
+![image-20211205173930178](/algo_images/image-20211205173930178.png)
+
+##### 思路分析
+
+![image-20211205174919045](/algo_images/image-20211205174919045.png)
+
+（3）如果我们发现在某躺排序中，没有发生一次交换，可以提前结束冒泡排序。（优化）
+
+##### 代码
+
+```java
+package com.lzd.algorithms.sort;
+
+import java.util.Arrays;
+
+public class BubbleSort {
+
+    public static void main(String[] args) {
+
+        int arr[] = {3, 9, -1, 10, -2};
+
+        // 第一趟排序，就是将最大的数排在最后
+        int temp = 0;
+        for (int i = 0; i < arr.length - 1; i++) {
+
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+
+                if (arr[j] > arr[j + 1]) {
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+            System.out.println("第" + (i + 1) + "趟排序后的数组");
+            System.out.println(Arrays.toString(arr));
+        }
+    }
+}
+```
+
+优化
+
+```java
+package com.lzd.algorithms.sort;
+
+import java.util.Arrays;
+
+public class BubbleSort {
+
+    public static void main(String[] args) {
+
+        int arr[] = {3, 9, -1, 10, 20};
+
+        bubbleSort(arr);
+
+        System.out.println("排序后：" + Arrays.toString(arr));
+    }
+
+
+    private static void bubbleSort(int[] arr) {
+        // 第一趟排序，就是将最大的数排在最后
+        int temp;
+        boolean flag = false;
+        for (int i = 0; i < arr.length - 1; i++) {
+
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+
+                if (arr[j] > arr[j + 1]) {
+                    flag = true;
+
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+            System.out.println("第" + (i + 1) + "趟排序后的数组");
+            System.out.println(Arrays.toString(arr));
+
+            if (!flag) { // 在一趟排序中，一次交换都没有发生
+                break;
+            }
+            flag = false; // 重置flag，进行下次判断
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
