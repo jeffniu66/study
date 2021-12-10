@@ -1,8 +1,3 @@
----
-typora-copy-images-to: ./kafka_img
-typora-root-url: ../study
----
-
 # 面试题
 
 <font color=red>1.Kafka中的ISR(InSyncRepli)、OSR(OutSyncRepli)、AR(AllRepli)代表什么？</font>
@@ -27,7 +22,7 @@ typora-root-url: ../study
 
 <font color=red>5.Kafka生产者客户端的整体结构是什么样子的？使用了几个线程来处理？分别是什么？</font>
 
-![image-20210411095713948](/kafka_img/image-20210411095713948.png)
+![image-20210411095713948](img/image-20210411095713948.png)
 
 <font color=red>6.“消费组中的消费者个数如果超过topic的分区，那么就会有消费者消费不到数据”这句话是否正确？</font>
 
@@ -37,11 +32,11 @@ typora-root-url: ../study
 
 <font color=gree>offset + 1</font>
 
-![image-20210411102957160](/kafka_img/image-20210411102957160.png)
+![image-20210411102957160](img/image-20210411102957160.png)
 
 <font color=gree>生产者发送数据offset是从0开始的</font>
 
-![image-20210411103051576](/kafka_img/image-20210411103051576.png)
+![image-20210411103051576](img/image-20210411103051576.png)
 
 <font color=gree>消费者消费的数据offset是从offset+1开始的</font>
 
@@ -101,7 +96,7 @@ bin/kafka-topics.sh --zookeeper localhost:2181/kafka --alter --topic topic-confi
 
 <font color=gree>1）Controller</font>
 
-![image-20210411165433467](/kafka_img/image-20210411165433467.png)
+![image-20210411165433467](img/image-20210411165433467.png)
 
 <font color=gree>2）ISR</font>
 
@@ -123,7 +118,7 @@ bin/kafka-topics.sh --zookeeper localhost:2181/kafka --alter --topic topic-confi
 
 <font color=red>21.Kafka中数据量计算</font>
 
-![image-20210411172117931](/kafka_img/image-20210411172117931.png)
+![image-20210411172117931](img/image-20210411172117931.png)
 
 <font color=red>22.Kafka挂掉</font>
 
@@ -135,7 +130,7 @@ bin/kafka-topics.sh --zookeeper localhost:2181/kafka --alter --topic topic-confi
 
 <font color=red>23.Kafka消息数据积压，Kafka消费能力不足怎么处理？</font>
 
-![image-20210411172614322](/kafka_img/image-20210411172614322.png)
+![image-20210411172614322](img/image-20210411172614322.png)
 
 
 
