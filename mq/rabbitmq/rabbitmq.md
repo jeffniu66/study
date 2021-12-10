@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./rabbitmq_img
----
-
 # MQ简介
 
 Java里面也提供了Queue，但是是内存级别的，很受限制。分布式中可能有很多服务都需要从队列取数据，所以需要消息中间件。
@@ -11,15 +6,15 @@ Java里面也提供了Queue，但是是内存级别的，很受限制。分布�
 
 ### 异步处理
 
-![image-20210808111208710](/rabbitmq_img/image-20210808111208710.png)
+![image-20210808111208710](img/image-20210808111208710.png)
 
 ### 应用解耦
 
-![image-20210808111747713](/rabbitmq_img/image-20210808111747713.png)
+![image-20210808111747713](img/image-20210808111747713.png)
 
 ### 流量控制
 
-![image-20210808112107811](/rabbitmq_img/image-20210808112107811.png)
+![image-20210808112107811](img/image-20210808112107811.png)
 
 # RabbitMQ简介
 
@@ -47,19 +42,19 @@ Java里面也提供了Queue，但是是内存级别的，很受限制。分布�
 
 ## ActiveMQ与RabbitMQ对比
 
-![image-20210808115055135](/rabbitmq_img/image-20210808115055135.png)
+![image-20210808115055135](img/image-20210808115055135.png)
 
 ## Spring的支持
 
-![image-20210808115525219](/rabbitmq_img/image-20210808115525219.png)
+![image-20210808115525219](img/image-20210808115525219.png)
 
 # RabbitMQ工作流程
 
-![image-20210809225143209](/rabbitmq_img/image-20210809225143209.png)
+![image-20210809225143209](img/image-20210809225143209.png)
 
 # RabbitMQ安装
 
-![image-20210809231220100](/rabbitmq_img/image-20210809231220100.png)
+![image-20210809231220100](img/image-20210809231220100.png)
 
 ```java
 https://rabbitmq.com/networking.html
@@ -89,15 +84,15 @@ docker update rabbitmq --restart=always
 
 # Exchange类型
 
-![image-20210810223043117](/rabbitmq_img/image-20210810223043117.png)
+![image-20210810223043117](img/image-20210810223043117.png)
 
-![image-20210810224551099](/rabbitmq_img/image-20210810224551099.png)
+![image-20210810224551099](img/image-20210810224551099.png)
 
-![image-20210810224406332](/rabbitmq_img/image-20210810224406332.png)
+![image-20210810224406332](img/image-20210810224406332.png)
 
 # Direct-Exchange
 
-![image-20210810225747633](/rabbitmq_img/image-20210810225747633.png)
+![image-20210810225747633](img/image-20210810225747633.png)
 
 # Fanout-Exchange
 
@@ -109,7 +104,7 @@ docker update rabbitmq --restart=always
 
 # SpringBoot整合RabbitMQ
 
-![image-20210812141313103](/rabbitmq_img/image-20210812141313103.png)
+![image-20210812141313103](img/image-20210812141313103.png)
 
 1.引入了amqp，RabbitAutoConfiguration就会自动生效
 
@@ -287,11 +282,11 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
 
 # 可靠投递-发送端确认
 
-![image-20210815200300593](/rabbitmq_img/image-20210815200300593.png)
+![image-20210815200300593](img/image-20210815200300593.png)
 
-![image-20210815204413109](/rabbitmq_img/image-20210815204413109.png)
+![image-20210815204413109](img/image-20210815204413109.png)
 
-![image-20210815214727474](/rabbitmq_img/image-20210815214727474.png)
+![image-20210815214727474](img/image-20210815214727474.png)
 
  ```properties
 # 开启发送端确认
@@ -374,7 +369,7 @@ public class MyRabbitConfig {
 
 # 可靠投递-消费端确认
 
-![image-20210819224738246](/rabbitmq_img/image-20210819224738246.png)
+![image-20210819224738246](img/image-20210819224738246.png)
 
 application.properties
 
@@ -556,23 +551,23 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
 
 # RabbitMQ延时队列
 
-![image-20210821142327485](/rabbitmq_img/image-20210821142327485.png)
+![image-20210821142327485](img/image-20210821142327485.png)
 
-![image-20210821143021191](/rabbitmq_img/image-20210821143021191.png)
+![image-20210821143021191](img/image-20210821143021191.png)
 
-![image-20210821142933347](/rabbitmq_img/image-20210821142933347.png)
+![image-20210821142933347](img/image-20210821142933347.png)
 
-![image-20210821143638641](/rabbitmq_img/image-20210821143638641.png)
+![image-20210821143638641](img/image-20210821143638641.png)
 
-![image-20210821143703283](/rabbitmq_img/image-20210821143703283.png)
+![image-20210821143703283](img/image-20210821143703283.png)
 
-![image-20210821144244700](/rabbitmq_img/image-20210821144244700.png)
+![image-20210821144244700](img/image-20210821144244700.png)
 
-![image-20210821145136697](/rabbitmq_img/image-20210821145136697.png)
+![image-20210821145136697](img/image-20210821145136697.png)
 
-![image-20210821152351462](/rabbitmq_img/image-20210821152351462.png)
+![image-20210821152351462](img/image-20210821152351462.png)
 
-![image-20210825225030412](/rabbitmq_img/image-20210825225030412.png)
+![image-20210825225030412](img/image-20210825225030412.png)
 
 MyMQConfig.java
 
