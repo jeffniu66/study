@@ -1634,6 +1634,47 @@ public class BubbleSort {
 }
 ```
 
+#### 选择排序
+
+```java
+package com.lzd.algorithms.sort;
+
+import java.util.Arrays;
+
+public class SelectSort {
+
+    public static void main(String[] args) {
+
+        int[] arr = {3, 1, 7, 5, -1};
+        selectSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    private static void selectSort(int[] arr) {
+
+        for (int i = 0; i < arr.length - 1; i++) {
+
+            int minIdx = i;
+            int min = arr[i];
+
+            for (int j = i + 1; j < arr.length; j++) {
+
+                if (min > arr[j]) {
+                    min = arr[j];
+                    minIdx = j;
+                }
+            }
+
+            // 一轮过后 选出了最小值 交换
+            if (i != minIdx) { // 如果最小值没有变化 说明没有移动 顺序是刚好的
+                arr[minIdx] = arr[i];
+                arr[i] = min;
+            }
+        }
+    }
+}
+```
+
 
 
 
