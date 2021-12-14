@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./interview_img
----
-
 # 1. JAVA
 
 ## 1.1 字符串常量Java内部加载
@@ -118,7 +113,7 @@ AtomicInteger为什么要用CAS而不是用synchronized?
 
 synchronized太重了，杀鸡焉用牛刀
 
-![image-20210824225859988](/interview_img/image-20210824225859988.png)
+![image-20210824225859988](img/image-20210824225859988.png)
 
 ```java
 package com.lzd.interview;
@@ -148,17 +143,17 @@ false	 current data: 2020
 
 2.Unsafe类
 
-![image-20210824232618706](/interview_img/image-20210824232618706.png)
+![image-20210824232618706](img/image-20210824232618706.png)
 
-![image-20210824232901840](/interview_img/image-20210824232901840.png)
+![image-20210824232901840](img/image-20210824232901840.png)
 
-![image-20210824233219837](/interview_img/image-20210824233219837.png)
+![image-20210824233219837](img/image-20210824233219837.png)
 
-![image-20210824233525502](/interview_img/image-20210824233525502.png)
+![image-20210824233525502](img/image-20210824233525502.png)
 
-![image-20210824234828561](/interview_img/image-20210824234828561.png)
+![image-20210824234828561](img/image-20210824234828561.png)
 
-![image-20210825000027141](/interview_img/image-20210825000027141.png)
+![image-20210825000027141](img/image-20210825000027141.png)
 
 ## 1.4 JUC
 
@@ -166,7 +161,7 @@ false	 current data: 2020
 
 传统版
 
-![image-20210902221837767](/interview_img/image-20210902221837767.png)
+![image-20210902221837767](img/image-20210902221837767.png)
 
 口诀：线程操作资源类，判断干活通知，防止虚假唤醒机制
 
