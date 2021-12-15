@@ -1,7 +1,3 @@
----
-typora-root-url: ../study
----
-
 # 面试题
 
 ## 缓存
