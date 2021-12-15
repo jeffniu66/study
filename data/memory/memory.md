@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./memory_img
----
-
 <font color=gree>聊聊Rust?</font>
 
 

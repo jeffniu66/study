@@ -1,8 +1,3 @@
----
-typora-copy-images-to: ./sentinel_img
-typora-root-url: ../study
----
-
 # 1. Hystrix与Sentinel
 
 ![image-20210919150305499](/sentinel_img/image-20210919150305499.png)

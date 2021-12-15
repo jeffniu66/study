@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./mysql_img
----
-
 # 1. SQL优化
 
 ## <font color=red>1.1 最佳左前缀法则</font>

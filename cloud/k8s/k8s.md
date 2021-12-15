@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./k8s_img
----
-
 # k8s
 
 ## 简介
