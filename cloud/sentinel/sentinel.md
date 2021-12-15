@@ -1,6 +1,6 @@
 # 1. Hystrix与Sentinel
 
-![image-20210919150305499](/sentinel_img/image-20210919150305499.png)
+![image-20210919150305499](sentinel_img/image-20210919150305499.png)
 
 # 2. SpringBoot整合Sentinel
 
