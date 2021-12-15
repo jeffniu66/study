@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./docker_img
----
-
 # 1. 简介
 
 虚拟化容器技术。Docker基于镜像，可以秒级启动各种容器。每一种容器都是一个完整的运行环境，容器之间互相隔离。
