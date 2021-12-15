@@ -1,7 +1,3 @@
----
-typora-root-url: ../study
----
-
 # 1. 第一个go程序
 
 hello.go
