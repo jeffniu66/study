@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./mall_images
----
-
 # 1. SpringCloud Alibaba
 
 ## 1.1 SpringCloud Alibaba介绍
@@ -11,7 +6,7 @@ typora-copy-images-to: ./mall_images
 
 版本适配
 
-![image-20201211234738534](/mall_images/image-20201211234738534.png)
+![image-20201211234738534](mall_images/image-20201211234738534.png)
 
 ## 1.2 SpringCloud Alibaba-Nacos作为注册中心
 
