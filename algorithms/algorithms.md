@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: .algo_images
----
-
 # 1. 算法与数据结构
 
 ## 1.1 时间复杂度
@@ -51,7 +46,7 @@ print binary_search([1, 2, 3, 4, 5], 4)
 
 时间复杂度
 
-![image-20210124170515129](algo_images/image-20210124170515129.png)
+<img src="algo_images/image-20210124170515129.png" />
 
 ## 1.4 线性结构与非线性结构
 
@@ -69,7 +64,7 @@ print binary_search([1, 2, 3, 4, 5], 4)
 
 2）把具有不同值的元素的行列及值记录在一个小规模的数组中，从而<font color=red>缩小程序</font>的规模
 
-![image-20210627112655453](algo_images/image-20210627112655453.png)
+<img src="algo_images/image-20210627112655453.png" />
 
 ### 1.5.1 二维数组转稀疏数组的思路
 
@@ -173,7 +168,7 @@ public class SparseArray {
 
 ### 1.6.1 数组模拟队列代码实现
 
-![image-20210627213753440](algo_images/image-20210627213753440.png)
+<img src="algo_images/image-20210627213753440.png" />
 
 ```java
 package com.lzd.algorithms;
@@ -256,7 +251,7 @@ class Queue {
 
 ### 1.6.2 数组模拟环形队列代码实现
 
-![image-20210704160706652](algo_images/image-20210704160706652.png)
+<img src="algo_images/image-20210704160706652.png" />
 
 ```java
 package com.lzd.algorithms.queue;
@@ -443,7 +438,7 @@ class HeroNode {
 
 ### 1.7.2 单链表按顺序插入节点
 
-![image-20210706225123235](algo_images/image-20210706225123235.png)
+<img src="algo_images/image-20210706225123235.png" />
 
 ```java
 package com.lzd.algorithms.linkedlist;
@@ -756,7 +751,7 @@ class HeroNode {
 
 ### 1.7.3 单链表节点的删除和小结
 
-![image-20210707232427237](algo_images/image-20210707232427237.png)
+<img src="algo_images/image-20210707232427237.png" />
 
 ```java
 package com.lzd.algorithms.linkedlist;
