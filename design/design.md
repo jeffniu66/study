@@ -1,8 +1,3 @@
----
-typora-root-url: ../study
-typora-copy-images-to: ./design_img
----
-
 # 创建型模式
 
 ## 简单工厂（静态工厂）
@@ -493,9 +488,9 @@ public class PizzaStore {
 
 ### 介绍
 
-![image-20210829182133195](/design_img/image-20210829182133195.png)
+![image-20210829182133195](design_img/image-20210829182133195.png)
 
-![image-20210829183529698](/design_img/image-20210829183529698.png)
+![image-20210829183529698](design_img/image-20210829183529698.png)
 
 ### 代码
 
@@ -634,13 +629,17 @@ public class PizzaStore {
 
 ### JDK源码分析
 
-![image-20210829222904603](/design_img/image-20210829222904603.png)
+![image-20210829222904603](design_img/image-20210829222904603.png)
 
 ### 工厂模式小节
 
-![image-20210829223410403](/design_img/image-20210829223410403.png)
+![image-20210829223410403](design_img/image-20210829223410403.png)
 
 
+
+## 单例模式
+
+<img src="design_img/image-20211216224814026.png" />
 
 # 行为模式
 
@@ -648,7 +647,7 @@ public class PizzaStore {
 
 ### 类图代码
 
-![image-20210628220421289](/design_img/image-20210628220421289.png)
+![image-20210628220421289](design_img/image-20210628220421289.png)
 
 #### Command.java
 
@@ -850,41 +849,41 @@ class QueryStatementCallback implements StatementCallback<T>, SqlProvider
 
 另外实现StatementCallback命令接口的子类还有
 
-![image-20210629232440295](/design_img/image-20210629232440295.png)
+![image-20210629232440295](design_img/image-20210629232440295.png)
 
 ### 命令模式的注意事项和细节
 
-![image-20210629233910530](/design_img/image-20210629233910530.png)
+![image-20210629233910530](design_img/image-20210629233910530.png)
 
 ## 中介者模式
 
-![image-20210630220322727](/design_img/image-20210630220322727.png)
+![image-20210630220322727](design_img/image-20210630220322727.png)
 
 #### 类图
 
-![image-20210630221808164](/design_img/image-20210630221808164.png)
+![image-20210630221808164](design_img/image-20210630221808164.png)
 
-![image-20210630222023353](/design_img/image-20210630222023353.png)
+![image-20210630222023353](design_img/image-20210630222023353.png)
 
 #### 代码案例
 
-###### ![image-20210630225354371](/design_img/image-20210630225354371.png)
+###### ![image-20210630225354371](design_img/image-20210630225354371.png)
 
-![image-20210630231159325](/design_img/image-20210630231159325.png)
+![image-20210630231159325](design_img/image-20210630231159325.png)
 
 # 结构型模式
 
 ## 装饰者模式
 
-![image-20210703101712714](/design_img/image-20210703101712714.png)
+![image-20210703101712714](design_img/image-20210703101712714.png)
 
-![image-20210703103335203](/design_img/image-20210703103335203.png)
+![image-20210703103335203](design_img/image-20210703103335203.png)
 
 
 
 ### 装饰者模式解决星巴克咖啡订单
 
-![image-20210703172631162](/design_img/image-20210703172631162.png)
+![image-20210703172631162](design_img/image-20210703172631162.png)
 
 ### 代码
 
@@ -1321,7 +1320,7 @@ public class Client {
 
 ### 组合模式的注意事项和细节
 
-![image-20210724145908475](/design_img/image-20210724145908475.png)
+![image-20210724145908475](design_img/image-20210724145908475.png)
 
 
 

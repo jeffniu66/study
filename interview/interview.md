@@ -620,5 +620,170 @@ class OutClass {
 
 就将局部变量设置为final，对它初始化后，我就不让你再去修改这个变量，就保证了内部类的成员变量和方法的局部变量的一致性。这实质上也是一种妥协。使得局部变量与内部类建立的拷贝保持一致。
 
+## 1.6 尚硅谷面试题第一季
 
+### 1.6.1 单例设计模式
+
+### 1.6.2 类初始化和实例初始化等
+
+```java
+package com.atguigu.test;
+
+/*
+ * 父类的初始化<clinit>：
+ * （1）j = method();
+ * （2）父类的静态代码块
+ * 
+ *  父类的实例化方法：
+ * （1）super()（最前）
+ * （2）i = test();
+ * （3）父类的非静态代码块
+ * （4）父类的无参构造（最后）
+ * 
+ * 非静态方法前面其实有一个默认的对象this
+ * this在构造器（或<init>）它表示的是正在创建的对象，因为这里是在创建Son对象，所以
+ * test()执行的是子类重写的代码（面向对象多态）
+ * 
+ * 这里i=test()执行的是子类重写的test()方法
+ */
+public class Father{
+	private int i = test();
+	private static int j = method();
+	
+	static{
+		System.out.print("(1)");
+	}
+	Father(){
+		System.out.print("(2)");
+	}
+	{
+		System.out.print("(3)");
+	}
+	
+	
+	public int test(){
+		System.out.print("(4)");
+		return 1;
+	}
+	public static int method(){
+		System.out.print("(5)");
+		return 1;
+	}
+}
+```
+
+```java
+package com.atguigu.test;
+
+/*
+ * 子类的初始化<clinit>：
+ * （1）j = method();
+ * （2）子类的静态代码块
+ * 
+ * 先初始化父类：(5)(1)
+ * 初始化子类：（10）(6)
+ * 
+ * 子类的实例化方法<init>：
+ * （1）super()（最前）      （9）（3）（2）
+ * （2）i = test();    （9）
+ * （3）子类的非静态代码块    （8）
+ * （4）子类的无参构造（最后） （7）
+ * 
+ * 因为创建了两个Son对象，因此实例化方法<init>执行两次
+ * 
+ * （9）（3）（2）（9）（8）（7）
+ */
+public class Son extends Father{
+	private int i = test();
+	private static int j = method();
+	static{
+		System.out.print("(6)");
+	}
+	Son(){
+//		super();//写或不写都在，在子类构造器中一定会调用父类的构造器
+		System.out.print("(7)");
+	}
+	{
+		System.out.print("(8)");
+	}
+	public int test(){
+		System.out.print("(9)");
+		return 1;
+	}
+	public static int method(){
+		System.out.print("(10)");
+		return 1;
+	}
+	public static void main(String[] args) {
+		Son s1 = new Son();
+		System.out.println();
+		Son s2 = new Son();
+	}
+}
+```
+
+### 1.6.3 递归与迭代
+
+```java
+package com.lzd.interview.递归与迭代;
+
+public class Test {
+    
+    public static void main(String[] args) {
+        System.out.println(loop(4));
+    }
+
+    public static int loop(int n) {
+        if (n == 1 || n == 2) {
+            return 1;
+        }
+        int a = 1, b = 1, sum = 0;
+        for (int i = 3; i <= n; i++) {
+            sum = a + b;
+            a = b;
+            b = sum;
+        }
+        return sum;
+    }
+}
+```
+
+### 1.6.4 成员变量与局部变量
+
+<font color=red>非静态代码块每创建1个对象就会执行1次</font>
+
+```java
+package com.lzd.interview.成员变量与局部变量;
+
+public class Exam5 {
+    static int s;//成员变量，类变量
+    int i;//成员变量，实例变量
+    int j;//成员变量，实例变量
+
+    {
+        int i = 1;//非静态代码块中的局部变量 i
+        i++;
+        j++;
+        s++;
+    }
+
+    public void test(int j) {//形参，局部变量,j
+        j++;
+        i++;
+        s++;
+    }
+
+    public static void main(String[] args) {//形参，局部变量，args
+        Exam5 obj1 = new Exam5();//局部变量，obj1
+        Exam5 obj2 = new Exam5();//局部变量，obj1
+        obj1.test(10);
+        obj1.test(20);
+        obj2.test(30);
+        System.out.println(obj1.i + "," + obj1.j + "," + obj1.s);
+        System.out.println(obj2.i + "," + obj2.j + "," + obj2.s);
+    }
+}
+```
+
+### 1.6.5 Spring支持的常用数据库事务传播属性事务隔离级别
 
