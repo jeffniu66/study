@@ -1663,14 +1663,14 @@ public class SelectSort {
             // 一轮过后 选出了最小值 交换
             if (i != minIdx) { // 如果最小值没有变化 说明没有移动 顺序是刚好的
                 arr[minIdx] = arr[i];
-                arr[i] = min;
+                arr[i] = min; // 这里的最小值min相当于用于交换两个数据的空瓶子
             }
         }
     }
 }
 ```
 
-
+时间复杂度为O($n^2$)，不稳定。
 
 
 
