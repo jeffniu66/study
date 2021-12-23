@@ -1606,7 +1606,7 @@ public class BubbleSort {
         int temp;
         boolean flag = false;
         for (int i = 0; i < arr.length - 1; i++) {
-
+          
             for (int j = 0; j < arr.length - 1 - i; j++) {
 
                 if (arr[j] > arr[j + 1]) {
@@ -1623,7 +1623,7 @@ public class BubbleSort {
             if (!flag) { // 在一趟排序中，一次交换都没有发生
                 break;
             }
-            flag = false; // 重置flag，进行下次判断
+            flag = false;
         }
     }
 }
@@ -1650,12 +1650,12 @@ public class SelectSort {
         for (int i = 0; i < arr.length - 1; i++) {
 
             int minIdx = i;
-            int min = arr[i];
+            int minVal = arr[i]; // minVal相当于空瓶子
 
             for (int j = i + 1; j < arr.length; j++) {
 
                 if (min > arr[j]) {
-                    min = arr[j];
+                    minVal = arr[j];
                     minIdx = j;
                 }
             }
@@ -1663,14 +1663,14 @@ public class SelectSort {
             // 一轮过后 选出了最小值 交换
             if (i != minIdx) { // 如果最小值没有变化 说明没有移动 顺序是刚好的
                 arr[minIdx] = arr[i];
-                arr[i] = min; // 这里的最小值min相当于用于交换两个数据的空瓶子
+                arr[i] = minVal;
             }
         }
     }
 }
 ```
 
-时间复杂度为O($n^2$)，不稳定。
+时间复杂度为O($n^2$)，不稳定。选择排序就是每次从未排序的元素里选择出最小的值和下标进行交换。
 
 #### 插入排序
 
