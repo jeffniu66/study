@@ -1672,6 +1672,22 @@ public class SelectSort {
 
 时间复杂度为O($n^2$)，不稳定。
 
+#### 插入排序
+
+```java
+public static void sort(int[] arr) {
+    for (int i = 1; i < arr.length; i++) {
+        int insertVal = arr[i]; // 未排好序的元素里要插入的值
+        int j = i; // 从排好序的最后边开始，找到比其小的数
+        while (j > 0 && insertVal < arr[j - 1]) {
+            arr[j] = arr[j - 1];
+            j--;
+        }
+        arr[j] = insertVal; // insertVal相当于空瓶子
+    }
+}
+```
+
 
 
 
