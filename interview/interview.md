@@ -803,5 +803,13 @@ public class Exam5 {
 
    Isolation.REPEATABLE_READ: 可重复读，MySQL默认的隔离级别
 
-   
+### 1.6.6 SpringMVC如何解决POST和GET请求乱码问题
+
+1.POST: CharacterEncodingFilter过滤器
+
+2.GET：在tomcat中server.xml里第一个Connector标签添加URIEncoding="UTF-8"
+
+### 1.6.7 简单地谈一谈SpringMVC的工作流程
+
+![image-20211226194946087](img/image-20211226194946087.png)
 
