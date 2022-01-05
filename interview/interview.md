@@ -813,3 +813,15 @@ public class Exam5 {
 
 ![image-20211226194946087](img/image-20211226194946087.png)
 
+### 1.6.8 ES和Solr的区别
+
+1.当实时建立索引的时候，solr会产生io阻塞，而es不会，es查询性能要高于solr。
+
+2.在不断动态添加数据的时候，solr的检索效率会变得低下，而es则没有什么变化。
+
+3.solr利用zookeeper进行分布式管理，而es自身带有分布式系统管理功能。Solr一般都要部署到web服务器，比如tomcat。启动tomcat的时候需要配置tomcat与solr的关联。【solr的本质是一个动态的web项目】
+
+4.Solr支持更多的数据格式[xml,json,csv]，而es仅支持json文件格式。
+
+
+
