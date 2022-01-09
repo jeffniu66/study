@@ -823,5 +823,324 @@ public class Exam5 {
 
 4.Solr支持更多的数据格式[xml,json,csv]，而es仅支持json文件格式。
 
+## 1.7 尚硅谷面试题第二季
+
+### 1.7.1 volatile
+
+#### 1.7.2 可见性的代码说明
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.TimeUnit;
+
+class MyData {
+
+    volatile int number = 0;
+
+    public void addTo60() {
+        this.number = 60;
+    }
+}
+
+public class VolatileDemo {
+
+    public static void main(String[] args) {
+
+        MyData myData = new MyData();
+
+        new Thread(()->{
+            System.out.println(Thread.currentThread().getName() + "\t come in");
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            myData.addTo60();
+            System.out.println(Thread.currentThread().getName() + "\t update number value: " + myData.number);
+        }, "AAA").start();
+
+
+//        try {
+//            TimeUnit.SECONDS.sleep(6);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+//        System.out.println(myData.number);
+        while (myData.number == 0) {
+
+        }
+
+        System.out.println(Thread.currentThread().getName() + "\t mission is over");
+    }
+}
+```
+
+#### 1.7.3 不保证原子性
+
+```java
+package com.lzd.interview.volatilee.atomic;
+
+
+class MyData {
+
+    volatile int number = 0;
+
+    public void addPlusPlus() {
+        number++;
+    }
+}
+
+public class Demo {
+
+    public static void main(String[] args) {
+
+        MyData myData = new MyData();
+
+        for (int i = 0; i < 20; i++) {
+
+            new Thread(() -> {
+                for (int j = 0; j < 1000; j++) {
+                    myData.addPlusPlus();
+                }
+            }, String.valueOf(i)).start();
+        }
+
+        while (Thread.activeCount() > 2) {
+            Thread.yield();
+        }
+
+        System.out.println(Thread.currentThread().getName() + "\t finally number value: " + myData.number);
+    }
+}
+```
+
+#### 1.7.4 解决volatile不保证原子性问题
+
+```java
+package com.lzd.interview.volatilee.atomic;
+
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+class MyData {
+
+    volatile int number = 0;
+
+    public void addPlusPlus() {
+        number++;
+    }
+
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    public void addMyAtomic() {
+        atomicInteger.getAndIncrement();
+    }
+}
+
+public class Demo {
+
+    public static void main(String[] args) {
+
+        MyData myData = new MyData();
+
+        for (int i = 0; i < 20; i++) {
+
+            new Thread(() -> {
+                for (int j = 0; j < 1000; j++) {
+                    myData.addPlusPlus();
+                    myData.addMyAtomic();
+                }
+            }, String.valueOf(i)).start();
+        }
+
+        while (Thread.activeCount() > 2) {
+            Thread.yield();
+        }
+
+        System.out.println(Thread.currentThread().getName() + "\t finally number value: " + myData.number);
+        System.out.println(Thread.currentThread().getName() + "\t finally number value: " + myData.atomicInteger);
+    }
+}
+```
+
+#### 1.7.5 单例模式下volatile分析
+
+```java
+package com.lzd.interview.volatilee.singleton;
+
+public class SingletonDemo {
+
+    private static volatile SingletonDemo instance = null;
+
+    private SingletonDemo() {
+        System.out.println(Thread.currentThread().getName() + "\t 我是构造方法SingletonDemo()");
+    }
+
+    public static SingletonDemo getInstance() {
+
+        if (instance == null) {
+
+            synchronized (SingletonDemo.class) {
+
+                if (instance == null) {
+
+                    instance = new SingletonDemo();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public static void main(String[] args) {
+
+        for (int i = 0; i < 100; i++) {
+            new Thread(SingletonDemo::getInstance, String.valueOf(i)).start();
+        }
+    }
+}
+```
+
+## 1.7.2 AtomicReference原子引用
+
+```java
+package com.lzd.interview.atomicreference;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+class User {
+
+    private String userName;
+    private int age;
+
+    public User() {
+    }
+
+    public User(String userName, int age) {
+        this.userName = userName;
+        this.age = age;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+
+public class AtomicReferenceDemo {
+
+    public static void main(String[] args) {
+
+        User z3 = new User("z3", 22);
+        User li4 = new User("li4", 25);
+
+        AtomicReference<User> atomicReference = new AtomicReference<>();
+        atomicReference.set(z3);
+
+        System.out.println(atomicReference.compareAndSet(z3, li4) + "\t " + atomicReference.get().toString());
+        System.out.println(atomicReference.compareAndSet(z3, li4) + "\t " + atomicReference.get().toString());
+    }
+}
+```
+
+## 1.7.3 ABA问题解决
+
+```java
+package com.lzd.interview.atomicreference;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicStampedReference;
+
+public class ABADemo {
+
+    static AtomicReference<Integer> atomicReference = new AtomicReference<>(100);
+    static AtomicStampedReference<Integer> atomicStampedReference = new AtomicStampedReference<>(100, 1);
+
+    public static void main(String[] args) {
+
+        System.out.println("以下是ABA问题的产生");
+
+        new Thread(() -> {
+            atomicReference.compareAndSet(100, 101);
+            atomicReference.compareAndSet(101, 100);
+        }, "t1").start();
+
+        new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(atomicReference.compareAndSet(100, 2019) + "\t" + atomicReference.get());
+        }, "t2").start();
+
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("以下是ABA问题的解决");
+
+        new Thread(() -> {
+            int stamp = atomicStampedReference.getStamp();
+            System.out.println(Thread.currentThread().getName() + "\t 第一次版本号: " + stamp);
+
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            atomicStampedReference.compareAndSet(100, 101, atomicStampedReference.getStamp(), atomicStampedReference.getStamp() + 1);
+            System.out.println(Thread.currentThread().getName() + "\t 第二次版本号: " + atomicStampedReference.getStamp());
+
+            atomicStampedReference.compareAndSet(101, 100, atomicStampedReference.getStamp(), atomicStampedReference.getStamp() + 1);
+            System.out.println(Thread.currentThread().getName() + "\t 第三次版本号: " + atomicStampedReference.getStamp());
+
+        }, "t3").start();
+
+
+        new Thread(() -> {
+            int stamp = atomicStampedReference.getStamp();
+            System.out.println(Thread.currentThread().getName() + "\t 第一次版本号: " + stamp);
+
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            boolean result = atomicStampedReference.compareAndSet(100, 2019, stamp, stamp + 1);
+            System.out.println(Thread.currentThread().getName() + "\t 修改成功否: " + result + "\t 当前最新实际版本号: " + atomicStampedReference.getStamp());
+
+            System.out.println(Thread.currentThread().getName() + "\t 当前实际最新值: " + atomicStampedReference.getReference());
+        }, "t4").start();
+    }
+}
+```
+
+
+
 
 
