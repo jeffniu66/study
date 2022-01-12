@@ -1002,7 +1002,7 @@ public class SingletonDemo {
 }
 ```
 
-## 1.7.2 AtomicReference原子引用
+### 1.7.2 AtomicReference原子引用
 
 ```java
 package com.lzd.interview.atomicreference;
@@ -1063,7 +1063,7 @@ public class AtomicReferenceDemo {
 }
 ```
 
-## 1.7.3 ABA问题解决
+### 1.7.3 ABA问题解决
 
 ```java
 package com.lzd.interview.atomicreference;
@@ -1136,6 +1136,144 @@ public class ABADemo {
 
             System.out.println(Thread.currentThread().getName() + "\t 当前实际最新值: " + atomicStampedReference.getReference());
         }, "t4").start();
+    }
+}
+```
+
+### 1.7.4 自旋锁
+
+```java
+package com.lzd.interview.自旋锁;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class SpinLockDemo {
+
+    // 原子引用线程
+    AtomicReference<Thread> atomicReference = new AtomicReference<>();
+
+    public void myLock() {
+        Thread thread = Thread.currentThread();
+        System.out.println(Thread.currentThread().getName() + "\t come in");
+
+        while (!atomicReference.compareAndSet(null, thread)) {
+
+        }
+    }
+
+    public void myUnlock() {
+        Thread thread = Thread.currentThread();
+        atomicReference.compareAndSet(thread, null);
+        System.out.println(Thread.currentThread().getName() + "\t invoke myUnlock");
+    }
+
+    public static void main(String[] args) {
+
+        SpinLockDemo spinLockDemo = new SpinLockDemo();
+
+        new Thread(() -> {
+            spinLockDemo.myLock();
+
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            spinLockDemo.myUnlock();
+        }, "AA").start();
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        new Thread(() -> {
+            spinLockDemo.myLock();
+            spinLockDemo.myUnlock();
+        }, "BB").start();
+    }
+}
+```
+
+### 1.7.5 读写锁
+
+```java
+package com.lzd.interview.读写锁;
+
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+class MyCache {
+
+    private volatile Map<String, Object> map = new HashMap<>();
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    public void put(String key, Object value) {
+        lock.writeLock().lock();
+
+        try {
+            System.out.println(Thread.currentThread().getName() + "\t 正在写入: " + key);
+
+            try {
+                TimeUnit.MILLISECONDS.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            map.put(key, value);
+
+            System.out.println(Thread.currentThread().getName() + "\t 写入完成: " + key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void get(String key) {
+
+        lock.readLock().lock(); // 如果读不加锁也可以 加了锁 就保证了一定得写完了才能读
+        try {
+            System.out.println(Thread.currentThread().getName() + "\t 正在读取: ");
+
+            try {
+                TimeUnit.MILLISECONDS.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Object result = map.get(key);
+
+            System.out.println(Thread.currentThread().getName() + "\t 读取完成: " + result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+}
+
+public class ReadWriteLockDemo {
+
+    public static void main(String[] args) {
+
+        MyCache myCache = new MyCache();
+
+        for (int i = 0; i < 5; i++) {
+            final int tempInt = i;
+            new Thread(() -> myCache.put(tempInt + "", tempInt), String.valueOf(i)).start();
+        }
+
+        for (int i = 0; i < 5; i++) {
+            final int tempInt = i;
+            new Thread(() -> myCache.get(tempInt + ""), String.valueOf(i)).start();
+        }
     }
 }
 ```
