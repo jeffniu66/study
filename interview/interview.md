@@ -1278,6 +1278,155 @@ public class ReadWriteLockDemo {
 }
 ```
 
+### 1.7.6 CountDownLatch
+
+CountryEnum.java
+
+```java
+package com.lzd.interview.countdownlatch;
+
+public enum CountryEnum {
+
+    ONE(1, "齐"), TWO(2, "楚"), THREE(3, "燕"), FOUR(4, "赵"), FIVE(5, "魏"), SIX(6, "韩");
+
+    private Integer retCode;
+    private String retMessage;
+
+    CountryEnum(Integer retCode, String retMessage) {
+        this.retCode = retCode;
+        this.retMessage = retMessage;
+    }
+
+    public Integer getRetCode() {
+        return retCode;
+    }
+
+    public void setRetCode(Integer retCode) {
+        this.retCode = retCode;
+    }
+
+    public String getRetMessage() {
+        return retMessage;
+    }
+
+    public void setRetMessage(String retMessage) {
+        this.retMessage = retMessage;
+    }
+
+    public static CountryEnum getMessageById(int idx) {
+
+        CountryEnum[] arr = CountryEnum.values();
+        for (CountryEnum ele : arr) {
+            if (ele.getRetCode() == idx) {
+                return ele;
+            }
+        }
+        return null;
+    }
+}
+```
+
+CountDownLatchDemo.java
+
+```java
+package com.lzd.interview.countdownlatch;
+
+import java.util.concurrent.CountDownLatch;
+
+public class CountDownLatchDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        CountDownLatch countDownLatch = new CountDownLatch(6);
+
+        for (int i = 1; i <= 6; i++) {
+
+            new Thread(() -> {
+
+                System.out.println(Thread.currentThread().getName() + "\t 国，被灭");
+                countDownLatch.countDown();
+
+            }, CountryEnum.getMessageById(i).getRetMessage()).start();
+        }
+
+        countDownLatch.await();
+
+        System.out.println(Thread.currentThread().getName() + "\t **************秦帝国，一统华夏");
+    }
+}
+```
+
+### 1.7.7 CyclicBarrier
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
+public class CyclicBarrierDemo {
+
+    public static void main(String[] args) {
+
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(7, () -> System.out.println("*****召唤神龙*********"));
+
+        for (int i = 0; i < 7; i++) {
+
+            final int temp = i;
+
+            new Thread(() -> {
+
+                System.out.println(Thread.currentThread().getName() + "\t 收集到第：" + temp + "龙珠");
+
+                try {
+                    cyclicBarrier.await();
+                } catch (InterruptedException | BrokenBarrierException e) {
+                    e.printStackTrace();
+                }
+
+            }).start();
+        }
+    }
+}
+```
+
+### 1.7.8 Semaphore
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
+public class SemaphoreDemo {
+
+    public static void main(String[] args) {
+
+        Semaphore semaphore = new Semaphore(3);
+
+        for (int i = 0; i < 6; i++) {
+
+            new Thread(() -> {
+
+                try {
+
+                    semaphore.acquire();
+                    System.out.println(Thread.currentThread().getName() + "\t 抢到车位");
+                    TimeUnit.SECONDS.sleep(3);
+                    System.out.println(Thread.currentThread().getName() + "\t 停车3秒后离开车位");
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    semaphore.release();
+                }
+
+            }, String.valueOf(i)).start();
+        }
+    }
+}
+```
+
 
 
 
