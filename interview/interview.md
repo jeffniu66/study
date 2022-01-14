@@ -157,256 +157,6 @@ false	 current data: 2020
 
 ## 1.4 JUC
 
-### 1.4.1 线程通信
-
-传统版
-
-![image-20210902221837767](img/image-20210902221837767.png)
-
-口诀：线程操作资源类，判断干活通知，防止虚假唤醒机制
-
-while不能用if代替，会有虚假唤醒的可能，需要放到循环里
-
-```java
-package com.lzd.interview;
-
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-class ShareData { // 资源类
-
-    private int number = 0;
-    private Lock lock = new ReentrantLock();
-    private Condition condition = lock.newCondition();
-
-    public void increment() throws Exception {
-        lock.lock();
-        try {
-            // 1. 判断
-            while (number != 0) {
-                // 等待 不能生产
-                condition.await();
-            }
-            // 2. 干活
-            number++;
-            System.out.println(Thread.currentThread().getName() + "\t" + number);
-            // 3. 通知唤醒
-            condition.signalAll();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void decrement() throws Exception {
-        lock.lock();
-        try {
-            // 1. 判断
-            while (number == 0) {
-                // 等待 不能生产
-                condition.await();
-            }
-            // 2. 干活
-            number--;
-            System.out.println(Thread.currentThread().getName() + "\t" + number);
-            // 3. 通知唤醒
-            condition.signalAll();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
-    }
-}
-
-/**
- * 题目：一个初始值为0的变量，两个线程对其交替操作，一个加1一个减1，来5轮
- * 1. 线程    操作（方法）   资源类
- * 2. 判断    干活          通知
- */
-public class AwaitSignalDemo {
-
-    public static void main(String[] args) {
-        ShareData shareData = new ShareData();
-
-        new Thread(() -> {
-            for (int i = 0; i < 5; i++) {
-                try {
-                    shareData.increment();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, "AA").start();
-
-
-        new Thread(() -> {
-            for (int i = 0; i < 5; i++) {
-                try {
-                    shareData.decrement();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, "BB").start();
-    }
-}
-```
-
-### 1.4.2 synchronizd和Lock有什么区别，用Lock有什么好处
-
-1）、synchronized是关键字属于JVM层面
-
-​		 monitorenter（底层是通过monitor对象来完成，其实wait/notify等方法也依赖于monitor对象只有在同步块或方法中才能调用wait/notify等方法）
-
-​		 monitorexit
-
-Lock是具体类（java.util.concurrent.locks.Lock）是api层面的锁
-
-2）、使用方法
-
-​		synchronized不需要用户手动释放锁，当synchronized代码执行完后系统会自动让线程释放对锁的占用
-
-​		ReentrantLock则需要用户手动释放锁若没有主动释放，就有可能导致死锁现象。
-
-​		需要lock()和unlock()方法配合try/finally语句块来完成。
-
-3）、等待是否可中断
-
-​		synchronized不可中断，除非抛出异常或者正常运行完成
-
-​		ReentrantLock可中断，1.设置超时方法 tryLock(long timeout, TimeUnit unit)
-
-​											  2.lockInterruptibly()放代码块中，调用interrupt()方法可中断
-
-4）、加锁是否公平
-
-​		synchronized非公平锁
-
-​		ReentrantLock两者都可以，默认非公平锁，构造方法可以传入boolean值，true为公平锁，false为非公平锁
-
-5）、锁绑定多个条件Condition
-
-​		synchronized没有
-
-​		ReentrantLock用来实现分组唤醒需要唤醒的线程们，可以精确唤醒，而不是项synchronized需要随机唤醒一个线程要么唤醒全部线程。
-
-```java
-package com.lzd.interview;
-
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-/**
- * synchronized和lock区别
- * <p===lock可绑定多个条件===
- * 对线程之间按顺序调用，实现A>B>C三个线程启动，要求如下：
- * AA打印5次，BB打印10次，CC打印15次
- * 紧接着
- * AA打印5次，BB打印10次，CC打印15次
- * 。。。。
- * 来十轮
- */
-public class SyncAndReentrantLockDemo {
-    public static void main(String[] args) {
-        ShareData2 shareData = new ShareData2();
-        new Thread(() -> {
-            for (int i = 1; i <= 10; i++) {
-                shareData.print5();
-            }
-        }, "A").start();
-        new Thread(() -> {
-            for (int i = 1; i <= 10; i++) {
-                shareData.print10();
-            }
-        }, "B").start();
-        new Thread(() -> {
-            for (int i = 1; i <= 10; i++) {
-                shareData.print15();
-            }
-        }, "C").start();
-    }
-
-}
-
-class ShareData2 {
-    private int number = 1;//A:1 B:2 C:3
-    private Lock lock = new ReentrantLock();
-    private Condition condition1 = lock.newCondition();
-    private Condition condition2 = lock.newCondition();
-    private Condition condition3 = lock.newCondition();
-
-    public void print5() {
-        lock.lock();
-        try {
-            //判断
-            while (number != 1) {
-                condition1.await();
-            }
-            //干活
-            for (int i = 1; i <= 5; i++) {
-                System.out.println(Thread.currentThread().getName() + "\t" + i);
-            }
-            //通知
-            number = 2;
-            condition2.signal();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void print10() {
-        lock.lock();
-        try {
-            //判断
-            while (number != 2) {
-                condition2.await();
-            }
-            //干活
-            for (int i = 1; i <= 10; i++) {
-                System.out.println(Thread.currentThread().getName() + "\t" + i);
-            }
-            //通知
-            number = 3;
-            condition3.signal();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void print15() {
-        lock.lock();
-        try {
-            //判断
-            while (number != 3) {
-                condition3.await();
-            }
-            //干活
-            for (int i = 1; i <= 15; i++) {
-                System.out.println(Thread.currentThread().getName() + "\t" + i);
-            }
-            //通知
-            number = 1;
-            condition1.signal();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
-    }
-}
-```
-
 ### 1.4.3 线程通信3.0版
 
 ```java
@@ -1427,7 +1177,310 @@ public class SemaphoreDemo {
 }
 ```
 
+### 1.7.9 阻塞队列
 
+SynchronousQueueDemo.java
+
+```java
+package com.lzd.interview.阻塞队列;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
+
+public class SynchronousQueueDemo {
+
+    public static void main(String[] args) {
+
+        BlockingQueue<String> blockingQueue = new SynchronousQueue<>();
+
+        new Thread(() -> {
+            try {
+                System.out.println(Thread.currentThread().getName() + "\t put 1");
+                blockingQueue.put("1");
+
+                System.out.println(Thread.currentThread().getName() + "\t put 2");
+                blockingQueue.put("2");
+
+                System.out.println(Thread.currentThread().getName() + "\t put 3");
+                blockingQueue.put("3");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, "A").start();
+
+        new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(3);
+                System.out.println(Thread.currentThread().getName() + "\t take 1");
+                blockingQueue.take();
+
+                TimeUnit.SECONDS.sleep(3);
+                System.out.println(Thread.currentThread().getName() + "\t take 2");
+                blockingQueue.take();
+
+                TimeUnit.SECONDS.sleep(3);
+                System.out.println(Thread.currentThread().getName() + "\t take 3");
+                blockingQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, "B").start();
+    }
+}
+```
+
+### 1.7.10 线程通信
+
+传统版
+
+![image-20210902221837767](img/image-20210902221837767.png)
+
+口诀：线程操作资源类，判断干活通知，防止虚假唤醒机制
+
+while不能用if代替，会有虚假唤醒的可能，需要放到循环里
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class ShareData { // 资源类
+
+    private int number = 0;
+    private Lock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
+
+    public void increment() throws Exception {
+        lock.lock();
+        try {
+            // 1. 判断
+            while (number != 0) {
+                // 等待 不能生产
+                condition.await();
+            }
+            // 2. 干活
+            number++;
+            System.out.println(Thread.currentThread().getName() + "\t" + number);
+            // 3. 通知唤醒
+            condition.signalAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void decrement() throws Exception {
+        lock.lock();
+        try {
+            // 1. 判断
+            while (number == 0) {
+                // 等待 不能生产
+                condition.await();
+            }
+            // 2. 干活
+            number--;
+            System.out.println(Thread.currentThread().getName() + "\t" + number);
+            // 3. 通知唤醒
+            condition.signalAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+/**
+ * 题目：一个初始值为0的变量，两个线程对其交替操作，一个加1一个减1，来5轮
+ * 1. 线程    操作（方法）   资源类
+ * 2. 判断    干活          通知
+ */
+public class AwaitSignalDemo {
+
+    public static void main(String[] args) {
+        ShareData shareData = new ShareData();
+
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    shareData.increment();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "AA").start();
+
+
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    shareData.decrement();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "BB").start();
+    }
+}
+```
+
+### 1.7.11 synchronizd与Lock区别
+
+1）、synchronized是关键字属于JVM层面
+
+​		 monitorenter（底层是通过monitor对象来完成，其实wait/notify等方法也依赖于monitor对象只有在同步块或方法中才能调用wait/notify等方法）
+
+​		 monitorexit
+
+Lock是具体类（java.util.concurrent.locks.Lock）是api层面的锁
+
+2）、使用方法
+
+​		synchronized不需要用户手动释放锁，当synchronized代码执行完后系统会自动让线程释放对锁的占用
+
+​		ReentrantLock则需要用户手动释放锁若没有主动释放，就有可能导致死锁现象。
+
+​		需要lock()和unlock()方法配合try/finally语句块来完成。
+
+3）、等待是否可中断
+
+​		synchronized不可中断，除非抛出异常或者正常运行完成
+
+​		ReentrantLock可中断，1.设置超时方法 tryLock(long timeout, TimeUnit unit)
+
+​											  2.lockInterruptibly()放代码块中，调用interrupt()方法可中断
+
+4）、加锁是否公平
+
+​		synchronized非公平锁
+
+​		ReentrantLock两者都可以，默认非公平锁，构造方法可以传入boolean值，true为公平锁，false为非公平锁
+
+5）、锁绑定多个条件Condition
+
+​		synchronized没有
+
+​		ReentrantLock用来实现分组唤醒需要唤醒的线程们，可以精确唤醒，而不是项synchronized需要随机唤醒一个线程要么唤醒全部线程。
+
+```java
+package com.lzd.interview;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * synchronized和lock区别
+ * <p===lock可绑定多个条件===
+ * 对线程之间按顺序调用，实现A>B>C三个线程启动，要求如下：
+ * AA打印5次，BB打印10次，CC打印15次
+ * 紧接着
+ * AA打印5次，BB打印10次，CC打印15次
+ * 。。。。
+ * 来十轮
+ */
+public class SyncAndReentrantLockDemo {
+    public static void main(String[] args) {
+        ShareData2 shareData = new ShareData2();
+        new Thread(() -> {
+            for (int i = 1; i <= 10; i++) {
+                shareData.print5();
+            }
+        }, "A").start();
+        new Thread(() -> {
+            for (int i = 1; i <= 10; i++) {
+                shareData.print10();
+            }
+        }, "B").start();
+        new Thread(() -> {
+            for (int i = 1; i <= 10; i++) {
+                shareData.print15();
+            }
+        }, "C").start();
+    }
+
+}
+
+class ShareData2 {
+    private int number = 1;//A:1 B:2 C:3
+    private Lock lock = new ReentrantLock();
+    private Condition condition1 = lock.newCondition();
+    private Condition condition2 = lock.newCondition();
+    private Condition condition3 = lock.newCondition();
+
+    public void print5() {
+        lock.lock();
+        try {
+            //判断
+            while (number != 1) {
+                condition1.await();
+            }
+            //干活
+            for (int i = 1; i <= 5; i++) {
+                System.out.println(Thread.currentThread().getName() + "\t" + i);
+            }
+            //通知
+            number = 2;
+            condition2.signal();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void print10() {
+        lock.lock();
+        try {
+            //判断
+            while (number != 2) {
+                condition2.await();
+            }
+            //干活
+            for (int i = 1; i <= 10; i++) {
+                System.out.println(Thread.currentThread().getName() + "\t" + i);
+            }
+            //通知
+            number = 3;
+            condition3.signal();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void print15() {
+        lock.lock();
+        try {
+            //判断
+            while (number != 3) {
+                condition3.await();
+            }
+            //干活
+            for (int i = 1; i <= 15; i++) {
+                System.out.println(Thread.currentThread().getName() + "\t" + i);
+            }
+            //通知
+            number = 1;
+            condition1.signal();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+### 
 
 
 
