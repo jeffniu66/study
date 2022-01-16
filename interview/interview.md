@@ -1480,7 +1480,59 @@ class MyResource {
 }
 ```
 
-### 
+### 1.7.13 死锁
+
+![image-20220116222433168](img/image-20220116222433168.png)
+
+```java
+package com.lzd.interview.死锁;
+
+import java.util.concurrent.TimeUnit;
+
+class HoldLockThread implements Runnable {
+
+    private String lockA;
+    private String lockB;
+
+    public HoldLockThread(String lockA, String lockB) {
+        this.lockA = lockA;
+        this.lockB = lockB;
+    }
+
+    @Override
+    public void run() {
+
+        synchronized (lockA) {
+            System.out.println(Thread.currentThread().getName() + "\t 自己持有：" + lockA + "\t 尝试获得：" + lockB);
+
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            synchronized (lockB) {
+                System.out.println(Thread.currentThread().getName() + "\t 自己持有：" + lockB + "\t 尝试获得：" + lockA);
+            }
+        }
+    }
+}
 
 
+public class DeadLockDemo {
 
+    public static void main(String[] args) {
+
+
+        String lockA = "lockA";
+        String lockB = "lockB";
+
+        new Thread(new HoldLockThread(lockA, lockB), "AAA").start();
+        new Thread(new HoldLockThread(lockB, lockA), "BBB").start();
+    }
+}
+```
+
+1.首先使用jps或ps -ef|grep xxx查看java进程
+
+2.然后使用jstack 进程号定位具体问题，可以看到死锁代码
