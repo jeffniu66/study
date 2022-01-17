@@ -1536,3 +1536,14 @@ public class DeadLockDemo {
 1.首先使用jps或ps -ef|grep xxx查看java进程
 
 2.然后使用jstack 进程号定位具体问题，可以看到死锁代码
+
+### 1.7.14 查看当前程序运行的配置jinfo
+
+1.首先使用jps -l查看java程序进程号
+
+2.然后使用jinfo -flag PrintGCDetails 进程号 
+
+### 1.7.15 运行java命令时查看参数
+
+java -XX:+PrintFlagsFinal -XX:MetaspaceSize=512m Hello（运行的java类名字）
+
