@@ -1,4 +1,7 @@
-# 1. JAVA
+1. [TOC]
+
+   # 1. JAVA
+
 
 ## 1.1 字符串常量Java内部加载
 
@@ -1547,3 +1550,4 @@ public class DeadLockDemo {
 
 java -XX:+PrintFlagsFinal -XX:MetaspaceSize=512m Hello（运行的java类名字）
 
+test
