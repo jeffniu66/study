@@ -488,7 +488,7 @@ public class Exam5 {
 
 ### 1.7.1 volatile
 
-#### 1.7.2 可见性的代码说明
+#### 1.7.1.1 可见性的代码说明
 
 ```java
 package com.lzd.interview;
@@ -538,7 +538,7 @@ public class VolatileDemo {
 }
 ```
 
-#### 1.7.3 不保证原子性
+#### 1.7.1.2 不保证原子性
 
 ```java
 package com.lzd.interview.volatilee.atomic;
@@ -577,7 +577,7 @@ public class Demo {
 }
 ```
 
-#### 1.7.4 解决volatile不保证原子性问题
+#### 1.7.1.3 解决volatile不保证原子性问题
 
 ```java
 package com.lzd.interview.volatilee.atomic;
@@ -626,7 +626,7 @@ public class Demo {
 }
 ```
 
-#### 1.7.5 单例模式下volatile分析
+#### 1.7.1.4 单例模式下volatile分析
 
 ```java
 package com.lzd.interview.volatilee.singleton;
@@ -1550,4 +1550,21 @@ public class DeadLockDemo {
 
 java -XX:+PrintFlagsFinal -XX:MetaspaceSize=512m Hello（运行的java类名字）
 
-test
+### 1.7.16 JVM常用参数
+
+1.-Xms: 初始大小内存，默认为物理内存1/64，<font color=red>等价于-XX:InitialHeapSize</font>
+
+2.-Xmx: 最大分配内存，默认为物理内存1/4，<font color=red>等价于-XX:MaxHeapSize</font>
+
+3.-Xss: 设置单个线程的大小，一般默认为512k~1014k，<font color=red>等价于-XX:ThreadStackSize</font>
+
+4.-Xmn: 设置年轻代大小
+
+5.-XX:MetaspaceSize: 设置元空间大小，默认20M
+
+元空间的本质和永久代类似，都是对JVM规范中方法区的实现。
+
+不过元空间与永久代之间最大的区别在于：
+
+<font color=red>元空间并不在虚拟机中，而是使用本地内存</font>，因此，默认情况下，元空间的大小仅受本地内存限制。
+
