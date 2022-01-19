@@ -448,7 +448,7 @@ public class Exam5 {
 
 ### 1.6.5 Spring支持的常用数据库事务传播属性事务隔离级别
 
-#### 事务的属性
+事务的属性
 
 1. propagation：用来设置事务的传播行为
 
@@ -1568,3 +1568,24 @@ java -XX:+PrintFlagsFinal -XX:MetaspaceSize=512m Hello（运行的java类名字�
 
 <font color=red>元空间并不在虚拟机中，而是使用本地内存</font>，因此，默认情况下，元空间的大小仅受本地内存限制。
 
+6.-XX:SurvivorRatio
+
+设置新生代中edenh和S0/S1空间的比例
+
+默认-XX:SurvivorRatio=8，Eden:S0:S1=8:1:1
+
+假如-XX:SurvivorRatio=4，Eden:S0:S1=4:1:1
+
+SurvivorRatio值就是设置eden区的比例占多少，S0/S1相同
+
+7.-XX:NewRatio
+
+配置年轻代与老年代在堆结构的占比
+
+默认-XX:NewRatio=2新生代占1，老年代2，年轻代占整个堆的1/3
+
+假如-XX:NewRatio=4新生代占1，老年代4，年轻代占整个堆的1/5，NewRatio值就是设置老年代的占比，剩下的1给新生代
+
+8.-XX:MaxTenuringThreshold
+
+设置垃圾的最大年龄，默认15
