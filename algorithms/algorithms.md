@@ -1654,7 +1654,7 @@ public class SelectSort {
 
             for (int j = i + 1; j < arr.length; j++) {
 
-                if (min > arr[j]) {
+                if (minVal > arr[j]) {
                     minVal = arr[j];
                     minIdx = j;
                 }
