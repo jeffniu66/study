@@ -1589,3 +1589,259 @@ SurvivorRatio值就是设置eden区的比例占多少，S0/S1相同
 8.-XX:MaxTenuringThreshold
 
 设置垃圾的最大年龄，默认15
+
+### 1.7.17 强引用
+
+<font color=red>死都不会回收</font>
+
+```java
+package interview.reference;
+
+public class StrongReferenceDemo {
+    public static void main(String[] args) {
+        Object obj1 = new Object(); // 这样定义的默认是强引用
+        Object obj2 = obj1;
+        obj1 = null; // 置空
+        System.gc();
+        System.out.println(obj2);
+    }
+}
+```
+
+### 1.7.18 软引用
+
+<font color=red>当系统内存足够时，不会被回收；系统内存不足时，会被回收</font>
+
+```java
+package interview.reference;
+
+import java.lang.ref.SoftReference;
+
+public class SoftReferenceDemo {
+    
+    public static void softRefMemoryEnough() {
+        Object o1 = new Object();
+        SoftReference<Object> softReference = new SoftReference<>(o1);
+        
+        o1 = null;
+        
+        System.gc();
+        
+        System.out.println(o1);
+        System.out.println(softReference.get());
+    }
+    
+    public static void softRefMemoryNotEnough() {
+        Object o1 = new Object();
+        SoftReference<Object> softReference = new SoftReference<>(o1);
+        System.out.println(o1);
+        System.out.println(softReference.get());
+
+        o1 = null;
+
+        try {
+            byte[] bytes = new byte[50 * 1024 * 1024];
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println(o1);
+            System.out.println(softReference.get());
+        }
+    }
+    
+    public static void main(String[] args) {
+        softRefMemoryEnough();
+        softRefMemoryNotEnough();
+    }
+}
+// 输出
+null
+java.lang.Object@4554617c
+java.lang.Object@74a14482
+java.lang.Object@74a14482
+null
+java.lang.Object@74a14482
+```
+
+### 1.7.19 弱引用
+
+弱引用需要用java.lang.ref.WeakReference类来实现，它比软引用的生存期更短
+
+对于只有弱引用的对象来说，只要垃圾回收机制一运行，不管JVM的内存空间是否足够，都会回收该对象占用的内存
+
+```java
+package interview.reference;
+
+import java.lang.ref.WeakReference;
+
+public class WeakReferenceDemo {
+    public static void main(String[] args) {
+        Object o1 = new Object();
+        WeakReference<Object> weakReference = new WeakReference<>(o1);
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+
+        o1 = null;
+        System.gc();
+        System.out.println("======================");
+
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+    }
+}
+// 输出
+java.lang.Object@4554617c
+java.lang.Object@4554617c
+======================
+null
+null
+```
+
+#### 应用场景
+
+假如有一个应用需要读取大量的本地图片：
+
+	* 如果每次读取图片都从硬盘读取则会严重影响性能
+	* 如果一次性全部加载到内存中又可能造成内存溢出
+
+此时使用软引用可以解决这个问题
+
+​	设计思路：用一个HashMap来保存图片的路径和相应图片对象关联的软引用（或弱引用）之间的映射关系，在内存不足时，JVM会自动回收这些缓存图片对象所占用的空间，从而有效地避免了OOM的问题。
+
+Map<String, SoftReference<Bitmap>> imageCache = new HashMap<String, SoftReference<Bitmap>>();
+
+```java
+package interview.reference;
+
+import java.util.HashMap;
+import java.util.WeakHashMap;
+
+public class WeakHashMapDemo {
+
+    private static void myHashMap() {
+        HashMap<Integer,String> map = new HashMap<>();
+        Integer key = new Integer(1);
+        String value = "HashMap";
+
+        map.put(key, value);
+        System.out.println(map);
+
+        key = null;
+        System.out.println(map);
+
+        System.gc();
+        System.out.println(map + "\t" + map.size());
+    }
+
+    private static void myWeakHashMap() {
+        WeakHashMap<Integer,String> map = new WeakHashMap<>();
+        Integer key = new Integer(2);
+        String value = "WeakHashMap";
+
+        map.put(key, value);
+        System.out.println(map);
+
+        key = null;
+        System.out.println(map);
+
+        System.gc();
+        System.out.println(map + "\t" + map.size());
+    }
+
+    public static void main(String[] args) {
+        myHashMap();
+        myWeakHashMap();
+    }
+}
+
+// 输出
+{1=HashMap}
+{1=HashMap}
+{1=HashMap}	1
+{2=WeakHashMap}
+{2=WeakHashMap}
+{}	0
+```
+
+### 1.7.20 虚引用
+
+![image-20220120224137946](img/image-20220120224137946.png)
+
+引用队列介绍
+
+```java
+package interview.reference;
+
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+
+public class ReferenceQueueDemo {
+    public static void main(String[] args) throws Exception {
+        Object o1 = new Object();
+        ReferenceQueue<Object> referenceQueue = new ReferenceQueue<>();
+        WeakReference<Object> weakReference = new WeakReference<>(o1, referenceQueue);
+
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+        System.out.println(referenceQueue.poll());
+
+        System.out.println("=============================");
+        o1 = null;
+        System.gc();
+        Thread.sleep(500);
+        
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+        System.out.println(referenceQueue.poll());
+    }
+}
+
+// 输出
+java.lang.Object@4554617c
+java.lang.Object@4554617c
+null
+=============================
+null
+null
+java.lang.ref.WeakReference@74a14482
+```
+
+```java
+package interview.reference;
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
+
+public class PhantomReferenceDemo {
+    public static void main(String[] args) throws Exception {
+        Object o1 = new Object();
+        ReferenceQueue<Object> referenceQueue = new ReferenceQueue<>();
+        PhantomReference<Object> phantomReference = new PhantomReference<>(o1, referenceQueue);
+
+        System.out.println(o1);
+        System.out.println(phantomReference.get());
+        System.out.println(referenceQueue.poll());
+
+        System.out.println("========================");
+        o1 = null;
+        System.gc();
+        Thread.sleep(500);
+
+        System.out.println(o1);
+        System.out.println(phantomReference.get());
+        System.out.println(referenceQueue.poll());
+    }
+}
+// 输出
+java.lang.Object@4554617c
+null
+null
+========================
+null
+null
+java.lang.ref.PhantomReference@74a14482
+```
+
+#### 总结
+
+![image-20220120231122106](img/image-20220120231122106.png)
