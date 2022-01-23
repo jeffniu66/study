@@ -1929,3 +1929,78 @@ public class DirectBufferMemoryDemo {
 
 扩大服务器线程数：
 vim /etc/security/limits.d/90-nproc.conf
+
+### 1.7.22 GC
+
+#### 1.7.22.1 如何查看默认的垃圾收集器
+
+<font color=red>java -XX:+PrintCommandLineFlags -version</font>
+
+#### 1.7.22.2 年轻代与老年代分别用哪些垃圾回收期
+
+![image-20220123114556993](img/image-20220123114556993.png)
+
+![image-20220123115130422](img/image-20220123115130422.png)
+
+#### 1.7.22.3 GC之Serial收集器
+
+![image-20220123152348780](img/image-20220123152348780.png)
+
+#### 1.7.22.4 GC之ParNew收集器
+
+![image-20220123153333429](img/image-20220123153333429.png)
+
+#### 1.7.22.5 GC之Parallel收集器
+
+![image-20220123154511087](img/image-20220123154511087.png)
+
+![image-20220123154708207](img/image-20220123154708207.png)
+
+#### 1.7.22.6 GC之CMS收集器
+
+![image-20220123165453260](img/image-20220123165453260.png)
+
+#### 1.7.22.7 GC之SerialOld收集器
+
+![image-20220123170758741](img/image-20220123170758741.png)
+
+#### 1.7.22.8 如何选择垃圾收集器
+
+组合的选择：
+
+1. 单CPU或小内存，单机程序
+
+​	**-XX:+UseSerialGC**
+ 2.多CPU，需要最大吞吐量，如后台计算型应用
+​	**-XX:+UseParallelGC 或**
+​	**-XX:+UseParallelOldGC**
+ 3.多CPU，追求低停顿时间，需要快速响应如互联网应用
+​	**-XX:+UseConcMarkSweepGC**
+​	**-XX:+PaeNewGC**
+
+#### 1.7.22.9 GC之G1收集器
+
+![image-20220123172638569](img/image-20220123172638569.png)
+
+![image-20220123172933709](img/image-20220123172933709.png)
+
+![image-20220123173250754](img/image-20220123173250754.png)
+
+![image-20220123175419140](img/image-20220123175419140.png)
+
+![image-20220123175748960](img/image-20220123175748960.png)
+
+![image-20220123180146713](img/image-20220123180146713.png)
+
+![image-20220123180400035](img/image-20220123180400035.png)
+
+![image-20220123180523869](img/image-20220123180523869.png)
+
+![image-20220123180645441](img/image-20220123180645441.png)
+
+![image-20220123181112775](img/image-20220123181112775.png)
+
+#### 1.7.22.10 微服务启动带JVM参数
+
+![image-20220123182006014](img/image-20220123182006014.png)
+
