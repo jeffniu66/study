@@ -2004,3 +2004,10 @@ vim /etc/security/limits.d/90-nproc.conf
 
 ![image-20220123182006014](img/image-20220123182006014.png)
 
+### 1.7.23 Linux命令
+
+#### 1.7.23.1 cpu查看之vmstat
+
+vmstat -n 2 3
+
+![image-20220125175037095](img/image-20220125175037095.png)
