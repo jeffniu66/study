@@ -1,6 +1,4 @@
-1. [TOC]
-
-   # 1. JAVA
+# 1. JAVA
 
 
 ## 1.1 字符串常量Java内部加载
@@ -1589,3 +1587,427 @@ SurvivorRatio值就是设置eden区的比例占多少，S0/S1相同
 8.-XX:MaxTenuringThreshold
 
 设置垃圾的最大年龄，默认15
+
+### 1.7.17 强引用
+
+<font color=red>死都不会回收</font>
+
+```java
+package interview.reference;
+
+public class StrongReferenceDemo {
+    public static void main(String[] args) {
+        Object obj1 = new Object(); // 这样定义的默认是强引用
+        Object obj2 = obj1;
+        obj1 = null; // 置空
+        System.gc();
+        System.out.println(obj2);
+    }
+}
+```
+
+### 1.7.18 软引用
+
+<font color=red>当系统内存足够时，不会被回收；系统内存不足时，会被回收</font>
+
+```java
+package interview.reference;
+
+import java.lang.ref.SoftReference;
+
+public class SoftReferenceDemo {
+    
+    public static void softRefMemoryEnough() {
+        Object o1 = new Object();
+        SoftReference<Object> softReference = new SoftReference<>(o1);
+        
+        o1 = null;
+        
+        System.gc();
+        
+        System.out.println(o1);
+        System.out.println(softReference.get());
+    }
+    
+    public static void softRefMemoryNotEnough() {
+        Object o1 = new Object();
+        SoftReference<Object> softReference = new SoftReference<>(o1);
+        System.out.println(o1);
+        System.out.println(softReference.get());
+
+        o1 = null;
+
+        try {
+            byte[] bytes = new byte[50 * 1024 * 1024];
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println(o1);
+            System.out.println(softReference.get());
+        }
+    }
+    
+    public static void main(String[] args) {
+        softRefMemoryEnough();
+        softRefMemoryNotEnough();
+    }
+}
+// 输出
+null
+java.lang.Object@4554617c
+java.lang.Object@74a14482
+java.lang.Object@74a14482
+null
+java.lang.Object@74a14482
+```
+
+### 1.7.19 弱引用
+
+弱引用需要用java.lang.ref.WeakReference类来实现，它比软引用的生存期更短
+
+对于只有弱引用的对象来说，只要垃圾回收机制一运行，不管JVM的内存空间是否足够，都会回收该对象占用的内存
+
+```java
+package interview.reference;
+
+import java.lang.ref.WeakReference;
+
+public class WeakReferenceDemo {
+    public static void main(String[] args) {
+        Object o1 = new Object();
+        WeakReference<Object> weakReference = new WeakReference<>(o1);
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+
+        o1 = null;
+        System.gc();
+        System.out.println("======================");
+
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+    }
+}
+// 输出
+java.lang.Object@4554617c
+java.lang.Object@4554617c
+======================
+null
+null
+```
+
+#### 应用场景
+
+假如有一个应用需要读取大量的本地图片：
+
+	* 如果每次读取图片都从硬盘读取则会严重影响性能
+	* 如果一次性全部加载到内存中又可能造成内存溢出
+
+此时使用软引用可以解决这个问题
+
+​	设计思路：用一个HashMap来保存图片的路径和相应图片对象关联的软引用（或弱引用）之间的映射关系，在内存不足时，JVM会自动回收这些缓存图片对象所占用的空间，从而有效地避免了OOM的问题。
+
+Map<String, SoftReference<Bitmap>> imageCache = new HashMap<String, SoftReference<Bitmap>>();
+
+```java
+package interview.reference;
+
+import java.util.HashMap;
+import java.util.WeakHashMap;
+
+public class WeakHashMapDemo {
+
+    private static void myHashMap() {
+        HashMap<Integer,String> map = new HashMap<>();
+        Integer key = new Integer(1);
+        String value = "HashMap";
+
+        map.put(key, value);
+        System.out.println(map);
+
+        key = null;
+        System.out.println(map);
+
+        System.gc();
+        System.out.println(map + "\t" + map.size());
+    }
+
+    private static void myWeakHashMap() {
+        WeakHashMap<Integer,String> map = new WeakHashMap<>();
+        Integer key = new Integer(2);
+        String value = "WeakHashMap";
+
+        map.put(key, value);
+        System.out.println(map);
+
+        key = null;
+        System.out.println(map);
+
+        System.gc();
+        System.out.println(map + "\t" + map.size());
+    }
+
+    public static void main(String[] args) {
+        myHashMap();
+        myWeakHashMap();
+    }
+}
+
+// 输出
+{1=HashMap}
+{1=HashMap}
+{1=HashMap}	1
+{2=WeakHashMap}
+{2=WeakHashMap}
+{}	0
+```
+
+### 1.7.20 虚引用
+
+![image-20220120224137946](img/image-20220120224137946.png)
+
+引用队列介绍
+
+```java
+package interview.reference;
+
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+
+public class ReferenceQueueDemo {
+    public static void main(String[] args) throws Exception {
+        Object o1 = new Object();
+        ReferenceQueue<Object> referenceQueue = new ReferenceQueue<>();
+        WeakReference<Object> weakReference = new WeakReference<>(o1, referenceQueue);
+
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+        System.out.println(referenceQueue.poll());
+
+        System.out.println("=============================");
+        o1 = null;
+        System.gc();
+        Thread.sleep(500);
+        
+        System.out.println(o1);
+        System.out.println(weakReference.get());
+        System.out.println(referenceQueue.poll());
+    }
+}
+
+// 输出
+java.lang.Object@4554617c
+java.lang.Object@4554617c
+null
+=============================
+null
+null
+java.lang.ref.WeakReference@74a14482
+```
+
+```java
+package interview.reference;
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
+
+public class PhantomReferenceDemo {
+    public static void main(String[] args) throws Exception {
+        Object o1 = new Object();
+        ReferenceQueue<Object> referenceQueue = new ReferenceQueue<>();
+        PhantomReference<Object> phantomReference = new PhantomReference<>(o1, referenceQueue);
+
+        System.out.println(o1);
+        System.out.println(phantomReference.get());
+        System.out.println(referenceQueue.poll());
+
+        System.out.println("========================");
+        o1 = null;
+        System.gc();
+        Thread.sleep(500);
+
+        System.out.println(o1);
+        System.out.println(phantomReference.get());
+        System.out.println(referenceQueue.poll());
+    }
+}
+// 输出
+java.lang.Object@4554617c
+null
+null
+========================
+null
+null
+java.lang.ref.PhantomReference@74a14482
+```
+
+#### 总结
+
+![image-20220120231122106](img/image-20220120231122106.png)
+
+### 1.7.21 异常
+
+#### java.lang.OutOfMemoryError:GC overhead limit exceeded
+
+GC回收时间长时会抛出OutOfMemoryError。过长的定义是，超过98%的时间用来做GC并且回收了不到2%的堆内存，连续多次GC都只回收了不到2%的极端情况下才会抛出。
+
+假设不抛出GC overhead limit错误会发生什么情况呢？
+那就是GC清理的这么点内存很快会再次填满，迫使GC再次执行，这样就形成恶性循环，CPU使用率一直是100%，而GC缺没有任何成果。
+
+```java
+package interview.gc;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GCOverHeadDemo {
+    public static void main(String[] args) {
+        int i = 0;
+        List<String> list = new ArrayList<>();
+
+        try {
+            while (true) {
+                list.add(String.valueOf(++i).intern());
+            }
+        } catch (Throwable e) {
+            System.out.println("*****************i: " + i);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+}
+
+```
+
+#### java.lang.OutOfMemoryError:Direct buffer memory
+
+导致原因：
+写NIO程序经常使用ByteBuffer来读取或者写入数据，这是一种基于通道（Channel）与缓冲区（Buffer）的I/O方式，它可以使用Native函数库直接分配堆外内存，然后通过一个存储在Java堆里面的DirectByteBuffer对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，因为避免了在java堆和Native堆中来回复制数据。
+
+ByteBuffer.allocate(capability)第一种方式是分配JVM堆内存，属于GC管辖范围，由于需要拷贝所以速度相对较慢。
+
+ByteBuffer.allocateDirect(capability)第一种方式是分配OS本地内存，**不属于GC管辖范围**，由于不需要内存拷贝，所以速度相对较快。
+
+但如果不断分配内存，堆内存很少使用，那么JVM就不需要执行GC，DirectByteBuffer对象们就不会被回收，这时候堆内存充足，但本地内存可能已经使用光了，再次尝试分配本地内存就会出现OutOfMemoryError，那程序就直接崩溃了。
+
+```java
+package interview.oom;
+
+import java.nio.ByteBuffer;
+
+public class DirectBufferMemoryDemo {
+    public static void main(String[] args) {
+        System.out.println("配置的maxDirectMemory:" + (sun.misc.VM.maxDirectMemory() / (double)1024 / 1024) + "MB");
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ByteBuffer bb = ByteBuffer.allocate(6 * 1024 * 1024);
+    }
+}
+
+```
+
+#### java.lang.OutOfMemoryError:unable to create new native thread
+
+高并发请求服务器时，经常出现如下异常：java.lang.OutOfMemoryError:unbale to create new native thread
+准确的将该native thread异常与对应的平台有关。
+
+导致原因：
+
+1. 应用创建了太多线程，一个应用进程创建多个线程，超过系统承载极限。
+2. 服务器并不允许应用程序创建那么多线程，linux系统默认允许单个进程可以创建的线程数是1024个，如果应用创建超过这个数量，就会报java.lang.OutOfMemoryError:unable to create new native thread
+
+解决办法：
+
+1. 想办法降低应用程序创建线程的数量，分析应用是否真的需要创建那么多线程，如果不是，改代码将线程数降到最低。
+2. 对于有的应用，确实需要创建多个线程，远超过linux系统默认的1024个线程的限制，可以通过修改linux服务器配置，扩大linux默认限制。
+
+非root用户登录linux系统测试，root用户可以一直new thread
+
+查看最大线程数量命令：ulimit -u
+
+扩大服务器线程数：
+vim /etc/security/limits.d/90-nproc.conf
+
+### 1.7.22 GC
+
+#### 1.7.22.1 如何查看默认的垃圾收集器
+
+<font color=red>java -XX:+PrintCommandLineFlags -version</font>
+
+#### 1.7.22.2 年轻代与老年代分别用哪些垃圾回收期
+
+![image-20220123114556993](img/image-20220123114556993.png)
+
+![image-20220123115130422](img/image-20220123115130422.png)
+
+#### 1.7.22.3 GC之Serial收集器
+
+![image-20220123152348780](img/image-20220123152348780.png)
+
+#### 1.7.22.4 GC之ParNew收集器
+
+![image-20220123153333429](img/image-20220123153333429.png)
+
+#### 1.7.22.5 GC之Parallel收集器
+
+![image-20220123154511087](img/image-20220123154511087.png)
+
+![image-20220123154708207](img/image-20220123154708207.png)
+
+#### 1.7.22.6 GC之CMS收集器
+
+![image-20220123165453260](img/image-20220123165453260.png)
+
+#### 1.7.22.7 GC之SerialOld收集器
+
+![image-20220123170758741](img/image-20220123170758741.png)
+
+#### 1.7.22.8 如何选择垃圾收集器
+
+组合的选择：
+
+1. 单CPU或小内存，单机程序
+
+​	**-XX:+UseSerialGC**
+ 2.多CPU，需要最大吞吐量，如后台计算型应用
+​	**-XX:+UseParallelGC 或**
+​	**-XX:+UseParallelOldGC**
+ 3.多CPU，追求低停顿时间，需要快速响应如互联网应用
+​	**-XX:+UseConcMarkSweepGC**
+​	**-XX:+PaeNewGC**
+
+#### 1.7.22.9 GC之G1收集器
+
+![image-20220123172638569](img/image-20220123172638569.png)
+
+![image-20220123172933709](img/image-20220123172933709.png)
+
+![image-20220123173250754](img/image-20220123173250754.png)
+
+![image-20220123175419140](img/image-20220123175419140.png)
+
+![image-20220123175748960](img/image-20220123175748960.png)
+
+![image-20220123180146713](img/image-20220123180146713.png)
+
+![image-20220123180400035](img/image-20220123180400035.png)
+
+![image-20220123180523869](img/image-20220123180523869.png)
+
+![image-20220123180645441](img/image-20220123180645441.png)
+
+![image-20220123181112775](img/image-20220123181112775.png)
+
+#### 1.7.22.10 微服务启动带JVM参数
+
+![image-20220123182006014](img/image-20220123182006014.png)
+
+### 1.7.23 Linux命令
+
+#### 1.7.23.1 cpu查看之vmstat
+
+vmstat -n 2 3
+
+![image-20220125175037095](img/image-20220125175037095.png)
