@@ -2780,7 +2780,7 @@ CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
 
 ### 购物车数据结构
 
-![image-20210728220853891](/mall_images/image-20210728220853891.png)
+![image-20210728220853891](mall_images/image-20210728220853891.png)
 
 
 
