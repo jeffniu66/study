@@ -1,0 +1,2 @@
+  This week is Tomb-Sweeping Day, We have three days holiday. First day, I had studied all day and had dinner with friends, we had eaten DongPo meat, it is dilicious. The second day, I went to the Evergreen Resort, we had through a tropical rainforest and saw many diffrent kind of animals, took a few of pictures, we had eaten barbecue at night. Last day, I still had studied all day. It is a pleasant holiday.
+
