@@ -1690,6 +1690,75 @@ public static void sort(int[] arr) {
 
 #### 快速排序
 
+在综合情况下，时间复杂度一般情况下为O(nlogn)，比希尔排序更快
+
+```java
+package interview.algorithms.sort;
+
+import java.util.Arrays;
+
+public class QuickSort {
+
+    public static void main(String[] args) {
+        int[] arr = {-9, 78, 0, 23, -567, 70};
+        quickSort(arr, 0, arr.length - 1);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    public static void quickSort(int[] arr, int left, int right) {
+        int l = left;
+        int r = right;
+        // pivot中轴值
+        int pivot = arr[(left + right) / 2];
+        // while循环的目的是让比pivot值小的值放到左边，比pivot值大放到右边
+        while (l < r) {
+            // 在pivot的左边一直找，找到大于等于pivot值，才退出
+            while (arr[l] < pivot) {
+                l++;
+            }
+            // 在pivot的右边一直找，找到小于等于pivot值，才退出
+            while (arr[r] > pivot) {
+                r--;
+            }
+            // 如果l >= r说明pivot的左右两边的值，已经按照左边全部都是小于等于pivot值，右边全部大于等于pivot值
+            if (l >= r) {
+                break;
+            }
+
+            // 交换
+            swap(arr, l, r);
+
+            // 如果交换后，发现这个arr[l] = pivot值，r--，前移
+            if (arr[l] == pivot) {
+                r--;
+            }
+            if (arr[r] == pivot) {
+                l++;
+            }
+        }
+        // 如果l == r，必须l++，r--，否则会出现栈溢出
+        if (l == r) {
+            l++;
+            r--;
+        }
+        // 向左递归
+        if (left < r) {
+            quickSort(arr, left, r);
+        }
+        // 向右递归
+        if (right > l) {
+            quickSort(arr, l, right);
+        }
+    }
+
+    private static void swap(int[] arr, int l, int r) {
+        int temp = arr[l];
+        arr[l] = arr[r];
+        arr[r] = temp;
+    }
+}
+```
+
 
 
 
