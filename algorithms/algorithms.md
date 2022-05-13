@@ -2,7 +2,7 @@
 
 ## 1.1 时间复杂度
 
-<img src="algo_images/image-20210124154452824.png" alt="image-20210124154452824"  />
+![image-20210124154452824](/algo_images/image-20210124154452824.png)
 
 ## 1.2 二分查找法
 
