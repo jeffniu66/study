@@ -2010,7 +2010,7 @@ public class Algo169 {
 
 ## 2.3 机器人行走
 
-![image-20220523224053889](/algo_images/image-20220523224053889.png)
+![image-20220523224053889](algo_images/image-20220523224053889.png)
 
 ```java
 package interview.algorithms.dp;
