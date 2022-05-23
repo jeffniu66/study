@@ -2008,7 +2008,48 @@ public class Algo169 {
 输出：[0]
 ```
 
+## 2.3 机器人行走
 
+![image-20220523224053889](/algo_images/image-20220523224053889.png)
+
+```java
+package interview.algorithms.dp;
+
+public class RobotWalk {
+
+    private static int way(int N, int start, int aim, int K) {
+        return process(start, K, aim, N);
+    }
+
+    /**
+     * @param cur  机器人当前来到的位置是cur
+     * @param rest 机器人还有rest步需要走
+     * @param aim  最终目标是aim
+     * @param N    有哪些位置1-N
+     * @return 机器人从cur出发，走过rest布之后，最终停在aim的方法数，是多少
+     */
+    private static int process(int cur, int rest, int aim, int N) {
+        if (rest == 0) { // 如果已经不需要走了，走完了！
+            return cur == aim ? 1 : 0;
+        }
+        // rest > 0，还有步数要走！
+        if (cur == 1) { // 1 -> 2
+            return process(2, rest - 1, aim, N);
+        }
+        if (cur == N) {
+            return process(N - 1, rest - 1, aim, N);
+        }
+        // 中间位置上
+        return process(cur - 1, rest - 1, aim, N) + process(cur + 1, rest - 1, aim, N);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(way(4, 2, 4, 4));
+    }
+}
+
+// 输出 3
+```
 
 
 
