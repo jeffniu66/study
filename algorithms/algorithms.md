@@ -2051,6 +2051,48 @@ public class RobotWalk {
 // 输出 3
 ```
 
+利用二维数组进行缓存，优化代码
+
+```java
+private static int way2(int N, int start, int aim, int K) {
+    int[][] dp = new int[N + 1][K + 1];
+    // N+1 * K+1
+    for (int i = 0; i <= N; i++) {
+        for (int j = 0; j <= K; j++) {
+            dp[i][j] = -1;
+        }
+    }
+    // dp就是缓存表
+    // dp[cur][rest] == -1   -->   process2(cur, rest)之前没算过！
+    // dp[cur][rest] != -1   -->   process2(cur, rest)之前算过！返回值, dp[cur][rest]
+    return process2(start, K, aim, N, dp);
+}
+
+// cur 范围：1-N
+// rest 范围：0-K
+private static int process2(int cur, int rest, int aim, int N, int[][] dp) {
+    if (dp[cur][rest] != -1) {
+        return dp[cur][rest];
+    }
+    // 之前没算过
+    int ans = 0;
+
+    if (rest == 0) { // 如果已经不需要走了，走完了！
+        ans = cur == aim ? 1 : 0;
+    } else if (cur == 1) {
+        ans = process2(2, rest - 1, aim, N, dp);
+    } else if (cur == N) {
+        ans = process2(N - 1, rest - 1, aim, N, dp);
+    } else {
+        ans = process2(cur - 1, rest - 1, aim, N, dp) + process2(cur + 1, rest - 1, aim, N, dp);
+    }
+
+    dp[cur][rest] = ans;
+
+    return ans;
+}
+```
+
 
 
 
