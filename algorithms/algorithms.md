@@ -1674,6 +1674,46 @@ public class SelectSort {
 }
 ```
 
+选择排序（方法二）
+
+```java
+package interview.algorithms.sort;
+
+import java.util.Arrays;
+
+public class SelectSort {
+
+    public static void main(String[] args) {
+        int[] arr = {-9, 78, 0, 23, -567, 70};
+        selectionSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    public static void selectionSort(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        for (int i = 0; i < arr.length - 1; i++) { // i ~ N-1
+            int minIndex = i;
+            for (int j = i + 1; j < arr.length; j++) { // i ~ N-1 上找最小值的下标
+                minIndex = arr[j] < arr[minIndex] ? j : minIndex;
+            }
+            swap(arr, i, minIndex);
+        }
+    }
+
+    public static void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
+
+```
+
+
+
 时间复杂度为O($n^2$)，不稳定。选择排序就是每次从未排序的元素里选择出最小的值和下标进行交换。
 
 #### 插入排序
