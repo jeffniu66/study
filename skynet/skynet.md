@@ -28,6 +28,25 @@ apt install make-guile
 make linux
 ```
 
+安装MySQL
+
+```bash
+apt-get install mysql-server
+```
+
+skynet连接mysql时，报错
+
+```bash
+socket: auth failed ./skynet/lualib/skynet/socketchannel.lua:465: errno:1251, msg:Client does not support authentication protocol requested by server; consider upgrading MySQL client,sqlstate:08004
+```
+
+如果 **plugin 不是 `mysql_native_password`**，比如 `caching_sha2_password`，则需要改回 **MySQL 5.7 支持的方式**：
+
+```bash
+ALTER USER '你的用户名'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的密码';
+FLUSH PRIVILEGES;
+```
+
 
 
 
